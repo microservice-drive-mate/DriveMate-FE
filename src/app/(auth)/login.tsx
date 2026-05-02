@@ -1,9 +1,8 @@
-import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
-import { authService } from "@/services/auth.service";
-import { useAuthStore } from "@/store/auth.store";
 import { ScreenWrapper } from "@/components/screen-wrapper";
+import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
+import { useAuthStore } from "@/store/auth.store";
 import { Ionicons } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
 	ActivityIndicator,
@@ -20,7 +19,7 @@ export default function LoginScreen() {
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-
+	const router = useRouter();
 	const { setTokens, setUser } = useAuthStore();
 
 	const handleLogin = async () => {
@@ -29,16 +28,17 @@ export default function LoginScreen() {
 			return;
 		}
 
-		setLoading(true);
-		try {
-			const data = await authService.login({ email, password });
-			await setTokens(data.accessToken, data.refreshToken);
-			setUser(data.user);
-		} catch {
-			Alert.alert("Đăng nhập thất bại", "Email hoặc mật khẩu không đúng");
-		} finally {
-			setLoading(false);
-		}
+		// setLoading(true);
+		// try {
+		// 	const data = await authService.login({ email, password });
+		// 	await setTokens(data.accessToken, data.refreshToken);
+		// 	setUser(data.user);
+		// } catch {
+		// 	Alert.alert("Đăng nhập thất bại", "Email hoặc mật khẩu không đúng");
+		// } finally {
+		// 	setLoading(false);
+		// }
+		router.replace("/(tabs)");
 	};
 
 	return (
