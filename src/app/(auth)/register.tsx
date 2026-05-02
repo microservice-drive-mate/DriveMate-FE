@@ -7,13 +7,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
 } from 'react-native';
 import { Link } from 'expo-router';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
+import { ScreenWrapper } from '@/components/screen-wrapper';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -43,11 +41,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled">
+    <ScreenWrapper keyboard scroll contentStyle={styles.inner}>
         <Text style={styles.title}>Tạo tài khoản</Text>
         <Text style={styles.subtitle}>Bắt đầu luyện thi bằng lái xe</Text>
 
@@ -98,14 +92,12 @@ export default function RegisterScreen() {
             <Text style={[styles.linkText, styles.linkBold]}>Đăng nhập</Text>
           </TouchableOpacity>
         </Link>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  inner: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 },
+  inner: { justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 },
   title: { fontSize: 32, fontWeight: '700', color: '#11181C', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#687076', marginBottom: 32 },
   input: {

@@ -1,14 +1,13 @@
 import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
+import { ScreenWrapper } from "@/components/screen-wrapper";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
-	KeyboardAvoidingView,
-	Platform,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -43,9 +42,10 @@ export default function LoginScreen() {
 	};
 
 	return (
-		<KeyboardAvoidingView
-			style={styles.container}
-			behavior={Platform.OS === "ios" ? "padding" : "height"}>
+		<ScreenWrapper
+			backgroundColor={AUTH_UI.colors.background}
+			keyboard
+			edges={["top", "bottom"]}>
 			<View style={styles.inner}>
 				<View style={styles.logoWrapper}>
 					<Ionicons
@@ -130,12 +130,11 @@ export default function LoginScreen() {
 					</Link>
 				</View>
 			</View>
-		</KeyboardAvoidingView>
+		</ScreenWrapper>
 	);
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: AUTH_UI.colors.background },
 	inner: {
 		flex: 1,
 		justifyContent: "center",

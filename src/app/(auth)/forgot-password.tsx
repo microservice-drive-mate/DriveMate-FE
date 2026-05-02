@@ -4,14 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	Alert,
 	Dimensions,
-	KeyboardAvoidingView,
-	Platform,
 	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
 	View,
 } from "react-native";
+
+import { ScreenWrapper } from "@/components/screen-wrapper";
 import Animated, {
 	Easing,
 	interpolate,
@@ -155,7 +155,9 @@ export default function ForgotPasswordScreen() {
 			<Ionicons
 				name={isPassed ? "checkmark-circle" : "ellipse-outline"}
 				size={14}
-				color={isPassed ? AUTH_UI.colors.success : AUTH_UI.colors.textMuted}
+				color={
+					isPassed ? AUTH_UI.colors.success : AUTH_UI.colors.textMuted
+				}
 			/>
 			<Text style={[styles.ruleText, isPassed && styles.ruleTextPassed]}>
 				{label}
@@ -166,9 +168,9 @@ export default function ForgotPasswordScreen() {
 	const titles = ["Quên mật khẩu", "Quên mật khẩu", "Tạo mật khẩu mới"];
 
 	return (
-		<KeyboardAvoidingView
-			style={styles.container}
-			behavior={Platform.OS === "ios" ? "padding" : "height"}>
+		<ScreenWrapper
+			backgroundColor={AUTH_UI.colors.background}
+			keyboard>
 			<View style={styles.content}>
 				<TouchableOpacity
 					style={styles.backButton}
@@ -204,22 +206,29 @@ export default function ForgotPasswordScreen() {
 									autoCapitalize="none"
 									keyboardType="email-address"
 									placeholder="Email của bạn"
-									placeholderTextColor={AUTH_UI.colors.textMuted}
+									placeholderTextColor={
+										AUTH_UI.colors.textMuted
+									}
 								/>
 							</View>
 
 							{!!emailError && (
-								<Text style={styles.errorText}>{emailError}</Text>
+								<Text style={styles.errorText}>
+									{emailError}
+								</Text>
 							)}
 
 							<TouchableOpacity
 								style={[
 									styles.primaryButton,
-									isEmailDisabled && styles.primaryButtonDisabled,
+									isEmailDisabled &&
+										styles.primaryButtonDisabled,
 								]}
 								onPress={handleSendOtp}
 								disabled={isEmailDisabled}>
-								<Text style={styles.primaryButtonText}>Gửi mã OTP</Text>
+								<Text style={styles.primaryButtonText}>
+									Gửi mã OTP
+								</Text>
 							</TouchableOpacity>
 						</>
 					)}
@@ -245,9 +254,14 @@ export default function ForgotPasswordScreen() {
 										value={digit}
 										keyboardType="number-pad"
 										maxLength={1}
-										onChangeText={(val) => handleOtpChange(val, index)}
+										onChangeText={(val) =>
+											handleOtpChange(val, index)
+										}
 										onKeyPress={({ nativeEvent }) =>
-											handleOtpKeyPress(nativeEvent.key, index)
+											handleOtpKeyPress(
+												nativeEvent.key,
+												index,
+											)
 										}
 										selectionColor={AUTH_UI.colors.accent}
 									/>
@@ -261,7 +275,8 @@ export default function ForgotPasswordScreen() {
 								<Text
 									style={[
 										styles.resendText,
-										secondsLeft > 0 && styles.resendTextDisabled,
+										secondsLeft > 0 &&
+											styles.resendTextDisabled,
 									]}>
 									{resendLabel}
 								</Text>
@@ -270,11 +285,14 @@ export default function ForgotPasswordScreen() {
 							<TouchableOpacity
 								style={[
 									styles.primaryButton,
-									isOtpDisabled && styles.primaryButtonDisabled,
+									isOtpDisabled &&
+										styles.primaryButtonDisabled,
 								]}
 								onPress={() => goToStep(3)}
 								disabled={isOtpDisabled}>
-								<Text style={styles.primaryButtonText}>Xác nhận</Text>
+								<Text style={styles.primaryButtonText}>
+									Xác nhận
+								</Text>
 							</TouchableOpacity>
 						</>
 					)}
@@ -293,13 +311,19 @@ export default function ForgotPasswordScreen() {
 									onChangeText={setPassword}
 									secureTextEntry={!showPassword}
 									placeholder="Mật khẩu mới"
-									placeholderTextColor={AUTH_UI.colors.textMuted}
+									placeholderTextColor={
+										AUTH_UI.colors.textMuted
+									}
 								/>
 								<TouchableOpacity
-									onPress={() => setShowPassword((prev) => !prev)}>
+									onPress={() =>
+										setShowPassword((prev) => !prev)
+									}>
 									<Ionicons
 										name={
-											showPassword ? "eye-off-outline" : "eye-outline"
+											showPassword
+												? "eye-off-outline"
+												: "eye-outline"
 										}
 										size={18}
 										color={AUTH_UI.colors.textMuted}
@@ -314,7 +338,9 @@ export default function ForgotPasswordScreen() {
 									onChangeText={setConfirmPassword}
 									secureTextEntry={!showConfirmPassword}
 									placeholder="Xác nhận mật khẩu"
-									placeholderTextColor={AUTH_UI.colors.textMuted}
+									placeholderTextColor={
+										AUTH_UI.colors.textMuted
+									}
 								/>
 								<TouchableOpacity
 									onPress={() =>
@@ -338,18 +364,25 @@ export default function ForgotPasswordScreen() {
 									rules.upperLower,
 									"Có chữ hoa và chữ thường",
 								)}
-								{renderRule(rules.hasNumber, "Có ít nhất 1 chữ số")}
+								{renderRule(
+									rules.hasNumber,
+									"Có ít nhất 1 chữ số",
+								)}
 								{renderRule(
 									rules.hasSpecial,
 									"Có ít nhất 1 ký tự đặc biệt",
 								)}
-								{renderRule(isConfirmMatched, "Mật khẩu xác nhận khớp")}
+								{renderRule(
+									isConfirmMatched,
+									"Mật khẩu xác nhận khớp",
+								)}
 							</View>
 
 							<TouchableOpacity
 								style={[
 									styles.primaryButton,
-									isPasswordDisabled && styles.primaryButtonDisabled,
+									isPasswordDisabled &&
+										styles.primaryButtonDisabled,
 								]}
 								onPress={handleSubmit}
 								disabled={isPasswordDisabled}>
@@ -361,19 +394,15 @@ export default function ForgotPasswordScreen() {
 					)}
 				</Animated.View>
 			</View>
-		</KeyboardAvoidingView>
+		</ScreenWrapper>
 	);
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: AUTH_UI.colors.background,
-	},
 	content: {
 		flex: 1,
 		paddingHorizontal: AUTH_LAYOUT.horizontalPadding,
-		paddingTop: 56,
+		paddingTop: 16,
 		overflow: "hidden",
 	},
 	backButton: {

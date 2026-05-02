@@ -16,8 +16,9 @@ import Animated, {
 	withTiming,
 } from "react-native-reanimated";
 
+import { ScreenWrapper } from "@/components/screen-wrapper";
+
 const SCREEN_WIDTH = Dimensions.get("window").width;
-import { SafeAreaView } from "react-native-safe-area-context";
 
 type WelcomeScreenProps = {
 	title: string;
@@ -81,9 +82,7 @@ export function WelcomeScreen({
 	}));
 
 	return (
-		<SafeAreaView
-			style={styles.safeArea}
-			edges={["top", "bottom"]}>
+		<ScreenWrapper backgroundColor="#0A0C10">
 			<View style={styles.container}>
 				<Animated.View
 					style={[
@@ -141,15 +140,11 @@ export function WelcomeScreen({
 					</View>
 				</View>
 			</View>
-		</SafeAreaView>
+		</ScreenWrapper>
 	);
 }
 
 const styles = StyleSheet.create({
-	safeArea: {
-		flex: 1,
-		backgroundColor: "#0A0C10",
-	},
 	container: {
 		flex: 1,
 		backgroundColor: "#0A0C10",
