@@ -43,6 +43,14 @@ export default function RootLayout() {
 				name="(tabs)"
 				options={{ headerShown: false }}
 			/>
+			<Stack.Screen
+				name="exam-preview"
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="exam-take"
+				options={{ headerShown: false }}
+			/>
 		</Stack>
 	);
 }
