@@ -6,7 +6,6 @@ import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
 	ActivityIndicator,
-	Alert,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -23,10 +22,10 @@ export default function LoginScreen() {
 	const { setTokens, setUser } = useAuthStore();
 
 	const handleLogin = async () => {
-		if (!email || !password) {
-			Alert.alert("Lỗi", "Vui lòng nhập email và mật khẩu");
-			return;
-		}
+		// if (!email || !password) {
+		// 	Alert.alert("Lỗi", "Vui lòng nhập email và mật khẩu");
+		// 	return;
+		// }
 
 		// setLoading(true);
 		// try {

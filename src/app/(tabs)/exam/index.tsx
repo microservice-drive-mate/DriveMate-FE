@@ -204,7 +204,7 @@ function ExamCard({ exam, activeType }: { exam: Exam; activeType: ExamType }) {
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.primaryBtn}
-          onPress={() => router.push(`/exam-take/${exam.id}` as never)}
+          onPress={() => router.push(`/exam-session/take/${exam.id}` as never)}
         >
           <Text style={styles.primaryBtnText}>
             {activeType === 'on-tap' ? '🚀 Ôn tập ngay' : '🚀 Vào thi'}
@@ -212,7 +212,7 @@ function ExamCard({ exam, activeType }: { exam: Exam; activeType: ExamType }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.secondaryBtn}
-          onPress={() => router.push(`/exam-preview/${exam.id}` as never)}
+          onPress={() => router.push(`/exam-session/preview/${exam.id}` as never)}
         >
           <Ionicons name="eye-outline" size={15} color={AUTH_UI.colors.textSecondary} />
           <Text style={styles.secondaryBtnText}>Xem đề</Text>
@@ -235,8 +235,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
-  // Header
   header: {
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -252,8 +250,6 @@ const styles = StyleSheet.create({
     color: AUTH_UI.colors.textSecondary,
     marginTop: 3,
   },
-
-  // Search
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -273,8 +269,6 @@ const styles = StyleSheet.create({
     color: AUTH_UI.colors.textPrimary,
     padding: 0,
   },
-
-  // License class tabs
   classTabsScroll: {
     flexGrow: 0,
     flexShrink: 0,
@@ -305,8 +299,6 @@ const styles = StyleSheet.create({
   classTabTextActive: {
     color: AUTH_UI.colors.accentText,
   },
-
-  // Type toggle
   typeToggle: {
     flexDirection: 'row',
     marginHorizontal: 16,
@@ -335,8 +327,6 @@ const styles = StyleSheet.create({
   typeOptionTextActive: {
     color: AUTH_UI.colors.accentText,
   },
-
-  // Banners
   bannerOnTap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -370,8 +360,6 @@ const styles = StyleSheet.create({
   bannerTextPurple: {
     color: '#C4B5FD',
   },
-
-  // List
   list: {
     flex: 1,
   },
@@ -380,8 +368,6 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     gap: 12,
   },
-
-  // Card
   card: {
     backgroundColor: AUTH_UI.colors.surface,
     borderRadius: AUTH_UI.radius.xl,
@@ -503,8 +489,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: AUTH_UI.colors.textSecondary,
   },
-
-  // Empty state
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',

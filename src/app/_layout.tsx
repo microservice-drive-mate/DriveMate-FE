@@ -30,7 +30,7 @@ export default function RootLayout() {
 	}
 
 	return (
-		<Stack>
+		<Stack screenOptions={{ headerShown: false }}>
 			<Stack.Screen
 				name="(onboarding)"
 				options={{ headerShown: false }}
@@ -44,15 +44,11 @@ export default function RootLayout() {
 				options={{ headerShown: false }}
 			/>
 			<Stack.Screen
-				name="exam-preview"
-				options={{ headerShown: false }}
-			/>
-			<Stack.Screen
-				name="exam-take"
-				options={{ headerShown: false }}
-			/>
-			<Stack.Screen
 				name="notifications"
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="exam-session"
 				options={{ headerShown: false }}
 			/>
 		</Stack>
