@@ -1,24 +1,23 @@
-import api from './api';
-import { ENDPOINTS } from '@/constants/api';
-import { LoginRequest, LoginResponse, RegisterRequest, RefreshTokenResponse } from '@/models/auth.model';
+import { apiService as api } from '@/lib/api';
+import { ENDPOINTS } from '@/constants';
+import type { ApiResponse } from '@/types/api.types';
+import type { LoginRequest, LoginResponse, RegisterRequest, RefreshTokenResponse } from '@/models/auth.model';
+import { withErrorHandling } from '@/utils';
 
 export const authService = {
-  login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, data);
-    return response.data;
-  },
+	login: withErrorHandling((data: LoginRequest) =>
+		api.post<ApiResponse<LoginResponse>>(ENDPOINTS.AUTH.LOGIN, data),
+	),
 
-  register: async (data: RegisterRequest): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>(ENDPOINTS.AUTH.REGISTER, data);
-    return response.data;
-  },
+	register: withErrorHandling((data: RegisterRequest) =>
+		api.post<ApiResponse<LoginResponse>>(ENDPOINTS.AUTH.REGISTER, data),
+	),
 
-  refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
-    const response = await api.post<RefreshTokenResponse>(ENDPOINTS.AUTH.REFRESH, { refreshToken });
-    return response.data;
-  },
+	refreshToken: withErrorHandling((refreshToken: string) =>
+		api.post<ApiResponse<RefreshTokenResponse>>(ENDPOINTS.AUTH.REFRESH, { refreshToken }),
+	),
 
-  logout: async (): Promise<void> => {
-    await api.post(ENDPOINTS.AUTH.LOGOUT);
-  },
+	logout: withErrorHandling((refreshToken: string) =>
+		api.post<ApiResponse<{ message: string }>>(ENDPOINTS.AUTH.LOGOUT, { refreshToken }),
+	),
 };

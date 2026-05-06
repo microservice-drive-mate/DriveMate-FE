@@ -1,6 +1,15 @@
-import { User } from "@/models/user.model";
-import { storage } from "@/utils/storage";
-import { create } from "zustand";
+import { User } from '@/models/user.model';
+import {
+	clearStorage,
+	getAuthToken,
+	getOnboardingSeen,
+	getRefreshToken,
+	saveOnboardingSeen,
+	setAuthToken,
+	setRefreshToken,
+	clearOnboardingSeen,
+} from '@/utils/storage';
+import { create } from 'zustand';
 
 interface AuthState {
 	user: User | null;
@@ -30,12 +39,11 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 
 	initialize: async () => {
 		try {
-			const [accessToken, refreshToken, hasSeenOnboarding] =
-				await Promise.all([
-					storage.getToken(),
-					storage.getRefreshToken(),
-					storage.getOnboardingSeen(),
-				]);
+			const [accessToken, refreshToken, hasSeenOnboarding] = await Promise.all([
+				getAuthToken(),
+				getRefreshToken(),
+				getOnboardingSeen(),
+			]);
 
 			set({
 				accessToken,
@@ -49,15 +57,14 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 	},
 
 	setTokens: async (accessToken, refreshToken) => {
-		await storage.saveToken(accessToken);
-		await storage.saveRefreshToken(refreshToken);
+		await Promise.all([setAuthToken(accessToken), setRefreshToken(refreshToken)]);
 		set({ accessToken, refreshToken, isAuthenticated: true });
 	},
 
 	setUser: (user) => set({ user }),
 
 	completeOnboarding: async () => {
-		await storage.saveOnboardingSeen();
+		await saveOnboardingSeen();
 		set({ hasSeenOnboarding: true });
 	},
 
@@ -65,13 +72,12 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 		if (!__DEV__) {
 			return;
 		}
-
-		await storage.clearOnboardingSeen();
+		await clearOnboardingSeen();
 		set({ hasSeenOnboarding: false });
 	},
 
 	logout: async () => {
-		await storage.clearTokens();
+		await clearStorage();
 		set({
 			user: null,
 			accessToken: null,
