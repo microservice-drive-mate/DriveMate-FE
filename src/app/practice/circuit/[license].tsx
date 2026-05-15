@@ -3,6 +3,7 @@ import { ScreenHeader } from '@/components/layout';
 import { AUTH_UI } from '@/constants/auth-ui';
 import { PracticeLicense } from '@/models/practice.model';
 import { practiceService } from '@/services/practice.service';
+import { ms, s, vs } from '@/utils/responsive';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -64,28 +65,28 @@ const styles = StyleSheet.create({
     backgroundColor: AUTH_UI.colors.background,
   },
   list: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
+    paddingHorizontal: s(16),
+    paddingBottom: vs(32),
   },
   header: {
-    marginBottom: 16,
+    marginBottom: vs(16),
   },
   mapPlaceholder: {
     width: '100%',
-    height: 200,
+    height: vs(200),
     backgroundColor: AUTH_UI.colors.surfaceMuted,
-    borderRadius: 12,
+    borderRadius: ms(12),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: vs(10),
   },
   mapPlaceholderText: {
     color: AUTH_UI.colors.textMuted,
-    fontSize: 14,
+    fontSize: ms(14),
   },
   hint: {
-    fontSize: 12,
+    fontSize: ms(12),
     color: AUTH_UI.colors.textMuted,
-    marginBottom: 4,
+    marginBottom: vs(4),
   },
 });

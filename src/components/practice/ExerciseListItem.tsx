@@ -1,4 +1,5 @@
 import { AUTH_UI } from '@/constants/auth-ui';
+import { ms, s, vs } from '@/utils/responsive';
 import { CircuitExercise } from '@/models/practice.model';
 import { practiceService } from '@/services/practice.service';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,7 +30,7 @@ export function ExerciseListItem({ exercise, onPress }: ExerciseListItemProps) {
         <Text style={styles.name}>{exercise.number}. {exercise.name}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color={AUTH_UI.colors.textMuted} />
+      <Ionicons name="chevron-forward" size={ms(16)} color={AUTH_UI.colors.textMuted} />
     </TouchableOpacity>
   );
 }
@@ -39,35 +40,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: AUTH_UI.colors.surface,
-    borderRadius: AUTH_UI.radius.lg,
-    padding: 14,
-    gap: 12,
-    marginBottom: 8,
+    borderRadius: ms(AUTH_UI.radius.lg),
+    padding: s(14),
+    gap: s(12),
+    marginBottom: vs(8),
   },
   badge: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
+    width: s(36),
+    height: s(36),
+    borderRadius: ms(8),
     backgroundColor: '#1A3A2A',
     alignItems: 'center',
     justifyContent: 'center',
   },
   badgeText: {
-    fontSize: 15,
+    fontSize: ms(15),
     fontWeight: '700',
     color: AUTH_UI.colors.success,
   },
   textBlock: {
     flex: 1,
-    gap: 3,
+    gap: vs(3),
   },
   name: {
-    fontSize: 15,
+    fontSize: ms(15),
     fontWeight: '600',
     color: AUTH_UI.colors.textPrimary,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: ms(12),
     color: AUTH_UI.colors.textSecondary,
   },
 });

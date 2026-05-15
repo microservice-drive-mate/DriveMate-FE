@@ -3,6 +3,7 @@ import { QuestionCard } from "@/components/exam/QuestionCard";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { MOCK_EXAMS } from "@/data/exams.mock";
+import { s, vs } from "@/utils/responsive";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FlatList, StyleSheet, View } from "react-native";
 
@@ -41,9 +42,9 @@ export default function ExamPreviewScreen() {
 const styles = StyleSheet.create({
   list: { flex: 1 },
   listContent: {
-    padding: 16,
-    paddingBottom: 32,
-    gap: 12,
+    padding: s(16),
+    paddingBottom: vs(32),
+    gap: s(12),
   },
   errorCenter: { flex: 1 },
 });

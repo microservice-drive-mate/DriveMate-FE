@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import {
   StyleSheet,
@@ -27,7 +28,7 @@ export function InputField({
   return (
     <View style={[styles.container, containerStyle]}>
       {leftIcon && (
-        <Ionicons name={leftIcon} size={18} color={AUTH_UI.colors.textMuted} />
+        <Ionicons name={leftIcon} size={ms(18)} color={AUTH_UI.colors.textMuted} />
       )}
       <TextInput
         style={[styles.input, style]}
@@ -36,7 +37,7 @@ export function InputField({
       />
       {rightIcon && (
         <TouchableOpacity onPress={onRightPress} disabled={!onRightPress}>
-          <Ionicons name={rightIcon} size={18} color={AUTH_UI.colors.textMuted} />
+          <Ionicons name={rightIcon} size={ms(18)} color={AUTH_UI.colors.textMuted} />
         </TouchableOpacity>
       )}
     </View>
@@ -45,20 +46,20 @@ export function InputField({
 
 const styles = StyleSheet.create({
   container: {
-    height: 50,
+    height: vs(50),
     borderWidth: 1,
     borderColor: AUTH_UI.colors.border,
-    borderRadius: AUTH_UI.radius.lg,
+    borderRadius: ms(AUTH_UI.radius.lg),
     backgroundColor: AUTH_UI.colors.surface,
-    paddingHorizontal: 14,
+    paddingHorizontal: s(14),
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
+    gap: s(10),
+    marginBottom: vs(12),
   },
   input: {
     flex: 1,
-    fontSize: 15,
+    fontSize: ms(15),
     color: AUTH_UI.colors.textPrimary,
     padding: 0,
   },

@@ -1,6 +1,7 @@
 import { Badge } from "@/components/common/Badge";
 import { OptionCard } from "@/components/exam/OptionCard";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { ExamQuestion } from "@/models/exam.model";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
@@ -43,7 +44,7 @@ export function QuestionCard({ question, index, mode = "preview" }: QuestionCard
         <View style={styles.explanationBox}>
           <Ionicons
             name="information-circle-outline"
-            size={14}
+            size={ms(14)}
             color={AUTH_UI.colors.textMuted}
           />
           <Text style={styles.explanationText}>{question.explanation}</Text>
@@ -56,37 +57,37 @@ export function QuestionCard({ question, index, mode = "preview" }: QuestionCard
 const styles = StyleSheet.create({
   card: {
     backgroundColor: AUTH_UI.colors.surface,
-    borderRadius: AUTH_UI.radius.xl,
-    padding: 14,
-    gap: 10,
+    borderRadius: ms(AUTH_UI.radius.xl),
+    padding: s(14),
+    gap: s(10),
   },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: s(8),
   },
   questionText: {
-    fontSize: 14,
+    fontSize: ms(14),
     fontWeight: "600",
     color: AUTH_UI.colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: ms(22),
   },
   optionsList: {
-    gap: 8,
+    gap: s(8),
   },
   explanationBox: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 6,
+    gap: s(6),
     backgroundColor: AUTH_UI.colors.surfaceMuted,
-    borderRadius: AUTH_UI.radius.lg,
-    padding: 10,
+    borderRadius: ms(AUTH_UI.radius.lg),
+    padding: s(10),
   },
   explanationText: {
     flex: 1,
-    fontSize: 12,
+    fontSize: ms(12),
     fontStyle: "italic",
     color: AUTH_UI.colors.textMuted,
-    lineHeight: 18,
+    lineHeight: ms(18),
   },
 });

@@ -3,6 +3,7 @@ import { ScreenHeader } from '@/components/layout';
 import { AUTH_UI } from '@/constants/auth-ui';
 import { PracticeLicense } from '@/models/practice.model';
 import { practiceService } from '@/services/practice.service';
+import { ms, s, vs } from '@/utils/responsive';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -76,39 +77,39 @@ const styles = StyleSheet.create({
     backgroundColor: AUTH_UI.colors.background,
   },
   content: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-    paddingTop: 4,
+    paddingHorizontal: s(16),
+    paddingBottom: vs(40),
+    paddingTop: vs(4),
   },
   legend: {
     flexDirection: 'row',
-    gap: 16,
+    gap: s(16),
     backgroundColor: AUTH_UI.colors.surface,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 20,
+    borderRadius: ms(10),
+    paddingHorizontal: s(14),
+    paddingVertical: vs(10),
+    marginBottom: vs(20),
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: s(6),
   },
   legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: s(10),
+    height: s(10),
+    borderRadius: ms(5),
   },
   legendText: {
-    fontSize: 12,
+    fontSize: ms(12),
     color: AUTH_UI.colors.textSecondary,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: vs(20),
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: ms(15),
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: vs(10),
   },
 });

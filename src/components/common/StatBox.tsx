@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s } from "@/utils/responsive";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 
 interface StatBoxProps {
@@ -31,19 +32,19 @@ export function StatBox({ value, label, bg, valueColor, labelColor, style }: Sta
 const styles = StyleSheet.create({
   box: {
     flex: 1,
-    borderRadius: AUTH_UI.radius.xl,
-    padding: 12,
+    borderRadius: ms(AUTH_UI.radius.xl),
+    padding: s(12),
     alignItems: "center",
-    gap: 4,
+    gap: s(4),
     backgroundColor: AUTH_UI.colors.surfaceMuted,
   },
   value: {
-    fontSize: 18,
+    fontSize: ms(18),
     fontWeight: "700",
     color: AUTH_UI.colors.textPrimary,
   },
   label: {
-    fontSize: 11,
+    fontSize: ms(11),
     fontWeight: "500",
     color: AUTH_UI.colors.textSecondary,
   },

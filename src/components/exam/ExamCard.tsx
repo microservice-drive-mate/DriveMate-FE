@@ -1,6 +1,7 @@
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Exam, ExamType } from "@/models/exam.model";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
@@ -45,15 +46,15 @@ export function ExamCard({ exam, activeType, onStart, onPreview }: ExamCardProps
 
       <View style={styles.statsRow}>
         <View style={styles.statChip}>
-          <Ionicons name="help-circle-outline" size={13} color={AUTH_UI.colors.textMuted} />
+          <Ionicons name="help-circle-outline" size={ms(13)} color={AUTH_UI.colors.textMuted} />
           <Text style={styles.statText}>{exam.totalQuestions} câu</Text>
         </View>
         <View style={styles.statChip}>
-          <Ionicons name="time-outline" size={13} color={AUTH_UI.colors.textMuted} />
+          <Ionicons name="time-outline" size={ms(13)} color={AUTH_UI.colors.textMuted} />
           <Text style={styles.statText}>{exam.durationMinutes} phút</Text>
         </View>
         <View style={styles.statChip}>
-          <Ionicons name="people-outline" size={13} color={AUTH_UI.colors.textMuted} />
+          <Ionicons name="people-outline" size={ms(13)} color={AUTH_UI.colors.textMuted} />
           <Text style={styles.statText}>{exam.attemptCount.toLocaleString()} lượt</Text>
         </View>
       </View>
@@ -82,60 +83,60 @@ export function ExamCard({ exam, activeType, onStart, onPreview }: ExamCardProps
 const styles = StyleSheet.create({
   card: {
     backgroundColor: AUTH_UI.colors.surface,
-    borderRadius: AUTH_UI.radius.xl,
-    padding: 14,
-    gap: 10,
+    borderRadius: ms(AUTH_UI.radius.xl),
+    padding: s(14),
+    gap: s(10),
   },
   badgeRow: {
     flexDirection: "row",
-    gap: 6,
+    gap: s(6),
   },
   nameRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: 8,
+    gap: s(8),
   },
   examName: {
     flex: 1,
-    fontSize: 15,
+    fontSize: ms(15),
     fontWeight: "700",
     color: AUTH_UI.colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: ms(22),
   },
   passRateBox: {
     alignItems: "flex-end",
   },
   passRate: {
-    fontSize: 18,
+    fontSize: ms(18),
     fontWeight: "800",
   },
   passRateLabel: {
-    fontSize: 10,
+    fontSize: ms(10),
     color: AUTH_UI.colors.textMuted,
     marginTop: 1,
   },
   statsRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: s(12),
   },
   statChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: s(4),
   },
   statText: {
-    fontSize: 12,
+    fontSize: ms(12),
     color: AUTH_UI.colors.textMuted,
   },
   buttonRow: {
     flexDirection: "row",
-    gap: 8,
+    gap: s(8),
   },
   primaryBtn: {
-    height: 42,
+    height: vs(42),
   },
   secondaryBtn: {
-    height: 42,
+    height: vs(42),
   },
 });

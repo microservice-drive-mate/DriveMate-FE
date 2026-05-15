@@ -4,6 +4,7 @@ import { InputField } from "@/components/common/InputField";
 import { FilterTabs, TabItem } from "@/components/layout/FilterTabs";
 import { ExamCard } from "@/components/exam/ExamCard";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { MOCK_EXAMS } from "@/data/exams.mock";
 import { ExamType, LicenseClass } from "@/models/exam.model";
 import { Ionicons } from "@expo/vector-icons";
@@ -78,14 +79,14 @@ export default function ExamScreen() {
 
         {activeType === "on-tap" ? (
           <View style={styles.bannerOnTap}>
-            <Ionicons name="book-outline" size={18} color={AUTH_UI.colors.accent} />
+            <Ionicons name="book-outline" size={ms(18)} color={AUTH_UI.colors.accent} />
             <Text style={styles.bannerText}>
               Không giới hạn lần làm. Xem đáp án ngay sau mỗi câu.
             </Text>
           </View>
         ) : (
           <View style={styles.bannerSatHach}>
-            <Ionicons name="trophy-outline" size={18} color="#A78BFA" />
+            <Ionicons name="trophy-outline" size={ms(18)} color="#A78BFA" />
             <Text style={[styles.bannerText, styles.bannerTextPurple]}>
               Mô phỏng sát hạch thực tế. Có câu điểm liệt. Thời gian giới hạn.
             </Text>
@@ -122,67 +123,67 @@ export default function ExamScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    paddingHorizontal: s(16),
+    paddingTop: vs(16),
+    paddingBottom: vs(12),
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: ms(22),
     fontWeight: "800",
     color: AUTH_UI.colors.textPrimary,
   },
   headerSub: {
-    fontSize: 13,
+    fontSize: ms(13),
     color: AUTH_UI.colors.textSecondary,
-    marginTop: 3,
+    marginTop: vs(3),
   },
   searchContainer: {
-    marginHorizontal: 16,
-    marginBottom: 12,
+    marginHorizontal: s(16),
+    marginBottom: vs(12),
   },
   classTabs: {
-    marginBottom: 12,
+    marginBottom: vs(12),
   },
   typeToggle: {
-    marginHorizontal: 16,
-    marginBottom: 12,
+    marginHorizontal: s(16),
+    marginBottom: vs(12),
   },
   bannerOnTap: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 16,
-    marginBottom: 12,
+    marginHorizontal: s(16),
+    marginBottom: vs(12),
     backgroundColor: "#2D2A0F",
     borderWidth: 1,
     borderColor: "#4A3F10",
-    borderRadius: AUTH_UI.radius.lg,
-    padding: 12,
-    gap: 10,
+    borderRadius: ms(AUTH_UI.radius.lg),
+    padding: s(12),
+    gap: s(10),
   },
   bannerSatHach: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 16,
-    marginBottom: 12,
+    marginHorizontal: s(16),
+    marginBottom: vs(12),
     backgroundColor: "#1A1040",
     borderWidth: 1,
     borderColor: "#2D1F6B",
-    borderRadius: AUTH_UI.radius.lg,
-    padding: 12,
-    gap: 10,
+    borderRadius: ms(AUTH_UI.radius.lg),
+    padding: s(12),
+    gap: s(10),
   },
   bannerText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: ms(13),
     color: AUTH_UI.colors.textSecondary,
-    lineHeight: 19,
+    lineHeight: ms(19),
   },
   bannerTextPurple: { color: "#C4B5FD" },
   list: { flex: 1 },
   listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-    gap: 12,
+    paddingHorizontal: s(16),
+    paddingBottom: vs(24),
+    gap: vs(12),
   },
-  emptyState: { paddingTop: 60 },
+  emptyState: { paddingTop: vs(60) },
 });

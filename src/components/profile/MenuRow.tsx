@@ -1,5 +1,6 @@
 import { IconBox } from "@/components/common/IconBox";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -22,7 +23,7 @@ export function MenuRow({ icon, label, value, onPress }: MenuRowProps) {
       </View>
       <Ionicons
         name="chevron-forward"
-        size={18}
+        size={ms(18)}
         color={AUTH_UI.colors.textSecondary}
       />
     </TouchableOpacity>
@@ -34,14 +35,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 10,
+    paddingVertical: vs(10),
   },
   left: {
     flexDirection: "row",
     alignItems: "center",
   },
   textBlock: {
-    marginLeft: 10,
+    marginLeft: s(10),
   },
   label: {
     color: AUTH_UI.colors.textPrimary,
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
   },
   value: {
     color: AUTH_UI.colors.textSecondary,
-    marginTop: 2,
-    fontSize: 12,
+    marginTop: vs(2),
+    fontSize: ms(12),
   },
 });

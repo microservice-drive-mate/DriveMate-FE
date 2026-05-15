@@ -3,6 +3,7 @@ import { StatBox } from "@/components/common/StatBox";
 import { CircularProgress } from "@/components/exam/CircularProgress";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -43,8 +44,8 @@ export default function ExamResultScreen() {
 				<View style={styles.progressContainer}>
 					<CircularProgress
 						percentage={percentage}
-						size={140}
-						strokeWidth={12}
+						size={s(140)}
+						strokeWidth={s(12)}
 						fillColor={fillColor}
 					/>
 					<View style={styles.progressCenter}>
@@ -75,7 +76,7 @@ export default function ExamResultScreen() {
 					<View style={styles.criticalWarning}>
 						<Ionicons
 							name="warning-outline"
-							size={18}
+							size={ms(18)}
 							color={AUTH_UI.colors.danger}
 						/>
 						<View style={styles.criticalWarningText}>
@@ -168,35 +169,35 @@ const styles = StyleSheet.create({
 		backgroundColor: AUTH_UI.colors.background,
 	},
 	content: {
-		paddingHorizontal: 20,
-		paddingTop: 24,
-		paddingBottom: 40,
+		paddingHorizontal: s(20),
+		paddingTop: vs(24),
+		paddingBottom: vs(40),
 		alignItems: "center",
-		gap: 20,
+		gap: vs(20),
 	},
 	progressContainer: {
-		width: 140,
-		height: 140,
+		width: s(140),
+		height: s(140),
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	progressCenter: {
 		position: "absolute",
 		alignItems: "center",
-		gap: 2,
+		gap: vs(2),
 	},
 	percentText: {
-		fontSize: 28,
+		fontSize: ms(28),
 		fontWeight: "800",
 	},
 	correctLabel: {
-		fontSize: 12,
+		fontSize: ms(12),
 		color: AUTH_UI.colors.textSecondary,
 	},
 	resultBadge: {
-		paddingHorizontal: 20,
-		paddingVertical: 8,
-		borderRadius: 20,
+		paddingHorizontal: s(20),
+		paddingVertical: vs(8),
+		borderRadius: ms(20),
 	},
 	resultBadgePassed: {
 		backgroundColor: "rgba(83,209,141,0.15)",
@@ -209,50 +210,50 @@ const styles = StyleSheet.create({
 		borderColor: "rgba(248,113,113,0.3)",
 	},
 	resultBadgeText: {
-		fontSize: 14,
+		fontSize: ms(14),
 		fontWeight: "700",
 		letterSpacing: 1,
 	},
 	criticalWarning: {
 		flexDirection: "row",
 		alignItems: "flex-start",
-		gap: 10,
+		gap: s(10),
 		backgroundColor: "rgba(248,113,113,0.1)",
-		borderRadius: AUTH_UI.radius.xl,
+		borderRadius: ms(AUTH_UI.radius.xl),
 		borderWidth: 1,
 		borderColor: "rgba(248,113,113,0.25)",
-		padding: 14,
+		padding: s(14),
 		width: "100%",
 	},
 	criticalWarningText: {
 		flex: 1,
-		gap: 4,
+		gap: vs(4),
 	},
 	criticalTitle: {
-		fontSize: 14,
+		fontSize: ms(14),
 		fontWeight: "700",
 		color: AUTH_UI.colors.danger,
 	},
 	criticalSubtitle: {
-		fontSize: 13,
+		fontSize: ms(13),
 		color: AUTH_UI.colors.textSecondary,
-		lineHeight: 18,
+		lineHeight: ms(18),
 	},
 	statsRow: {
 		flexDirection: "row",
-		gap: 10,
+		gap: s(10),
 		width: "100%",
 	},
 	reviewBtn: {
 		width: "100%",
-		height: 50,
+		height: vs(50),
 	},
 	actions: {
 		flexDirection: "row",
-		gap: 10,
+		gap: s(10),
 		width: "100%",
 	},
 	actionBtn: {
-		height: 50,
+		height: vs(50),
 	},
 });

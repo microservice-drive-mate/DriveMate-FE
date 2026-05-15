@@ -1,6 +1,7 @@
 import { LicenseSelectorSheet, PracticeCard } from '@/components/practice';
 import { ScreenWrapper } from '@/components/screen-wrapper';
 import { AUTH_UI } from '@/constants/auth-ui';
+import { ms, s, vs } from '@/utils/responsive';
 import { PracticeCardType, PracticeLicense } from '@/models/practice.model';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -59,19 +60,19 @@ export default function Practice() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: s(16),
+    paddingTop: vs(16),
   },
   title: {
-    fontSize: 24,
+    fontSize: ms(24),
     fontWeight: '700',
     color: AUTH_UI.colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: vs(4),
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: ms(14),
     color: AUTH_UI.colors.textSecondary,
-    marginBottom: 24,
+    marginBottom: vs(24),
   },
   cards: {
     gap: 0,

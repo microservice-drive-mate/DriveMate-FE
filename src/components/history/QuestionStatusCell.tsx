@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { HistoryQuestionState } from "@/models/history.model";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
@@ -29,7 +30,7 @@ export function QuestionStatusCell({ state, index }: QuestionStatusCellProps) {
 			<Text style={[styles.number, { color: iconColor }]}>{index}</Text>
 			<Ionicons
 				name={isCorrect ? "checkmark" : isWrong ? "close" : "remove"}
-				size={16}
+				size={ms(16)}
 				color={iconColor}
 			/>
 		</View>
@@ -38,13 +39,13 @@ export function QuestionStatusCell({ state, index }: QuestionStatusCellProps) {
 
 const styles = StyleSheet.create({
 	cell: {
-		width: 54,
-		height: 60,
-		borderRadius: 12,
+		width: s(54),
+		height: vs(60),
+		borderRadius: ms(12),
 		alignItems: "center",
 		justifyContent: "center",
 		borderWidth: 1,
-		gap: 2,
+		gap: vs(2),
 	},
 	cellCorrect: {
 		backgroundColor: "#004C2F",
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
 		borderColor: AUTH_UI.colors.border,
 	},
 	number: {
-		fontSize: 11,
+		fontSize: ms(11),
 		fontWeight: "700",
 		opacity: 0.85,
 	},

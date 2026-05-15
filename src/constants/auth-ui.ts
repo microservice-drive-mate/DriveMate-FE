@@ -1,3 +1,5 @@
+import { s } from '@/utils/responsive';
+
 export const AUTH_UI = {
 	colors: {
 		background: "#090B0F",
@@ -20,5 +22,5 @@ export const AUTH_UI = {
 };
 
 export const AUTH_LAYOUT = {
-	horizontalPadding: 24,
+	horizontalPadding: s(24),
 };

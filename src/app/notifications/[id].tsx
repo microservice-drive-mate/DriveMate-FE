@@ -1,5 +1,6 @@
 import { AUTH_UI } from "@/constants/auth-ui";
 import { useNotificationsStore } from "@/store/notifications.store";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo } from "react";
@@ -48,7 +49,7 @@ export default function NotificationDetailScreen() {
 					onPress={() => router.back()}>
 					<Ionicons
 						name="arrow-back"
-						size={20}
+						size={ms(20)}
 						color={AUTH_UI.colors.textPrimary}
 					/>
 				</TouchableOpacity>
@@ -61,7 +62,7 @@ export default function NotificationDetailScreen() {
 				<TouchableOpacity style={styles.iconBtn} onPress={refresh}>
 					<Ionicons
 						name="refresh-outline"
-						size={20}
+						size={ms(20)}
 						color={AUTH_UI.colors.textPrimary}
 					/>
 				</TouchableOpacity>
@@ -89,14 +90,14 @@ const styles = StyleSheet.create({
 	header: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		gap: 12,
+		paddingHorizontal: s(16),
+		paddingVertical: vs(12),
+		gap: s(12),
 	},
 	iconBtn: {
-		width: 40,
-		height: 40,
-		borderRadius: 12,
+		width: s(40),
+		height: s(40),
+		borderRadius: ms(12),
 		backgroundColor: AUTH_UI.colors.surface,
 		alignItems: "center",
 		justifyContent: "center",
@@ -104,42 +105,42 @@ const styles = StyleSheet.create({
 	headerCenter: { flex: 1, alignItems: "center" },
 	headerTitle: {
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 16,
+		fontSize: ms(16),
 		fontWeight: "700",
 	},
 	headerSubtitle: {
 		color: AUTH_UI.colors.textMuted,
-		fontSize: 12,
-		marginTop: 2,
+		fontSize: ms(12),
+		marginTop: vs(2),
 	},
 
-	scrollContent: { paddingHorizontal: 16, paddingBottom: 32 },
+	scrollContent: { paddingHorizontal: s(16), paddingBottom: vs(32) },
 
 	card: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.xl,
-		padding: 20,
-		gap: 16,
+		borderRadius: ms(AUTH_UI.radius.xl),
+		padding: s(20),
+		gap: vs(16),
 	},
 	detail: {
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 14,
-		lineHeight: 24,
+		fontSize: ms(14),
+		lineHeight: ms(24),
 	},
 
-	timeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+	timeRow: { flexDirection: "row", alignItems: "center", gap: s(6) },
 	dot: {
-		width: 8,
-		height: 8,
-		borderRadius: 4,
+		width: s(8),
+		height: s(8),
+		borderRadius: ms(4),
 		backgroundColor: AUTH_UI.colors.accent,
 	},
-	timeAgo: { color: AUTH_UI.colors.textMuted, fontSize: 12 },
+	timeAgo: { color: AUTH_UI.colors.textMuted, fontSize: ms(12) },
 
 	notFound: {
 		textAlign: "center",
 		color: AUTH_UI.colors.textMuted,
-		marginTop: 40,
-		fontSize: 14,
+		marginTop: vs(40),
+		fontSize: ms(14),
 	},
 });

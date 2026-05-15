@@ -2,6 +2,7 @@ import { StepCard } from '@/components/practice';
 import { ScreenHeader } from '@/components/layout';
 import { AUTH_UI } from '@/constants/auth-ui';
 import { practiceService } from '@/services/practice.service';
+import { ms, s, vs } from '@/utils/responsive';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -121,8 +122,8 @@ const styles = StyleSheet.create({
     backgroundColor: AUTH_UI.colors.background,
   },
   content: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
+    paddingHorizontal: s(16),
+    paddingBottom: vs(40),
   },
   center: {
     flex: 1,
@@ -131,70 +132,70 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: AUTH_UI.colors.textSecondary,
-    fontSize: 15,
+    fontSize: ms(15),
   },
   exerciseHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-    marginTop: 4,
+    gap: s(12),
+    marginBottom: vs(16),
+    marginTop: vs(4),
   },
   numberBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: s(44),
+    height: s(44),
+    borderRadius: ms(10),
     backgroundColor: '#1A3A2A',
     alignItems: 'center',
     justifyContent: 'center',
   },
   numberText: {
-    fontSize: 18,
+    fontSize: ms(18),
     fontWeight: '700',
     color: AUTH_UI.colors.success,
   },
   exerciseTitleBlock: {
     flex: 1,
-    gap: 3,
+    gap: vs(3),
   },
   exerciseName: {
-    fontSize: 18,
+    fontSize: ms(18),
     fontWeight: '700',
     color: AUTH_UI.colors.textPrimary,
   },
   exerciseCount: {
-    fontSize: 13,
+    fontSize: ms(13),
     color: AUTH_UI.colors.textSecondary,
   },
   legend: {
     flexDirection: 'row',
-    gap: 16,
+    gap: s(16),
     backgroundColor: AUTH_UI.colors.surface,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 20,
+    borderRadius: ms(10),
+    paddingHorizontal: s(14),
+    paddingVertical: vs(10),
+    marginBottom: vs(20),
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: s(6),
   },
   legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: s(10),
+    height: s(10),
+    borderRadius: ms(5),
   },
   legendText: {
-    fontSize: 12,
+    fontSize: ms(12),
     color: AUTH_UI.colors.textSecondary,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: vs(20),
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: ms(15),
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: vs(10),
   },
 });

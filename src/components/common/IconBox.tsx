@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View, ViewStyle } from "react-native";
 
@@ -14,11 +15,11 @@ interface IconBoxProps {
 
 export function IconBox({
   icon,
-  size = 18,
+  size = ms(18),
   bg,
   color,
-  boxSize = 40,
-  borderRadius = 10,
+  boxSize = s(40),
+  borderRadius = ms(10),
   style,
 }: IconBoxProps) {
   return (

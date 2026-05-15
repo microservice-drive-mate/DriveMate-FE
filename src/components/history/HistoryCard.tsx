@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -35,7 +36,7 @@ export function HistoryCard({
 							? "checkmark-circle-outline"
 							: "close-circle-outline"
 					}
-					size={24}
+					size={ms(24)}
 					color={
 						passed ? AUTH_UI.colors.success : AUTH_UI.colors.danger
 					}
@@ -82,18 +83,18 @@ export function HistoryCard({
 const styles = StyleSheet.create({
 	card: {
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
-		borderRadius: 18,
+		borderRadius: ms(18),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
-		padding: 14,
+		padding: s(14),
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 12,
+		gap: s(12),
 	},
 	statusIconWrap: {
-		width: 52,
-		height: 52,
-		borderRadius: 14,
+		width: s(52),
+		height: s(52),
+		borderRadius: ms(14),
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -105,24 +106,24 @@ const styles = StyleSheet.create({
 	},
 	info: {
 		flex: 1,
-		gap: 3,
+		gap: vs(3),
 	},
 	title: {
-		fontSize: 31 / 2,
+		fontSize: ms(15),
 		fontWeight: "800",
 		color: AUTH_UI.colors.textPrimary,
 	},
 	meta: {
-		fontSize: 24 / 2,
+		fontSize: ms(12),
 		color: AUTH_UI.colors.textSecondary,
 		fontWeight: "500",
 	},
 	scoreWrap: {
 		alignItems: "flex-end",
-		gap: 8,
+		gap: s(8),
 	},
 	score: {
-		fontSize: 17,
+		fontSize: ms(17),
 		fontWeight: "900",
 	},
 	scorePass: {
@@ -133,8 +134,8 @@ const styles = StyleSheet.create({
 	},
 	badge: {
 		borderRadius: 999,
-		paddingHorizontal: 10,
-		paddingVertical: 3,
+		paddingHorizontal: s(10),
+		paddingVertical: vs(3),
 	},
 	badgePass: {
 		backgroundColor: "rgba(83, 209, 141, 0.18)",
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "rgba(248, 113, 113, 0.16)",
 	},
 	badgeText: {
-		fontSize: 12,
+		fontSize: ms(12),
 		fontWeight: "700",
 	},
 	badgeTextPass: {

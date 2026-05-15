@@ -1,5 +1,6 @@
 import { IconBox } from "@/components/common/IconBox";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -28,23 +29,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 10,
+    paddingVertical: vs(10),
   },
   left: {
     flexDirection: "row",
     alignItems: "center",
   },
   textBlock: {
-    marginLeft: 10,
+    marginLeft: s(10),
   },
   label: {
     color: AUTH_UI.colors.textSecondary,
-    fontSize: 11,
+    fontSize: ms(11),
   },
   value: {
     color: AUTH_UI.colors.textPrimary,
-    fontSize: 14,
+    fontSize: ms(14),
     fontWeight: "600",
-    marginTop: 2,
+    marginTop: vs(2),
   },
 });

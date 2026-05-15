@@ -6,6 +6,7 @@ import { MenuRow } from "@/components/profile/MenuRow";
 import { StatCard } from "@/components/profile/StatCard";
 import { ToggleRow } from "@/components/profile/ToggleRow";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -113,19 +114,19 @@ export default function Me() {
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, padding: 16, paddingBottom: 32, gap: 12 },
+	container: { flex: 1, padding: s(16), paddingBottom: vs(32), gap: vs(12) },
 
 	headerCard: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.xl,
-		padding: 16,
+		borderRadius: ms(AUTH_UI.radius.xl),
+		padding: s(16),
 	},
 	headerLeft: { flexDirection: "row", alignItems: "center" },
-	headerInfo: { marginLeft: 12, flex: 1 },
+	headerInfo: { marginLeft: s(12), flex: 1 },
 	avatar: {
-		width: 64,
-		height: 64,
-		borderRadius: 16,
+		width: s(64),
+		height: s(64),
+		borderRadius: ms(16),
 		backgroundColor: AUTH_UI.colors.accent,
 		alignItems: "center",
 		justifyContent: "center",
@@ -133,57 +134,57 @@ const styles = StyleSheet.create({
 	avatarText: {
 		color: AUTH_UI.colors.accentText,
 		fontWeight: "800",
-		fontSize: 20,
+		fontSize: ms(20),
 	},
 	fullName: {
 		color: AUTH_UI.colors.textPrimary,
 		fontWeight: "800",
-		fontSize: 16,
+		fontSize: ms(16),
 	},
-	email: { color: AUTH_UI.colors.textSecondary, marginTop: 4, fontSize: 12 },
-	badgesRow: { flexDirection: "row", gap: 8, marginTop: 12 },
+	email: { color: AUTH_UI.colors.textSecondary, marginTop: vs(4), fontSize: ms(12) },
+	badgesRow: { flexDirection: "row", gap: s(8), marginTop: vs(12) },
 	badgePrimary: {
 		backgroundColor: AUTH_UI.colors.accent,
-		paddingHorizontal: 10,
-		paddingVertical: 6,
-		borderRadius: 12,
+		paddingHorizontal: s(10),
+		paddingVertical: vs(6),
+		borderRadius: ms(12),
 	},
 	badgePrimaryText: { color: AUTH_UI.colors.accentText, fontWeight: "700" },
 	badgePill: {
 		backgroundColor: "rgba(83, 209, 141, 0.15)",
-		paddingHorizontal: 10,
-		paddingVertical: 6,
-		borderRadius: 12,
+		paddingHorizontal: s(10),
+		paddingVertical: vs(6),
+		borderRadius: ms(12),
 	},
 	badgePillText: { color: AUTH_UI.colors.success },
 
 	infoCard: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.lg,
-		padding: 12,
+		borderRadius: ms(AUTH_UI.radius.lg),
+		padding: s(12),
 	},
-	statsRow: { flexDirection: "row", gap: 8, marginTop: 6 },
+	statsRow: { flexDirection: "row", gap: s(8), marginTop: vs(6) },
 	sectionTitle: {
 		textTransform: "uppercase",
-		fontSize: 11,
+		fontSize: ms(11),
 		color: AUTH_UI.colors.textMuted,
 		letterSpacing: 0.8,
 		fontWeight: "600",
-		marginTop: 8,
-		marginBottom: 6,
+		marginTop: vs(8),
+		marginBottom: vs(6),
 	},
 	sectionCard: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.lg,
-		padding: 8,
+		borderRadius: ms(AUTH_UI.radius.lg),
+		padding: s(8),
 	},
 	versionText: {
 		color: AUTH_UI.colors.textMuted,
-		fontSize: 11,
+		fontSize: ms(11),
 		textAlign: "center",
-		marginTop: 8,
+		marginTop: vs(8),
 	},
 	logoutBtn: {
-		marginTop: 16,
+		marginTop: vs(16),
 	},
 });

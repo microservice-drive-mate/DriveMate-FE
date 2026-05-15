@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms } from "@/utils/responsive";
 import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
 interface SectionHeaderProps {
@@ -28,12 +29,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   title: {
-    fontSize: 15,
+    fontSize: ms(15),
     fontWeight: "700",
     color: AUTH_UI.colors.textPrimary,
   },
   action: {
-    fontSize: 13,
+    fontSize: ms(13),
     color: AUTH_UI.colors.accent,
     fontWeight: "600",
   },

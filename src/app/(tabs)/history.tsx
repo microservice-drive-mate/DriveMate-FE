@@ -4,6 +4,7 @@ import { StatBox } from "@/components/common/StatBox";
 import { HistoryCard } from "@/components/history";
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { HistoryFilterStatus } from "@/models/history.model";
 import { historyService } from "@/services/history.service";
 import { Ionicons } from "@expo/vector-icons";
@@ -157,7 +158,7 @@ export default function History() {
 								onPress={() => setActiveFilter(option.key)}>
 								<Ionicons
 									name={option.icon}
-									size={14}
+									size={ms(14)}
 									color={
 										isActive
 											? AUTH_UI.colors.accentText
@@ -222,51 +223,51 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	header: {
-		paddingHorizontal: 16,
-		paddingTop: 16,
-		paddingBottom: 12,
+		paddingHorizontal: s(16),
+		paddingTop: vs(16),
+		paddingBottom: vs(12),
 	},
 	title: {
-		fontSize: 38 / 2,
+		fontSize: ms(19),
 		fontWeight: "800",
 		color: AUTH_UI.colors.textPrimary,
 	},
 	subtitle: {
-		marginTop: 2,
-		fontSize: (14 / 2) * 2,
+		marginTop: vs(2),
+		fontSize: ms(14),
 		color: AUTH_UI.colors.textSecondary,
 	},
 	statRow: {
-		paddingHorizontal: 16,
+		paddingHorizontal: s(16),
 		flexDirection: "row",
-		gap: 10,
-		marginBottom: 12,
+		gap: s(10),
+		marginBottom: vs(12),
 	},
 	searchInput: {
-		marginHorizontal: 16,
-		marginBottom: 10,
+		marginHorizontal: s(16),
+		marginBottom: vs(10),
 	},
 	filters: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 8,
-		paddingHorizontal: 16,
-		marginBottom: 12,
+		gap: s(8),
+		paddingHorizontal: s(16),
+		marginBottom: vs(12),
 	},
 	filterChip: {
-		paddingHorizontal: 14,
-		paddingVertical: 8,
-		borderRadius: 12,
+		paddingHorizontal: s(14),
+		paddingVertical: vs(8),
+		borderRadius: ms(12),
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
+		gap: s(6),
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
 	},
 	filterChipActive: {
 		backgroundColor: AUTH_UI.colors.accent,
 	},
 	filterText: {
-		fontSize: (15 / 2) * 2,
+		fontSize: ms(15),
 		fontWeight: "700",
 		color: AUTH_UI.colors.textSecondary,
 	},
@@ -274,14 +275,14 @@ const styles = StyleSheet.create({
 		color: AUTH_UI.colors.accentText,
 	},
 	listContent: {
-		paddingHorizontal: 16,
-		paddingBottom: 20,
-		gap: 12,
+		paddingHorizontal: s(16),
+		paddingBottom: vs(20),
+		gap: vs(12),
 	},
 	footerLoading: {
-		paddingVertical: 10,
+		paddingVertical: vs(10),
 	},
 	emptyState: {
-		paddingTop: 48,
+		paddingTop: vs(48),
 	},
 });

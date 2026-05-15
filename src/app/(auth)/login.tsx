@@ -3,6 +3,7 @@ import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/InputField";
 import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
 import { AUTH_MESSAGES } from "@/constants/messages";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -37,7 +38,7 @@ export default function LoginScreen() {
 				<View style={styles.logoWrapper}>
 					<Ionicons
 						name="key-outline"
-						size={22}
+						size={ms(22)}
 						color={AUTH_UI.colors.accentText}
 					/>
 				</View>
@@ -96,37 +97,37 @@ const styles = StyleSheet.create({
 		paddingHorizontal: AUTH_LAYOUT.horizontalPadding,
 	},
 	logoWrapper: {
-		width: 48,
-		height: 48,
-		borderRadius: AUTH_UI.radius.xl,
+		width: s(48),
+		height: s(48),
+		borderRadius: ms(AUTH_UI.radius.xl),
 		backgroundColor: AUTH_UI.colors.accent,
 		alignItems: "center",
 		justifyContent: "center",
-		marginBottom: 18,
+		marginBottom: vs(18),
 	},
 	title: {
-		fontSize: 30,
+		fontSize: ms(30),
 		fontWeight: "700",
 		color: AUTH_UI.colors.textPrimary,
-		marginBottom: 6,
+		marginBottom: vs(6),
 	},
 	subtitle: {
-		fontSize: 14,
+		fontSize: ms(14),
 		color: AUTH_UI.colors.textSecondary,
-		marginBottom: 26,
+		marginBottom: vs(26),
 	},
-	forgotLink: { alignSelf: "flex-end", marginBottom: 14, marginTop: -4 },
+	forgotLink: { alignSelf: "flex-end", marginBottom: vs(14), marginTop: -4 },
 	forgotText: {
-		fontSize: 12,
+		fontSize: ms(12),
 		color: AUTH_UI.colors.accent,
 		fontWeight: "600",
 	},
 	registerView: {
 		flexDirection: "row",
 		justifyContent: "center",
-		gap: 2,
-		marginTop: 16,
+		gap: s(2),
+		marginTop: vs(16),
 	},
-	linkText: { fontSize: 13, color: AUTH_UI.colors.textSecondary },
+	linkText: { fontSize: ms(13), color: AUTH_UI.colors.textSecondary },
 	linkBold: { color: AUTH_UI.colors.accent, fontWeight: "600" },
 });

@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { StyleSheet, Text, View } from "react-native";
 
 interface StatCardProps {
@@ -20,18 +21,18 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: AUTH_UI.colors.surface,
-    borderRadius: AUTH_UI.radius.lg,
-    padding: 12,
+    borderRadius: ms(AUTH_UI.radius.lg),
+    padding: s(12),
     alignItems: "center",
   },
   value: {
     color: AUTH_UI.colors.accent,
     fontWeight: "900",
-    fontSize: 18,
+    fontSize: ms(18),
   },
   label: {
     color: AUTH_UI.colors.textSecondary,
-    fontSize: 12,
-    marginTop: 6,
+    fontSize: ms(12),
+    marginTop: vs(6),
   },
 });

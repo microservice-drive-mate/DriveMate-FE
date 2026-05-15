@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import {
   ScrollView,
@@ -43,7 +44,7 @@ export function FilterTabs({
               {tab.icon && (
                 <Ionicons
                   name={tab.icon}
-                  size={15}
+                  size={ms(15)}
                   color={isActive ? AUTH_UI.colors.accentText : AUTH_UI.colors.textSecondary}
                 />
               )}
@@ -92,14 +93,14 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   pillsContent: {
-    gap: 8,
+    gap: s(8),
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: s(16),
   },
   pill: {
-    paddingHorizontal: 18,
-    paddingVertical: 7,
-    borderRadius: 20,
+    paddingHorizontal: s(18),
+    paddingVertical: vs(7),
+    borderRadius: ms(20),
     backgroundColor: AUTH_UI.colors.surface,
     borderWidth: 1,
     borderColor: AUTH_UI.colors.border,
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     borderColor: AUTH_UI.colors.accent,
   },
   pillText: {
-    fontSize: 14,
+    fontSize: ms(14),
     fontWeight: "600",
     color: AUTH_UI.colors.textSecondary,
   },
@@ -119,23 +120,23 @@ const styles = StyleSheet.create({
   segment: {
     flexDirection: "row",
     backgroundColor: AUTH_UI.colors.surfaceMuted,
-    borderRadius: AUTH_UI.radius.lg,
-    padding: 4,
+    borderRadius: ms(AUTH_UI.radius.lg),
+    padding: s(4),
   },
   segmentOption: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 9,
-    borderRadius: 10,
-    gap: 6,
+    paddingVertical: vs(9),
+    borderRadius: ms(10),
+    gap: s(6),
   },
   segmentOptionActive: {
     backgroundColor: AUTH_UI.colors.accent,
   },
   segmentText: {
-    fontSize: 14,
+    fontSize: ms(14),
     fontWeight: "600",
     color: AUTH_UI.colors.textSecondary,
   },

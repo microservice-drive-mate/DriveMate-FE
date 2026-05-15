@@ -1,4 +1,5 @@
 import { AUTH_UI } from '@/constants/auth-ui';
+import { ms, s, vs } from '@/utils/responsive';
 import { PracticeCardType } from '@/models/practice.model';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -47,9 +48,9 @@ export function PracticeCard({ type, onPress }: PracticeCardProps) {
     >
       <View style={styles.topRow}>
         <View style={[styles.iconBox, { backgroundColor: config.iconBg }]}>
-          <Ionicons name="map" size={24} color={config.iconColor} />
+          <Ionicons name="map" size={ms(24)} color={config.iconColor} />
         </View>
-        <Ionicons name="chevron-forward" size={18} color={AUTH_UI.colors.textMuted} />
+        <Ionicons name="chevron-forward" size={ms(18)} color={AUTH_UI.colors.textMuted} />
       </View>
 
       <Text style={styles.title}>{config.title}</Text>
@@ -78,61 +79,61 @@ export function PracticeCard({ type, onPress }: PracticeCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: ms(16),
+    padding: s(16),
+    marginBottom: vs(16),
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: vs(12),
   },
   iconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: s(48),
+    height: s(48),
+    borderRadius: ms(12),
     alignItems: 'center',
     justifyContent: 'center',
   },
   title: {
-    fontSize: 18,
+    fontSize: ms(18),
     fontWeight: '700',
     color: AUTH_UI.colors.textPrimary,
-    marginBottom: 6,
+    marginBottom: vs(6),
   },
   description: {
-    fontSize: 13,
+    fontSize: ms(13),
     color: AUTH_UI.colors.danger,
-    lineHeight: 18,
-    marginBottom: 10,
+    lineHeight: ms(18),
+    marginBottom: vs(10),
   },
   licensesRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: s(6),
     marginBottom: 0,
   },
   licenseBadge: {
     backgroundColor: '#5A1A1A',
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    borderRadius: ms(6),
+    paddingHorizontal: s(10),
+    paddingVertical: vs(4),
   },
   licenseText: {
-    fontSize: 12,
+    fontSize: ms(12),
     fontWeight: '600',
     color: AUTH_UI.colors.textPrimary,
   },
   tagsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: s(12),
     backgroundColor: 'rgba(0,0,0,0.25)',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: ms(8),
+    paddingHorizontal: s(12),
+    paddingVertical: vs(8),
   },
   tagText: {
-    fontSize: 12,
+    fontSize: ms(12),
     fontWeight: '500',
   },
 });

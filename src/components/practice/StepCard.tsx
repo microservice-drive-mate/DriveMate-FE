@@ -1,3 +1,4 @@
+import { ms, s, vs } from '@/utils/responsive';
 import { StepType } from '@/models/practice.model';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -14,25 +15,25 @@ const STEP_STYLES: Record<StepType, { bg: string; border: string; text: string }
 };
 
 export function StepCard({ description, type, points }: StepCardProps) {
-  const s = STEP_STYLES[type];
+  const stepStyle = STEP_STYLES[type];
   const label = points != null ? `${description} (${points} điểm)` : description;
 
   return (
-    <View style={[styles.card, { backgroundColor: s.bg, borderColor: s.border }]}>
-      <Text style={[styles.text, { color: s.text }]}>{label}</Text>
+    <View style={[styles.card, { backgroundColor: stepStyle.bg, borderColor: stepStyle.border }]}>
+      <Text style={[styles.text, { color: stepStyle.text }]}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 10,
+    borderRadius: ms(10),
     borderWidth: 1,
-    padding: 14,
-    marginBottom: 8,
+    padding: s(14),
+    marginBottom: vs(8),
   },
   text: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: ms(14),
+    lineHeight: ms(20),
   },
 });

@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 
 type BadgeVariant = "accent" | "success" | "danger" | "warning" | "on-tap" | "sat-hach" | "critical";
@@ -61,23 +62,23 @@ const variantStyles: Record<BadgeVariant, { container: object; text: object }> =
 };
 
 export function Badge({ text, variant = "accent", style }: BadgeProps) {
-  const vs = variantStyles[variant];
+  const variantStyle = variantStyles[variant];
   return (
-    <View style={[styles.base, vs.container, style]}>
-      <Text style={[styles.text, vs.text]}>{text}</Text>
+    <View style={[styles.base, variantStyle.container, style]}>
+      <Text style={[styles.text, variantStyle.text]}>{text}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    borderRadius: ms(20),
+    paddingHorizontal: s(10),
+    paddingVertical: vs(3),
     alignSelf: "flex-start",
   },
   text: {
-    fontSize: 11,
+    fontSize: ms(11),
     fontWeight: "600",
   },
 });

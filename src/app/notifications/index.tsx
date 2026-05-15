@@ -1,6 +1,7 @@
 import { AUTH_UI } from "@/constants/auth-ui";
 import { Notification } from "@/models/notification.model";
 import { useNotificationsStore } from "@/store/notifications.store";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -84,7 +85,7 @@ export default function NotificationsScreen() {
 					onPress={() => router.back()}>
 					<Ionicons
 						name="arrow-back"
-						size={20}
+						size={ms(20)}
 						color={AUTH_UI.colors.textPrimary}
 					/>
 				</TouchableOpacity>
@@ -99,7 +100,7 @@ export default function NotificationsScreen() {
 					onPress={refresh}>
 					<Ionicons
 						name="refresh-outline"
-						size={20}
+						size={ms(20)}
 						color={AUTH_UI.colors.textPrimary}
 					/>
 				</TouchableOpacity>
@@ -147,14 +148,14 @@ const styles = StyleSheet.create({
 	header: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		gap: 12,
+		paddingHorizontal: s(16),
+		paddingVertical: vs(12),
+		gap: s(12),
 	},
 	iconBtn: {
-		width: 40,
-		height: 40,
-		borderRadius: 12,
+		width: s(40),
+		height: s(40),
+		borderRadius: ms(12),
 		backgroundColor: AUTH_UI.colors.surface,
 		alignItems: "center",
 		justifyContent: "center",
@@ -162,42 +163,42 @@ const styles = StyleSheet.create({
 	headerCenter: { flex: 1, alignItems: "center" },
 	headerTitle: {
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 16,
+		fontSize: ms(16),
 		fontWeight: "700",
 	},
 	headerSubtitle: {
 		color: AUTH_UI.colors.textMuted,
-		fontSize: 12,
-		marginTop: 2,
+		fontSize: ms(12),
+		marginTop: vs(2),
 	},
 
 	tabRow: {
 		flexDirection: "row",
-		paddingHorizontal: 16,
-		gap: 8,
-		marginBottom: 8,
+		paddingHorizontal: s(16),
+		gap: s(8),
+		marginBottom: vs(8),
 	},
 	tab: {
-		paddingHorizontal: 16,
-		paddingVertical: 8,
-		borderRadius: 20,
+		paddingHorizontal: s(16),
+		paddingVertical: vs(8),
+		borderRadius: ms(20),
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
 	},
 	tabActive: { backgroundColor: AUTH_UI.colors.accent },
 	tabText: {
 		color: AUTH_UI.colors.textSecondary,
-		fontSize: 13,
+		fontSize: ms(13),
 		fontWeight: "600",
 	},
 	tabTextActive: { color: AUTH_UI.colors.accentText },
 
-	listContent: { paddingHorizontal: 16, paddingBottom: 32, gap: 12 },
+	listContent: { paddingHorizontal: s(16), paddingBottom: vs(32), gap: vs(12) },
 
 	card: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.xl,
-		padding: 16,
-		gap: 8,
+		borderRadius: ms(AUTH_UI.radius.xl),
+		padding: s(16),
+		gap: s(8),
 	},
 	cardTop: {
 		flexDirection: "row",
@@ -207,38 +208,38 @@ const styles = StyleSheet.create({
 	category: {
 		color: AUTH_UI.colors.textPrimary,
 		fontWeight: "700",
-		fontSize: 14,
+		fontSize: ms(14),
 	},
 	badge: {
-		paddingHorizontal: 10,
-		paddingVertical: 4,
-		borderRadius: 20,
+		paddingHorizontal: s(10),
+		paddingVertical: vs(4),
+		borderRadius: ms(20),
 	},
 	badgeUnread: { backgroundColor: "rgba(243,201,66,0.2)" },
 	badgeRead: { backgroundColor: "rgba(83,209,141,0.15)" },
-	badgeText: { fontSize: 12, fontWeight: "600" },
+	badgeText: { fontSize: ms(12), fontWeight: "600" },
 	badgeTextUnread: { color: AUTH_UI.colors.accent },
 	badgeTextRead: { color: AUTH_UI.colors.success },
 
 	preview: {
 		color: AUTH_UI.colors.textSecondary,
-		fontSize: 13,
-		lineHeight: 20,
+		fontSize: ms(13),
+		lineHeight: ms(20),
 	},
 
-	timeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+	timeRow: { flexDirection: "row", alignItems: "center", gap: s(6) },
 	dot: {
-		width: 8,
-		height: 8,
-		borderRadius: 4,
+		width: s(8),
+		height: s(8),
+		borderRadius: ms(4),
 		backgroundColor: AUTH_UI.colors.accent,
 	},
-	timeAgo: { color: AUTH_UI.colors.textMuted, fontSize: 12 },
+	timeAgo: { color: AUTH_UI.colors.textMuted, fontSize: ms(12) },
 
 	empty: {
 		textAlign: "center",
 		color: AUTH_UI.colors.textMuted,
-		marginTop: 40,
-		fontSize: 14,
+		marginTop: vs(40),
+		fontSize: ms(14),
 	},
 });

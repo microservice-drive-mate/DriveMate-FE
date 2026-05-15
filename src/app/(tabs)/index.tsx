@@ -1,5 +1,6 @@
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -67,7 +68,7 @@ export default function Home() {
 					<View style={styles.avatar}>
 						<Text style={styles.avatarText}>NV</Text>
 					</View>
-					<View style={{ flex: 1, marginLeft: 12 }}>
+					<View style={{ flex: 1, marginLeft: s(12) }}>
 						<Text style={styles.hello}>Xin chào 🔥</Text>
 						<Text style={styles.name}>Nguyễn Văn An</Text>
 					</View>
@@ -76,7 +77,7 @@ export default function Home() {
 						onPress={() => router.push("/notifications")}>
 						<Ionicons
 							name="notifications-outline"
-							size={20}
+							size={ms(20)}
 							color={AUTH_UI.colors.textSecondary}
 						/>
 					</TouchableOpacity>
@@ -110,7 +111,7 @@ export default function Home() {
 							style={styles.metricCard}>
 							<Ionicons
 								name={m.icon}
-								size={20}
+								size={ms(20)}
 								color={AUTH_UI.colors.accent}
 							/>
 							<Text style={styles.metricValue}>{m.value}</Text>
@@ -125,7 +126,7 @@ export default function Home() {
 					<TouchableOpacity style={[styles.btn, styles.btnPrimary]}>
 						<Ionicons
 							name="flash"
-							size={16}
+							size={ms(16)}
 							color={AUTH_UI.colors.accentText}
 						/>
 						<Text style={styles.btnText}>Thi ngay</Text>
@@ -133,7 +134,7 @@ export default function Home() {
 					<TouchableOpacity style={styles.btn}>
 						<Ionicons
 							name="book-outline"
-							size={16}
+							size={ms(16)}
 							color={AUTH_UI.colors.textSecondary}
 						/>
 						<Text style={styles.btnTextMuted}>Ôn yếu điểm</Text>
@@ -141,7 +142,7 @@ export default function Home() {
 					<TouchableOpacity style={styles.btn}>
 						<Ionicons
 							name="map-outline"
-							size={16}
+							size={ms(16)}
 							color={AUTH_UI.colors.textSecondary}
 						/>
 						<Text style={styles.btnTextMuted}>Sa hình</Text>
@@ -167,7 +168,7 @@ export default function Home() {
 							<View style={styles.weakIconBox}>
 								<Ionicons
 									name="ribbon-outline"
-									size={16}
+									size={ms(16)}
 									color={AUTH_UI.colors.accent}
 								/>
 							</View>
@@ -214,7 +215,7 @@ export default function Home() {
 							]}>
 							<Ionicons
 								name="document-text-outline"
-								size={18}
+								size={ms(18)}
 								color={
 									item.ok
 										? AUTH_UI.colors.success
@@ -264,29 +265,29 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, padding: 16, paddingBottom: 32, gap: 10 },
+	container: { flex: 1, padding: s(16), paddingBottom: vs(32), gap: vs(10) },
 
 	// Header
-	header: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+	header: { flexDirection: "row", alignItems: "center", marginBottom: vs(12) },
 	avatar: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
+		width: s(48),
+		height: s(48),
+		borderRadius: ms(24),
 		backgroundColor: AUTH_UI.colors.accent,
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	avatarText: { color: AUTH_UI.colors.accentText, fontWeight: "700" },
-	hello: { color: AUTH_UI.colors.textSecondary, fontSize: 12 },
+	hello: { color: AUTH_UI.colors.textSecondary, fontSize: ms(12) },
 	name: {
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 16,
+		fontSize: ms(16),
 		fontWeight: "700",
 	},
 	bell: {
-		width: 40,
-		height: 40,
-		borderRadius: 12,
+		width: s(40),
+		height: s(40),
+		borderRadius: ms(12),
 		backgroundColor: AUTH_UI.colors.surface,
 		alignItems: "center",
 		justifyContent: "center",
@@ -294,62 +295,62 @@ const styles = StyleSheet.create({
 
 	// Progress Card
 	progressCard: {
-		marginTop: 6,
+		marginTop: vs(6),
 		backgroundColor: AUTH_UI.colors.accent,
-		borderRadius: 14,
-		padding: 16,
-		paddingBottom: 26,
+		borderRadius: ms(14),
+		padding: s(16),
+		paddingBottom: vs(26),
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
 		overflow: "hidden",
 	},
-	levelLabel: { color: AUTH_UI.colors.accentText, fontSize: 12 },
+	levelLabel: { color: AUTH_UI.colors.accentText, fontSize: ms(12) },
 	level: {
-		fontSize: 36,
+		fontSize: ms(36),
 		fontWeight: "800",
 		color: AUTH_UI.colors.accentText,
 	},
-	vehicle: { color: AUTH_UI.colors.accentText, fontSize: 13 },
+	vehicle: { color: AUTH_UI.colors.accentText, fontSize: ms(13) },
 	progressRight: { alignItems: "flex-end" },
 	progressLabel: {
 		color: AUTH_UI.colors.accentText,
-		fontSize: 12,
-		marginBottom: 2,
+		fontSize: ms(12),
+		marginBottom: vs(2),
 	},
 	progressPercent: {
 		color: AUTH_UI.colors.accentText,
 		fontWeight: "800",
-		fontSize: 24,
+		fontSize: ms(24),
 	},
 	progressBarTrack: {
 		position: "absolute",
 		bottom: 0,
 		left: 0,
 		right: 0,
-		height: 6,
+		height: vs(6),
 		backgroundColor: "#D4A832",
 	},
-	progressBarFill: { height: 6, backgroundColor: AUTH_UI.colors.accentText },
+	progressBarFill: { height: vs(6), backgroundColor: AUTH_UI.colors.accentText },
 
 	// Metrics
-	metricsRow: { flexDirection: "row", gap: 8, marginTop: 12 },
+	metricsRow: { flexDirection: "row", gap: s(8), marginTop: vs(12) },
 	metricCard: {
 		flex: 1,
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: 12,
-		padding: 12,
+		borderRadius: ms(12),
+		padding: s(12),
 		alignItems: "center",
-		gap: 4,
+		gap: vs(4),
 	},
 	metricValue: {
 		color: AUTH_UI.colors.accent,
 		fontWeight: "800",
-		fontSize: 18,
+		fontSize: ms(18),
 	},
 	metricLabel: {
 		color: AUTH_UI.colors.textSecondary,
-		fontSize: 11,
+		fontSize: ms(11),
 		textAlign: "center",
 	},
 
@@ -358,72 +359,72 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		marginVertical: 4,
+		marginVertical: vs(4),
 	},
 	sectionTitle: {
 		color: AUTH_UI.colors.textPrimary,
 		fontWeight: "700",
-		fontSize: 15,
-		marginVertical: 4,
+		fontSize: ms(15),
+		marginVertical: vs(4),
 	},
 	sectionLink: {
 		color: AUTH_UI.colors.accent,
-		fontSize: 12,
+		fontSize: ms(12),
 		fontWeight: "600",
 	},
 
 	// Quick Practice
-	quickRow: { flexDirection: "row", gap: 8 },
+	quickRow: { flexDirection: "row", gap: s(8) },
 	btn: {
 		flex: 1,
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: 12,
-		paddingVertical: 12,
-		paddingHorizontal: 8,
+		borderRadius: ms(12),
+		paddingVertical: vs(12),
+		paddingHorizontal: s(8),
 		alignItems: "center",
 		justifyContent: "center",
 		flexDirection: "row",
-		gap: 6,
+		gap: s(6),
 	},
 	btnPrimary: { backgroundColor: AUTH_UI.colors.accent },
 	btnText: { color: AUTH_UI.colors.accentText, fontWeight: "700" },
-	btnTextMuted: { color: AUTH_UI.colors.textSecondary, fontSize: 12 },
+	btnTextMuted: { color: AUTH_UI.colors.textSecondary, fontSize: ms(12) },
 
 	// Weak Points
 	weakItem: {
 		flexDirection: "row",
 		alignItems: "center",
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: 12,
-		padding: 12,
-		marginBottom: 8,
-		gap: 12,
+		borderRadius: ms(12),
+		padding: s(12),
+		marginBottom: vs(8),
+		gap: s(12),
 	},
 	weakIconBox: {
-		width: 32,
-		height: 32,
-		borderRadius: 8,
+		width: s(32),
+		height: s(32),
+		borderRadius: ms(8),
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
 		alignItems: "center",
 		justifyContent: "center",
 	},
-	weakCenter: { flex: 1, gap: 6 },
+	weakCenter: { flex: 1, gap: vs(6) },
 	weakLabel: {
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 13,
+		fontSize: ms(13),
 		fontWeight: "600",
 	},
 	weakBarTrack: {
-		height: 4,
+		height: vs(4),
 		borderRadius: 999,
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
 		overflow: "hidden",
 	},
-	weakBarFill: { height: 4, borderRadius: 999 },
+	weakBarFill: { height: vs(4), borderRadius: 999 },
 	weakPct: {
-		fontSize: 13,
+		fontSize: ms(13),
 		fontWeight: "700",
-		minWidth: 36,
+		minWidth: s(36),
 		textAlign: "right",
 	},
 
@@ -432,15 +433,15 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		backgroundColor: AUTH_UI.colors.surface,
-		padding: 12,
-		borderRadius: 12,
-		marginBottom: 10,
-		gap: 12,
+		padding: s(12),
+		borderRadius: ms(12),
+		marginBottom: vs(10),
+		gap: s(12),
 	},
 	testIconBox: {
-		width: 40,
-		height: 40,
-		borderRadius: 10,
+		width: s(40),
+		height: s(40),
+		borderRadius: ms(10),
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -448,17 +449,17 @@ const styles = StyleSheet.create({
 	testTitle: {
 		color: AUTH_UI.colors.textPrimary,
 		fontWeight: "700",
-		fontSize: 13,
+		fontSize: ms(13),
 	},
 	testDate: {
 		color: AUTH_UI.colors.textSecondary,
-		marginTop: 2,
-		fontSize: 12,
+		marginTop: vs(2),
+		fontSize: ms(12),
 	},
-	testRight: { alignItems: "flex-end", gap: 4 },
-	testScore: { fontWeight: "800", fontSize: 14 },
-	testBadge: { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-	testBadgeText: { fontSize: 11, fontWeight: "600" },
+	testRight: { alignItems: "flex-end", gap: s(4) },
+	testScore: { fontWeight: "800", fontSize: ms(14) },
+	testBadge: { borderRadius: ms(6), paddingHorizontal: s(6), paddingVertical: vs(2) },
+	testBadgeText: { fontSize: ms(11), fontWeight: "600" },
 	success: { color: AUTH_UI.colors.success },
 	danger: { color: AUTH_UI.colors.danger },
 });

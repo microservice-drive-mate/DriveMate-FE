@@ -4,6 +4,7 @@ import { StatBox } from "@/components/common/StatBox";
 import { OptionCard } from "@/components/exam/OptionCard";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { MOCK_EXAMS } from "@/data/exams.mock";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -204,7 +205,7 @@ export default function ExamTakeScreen() {
 					activeOpacity={1}>
 					<Ionicons
 						name="timer-outline"
-						size={16}
+						size={ms(16)}
 						color={isTimeLow ? AUTH_UI.colors.danger : AUTH_UI.colors.accent}
 					/>
 					<Text style={[styles.timerText, isTimeLow && styles.timerTextLow]}>
@@ -293,7 +294,7 @@ export default function ExamTakeScreen() {
 									{
 										translateY: navSheetAnim.interpolate({
 											inputRange: [0, 1],
-											outputRange: [400, 0],
+											outputRange: [vs(400), 0],
 										}),
 									},
 								],
@@ -374,7 +375,7 @@ export default function ExamTakeScreen() {
 									{
 										translateY: submitSheetAnim.interpolate({
 											inputRange: [0, 1],
-											outputRange: [400, 0],
+											outputRange: [vs(400), 0],
 										}),
 									},
 								],
@@ -427,19 +428,19 @@ const styles = StyleSheet.create({
 	header: {
 		flexDirection: "row",
 		alignItems: "center",
-		paddingHorizontal: 16,
-		paddingVertical: 10,
-		gap: 10,
+		paddingHorizontal: s(16),
+		paddingVertical: vs(10),
+		gap: s(10),
 	},
 	timerBadge: {
 		flex: 1,
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
-		gap: 6,
+		gap: s(6),
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.xl,
-		paddingVertical: 8,
+		borderRadius: ms(AUTH_UI.radius.xl),
+		paddingVertical: vs(8),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
 	},
@@ -448,7 +449,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "rgba(248,113,113,0.1)",
 	},
 	timerText: {
-		fontSize: 16,
+		fontSize: ms(16),
 		fontWeight: "700",
 		color: AUTH_UI.colors.accent,
 	},
@@ -460,73 +461,73 @@ const styles = StyleSheet.create({
 	},
 	counterBadge: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.lg,
-		paddingHorizontal: 12,
-		paddingVertical: 8,
+		borderRadius: ms(AUTH_UI.radius.lg),
+		paddingHorizontal: s(12),
+		paddingVertical: vs(8),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
 	},
 	counterText: {
-		fontSize: 14,
+		fontSize: ms(14),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textPrimary,
 	},
 	scroll: { flex: 1 },
 	scrollContent: {
-		paddingHorizontal: 16,
-		paddingTop: 12,
-		paddingBottom: 20,
-		gap: 12,
+		paddingHorizontal: s(16),
+		paddingTop: vs(12),
+		paddingBottom: vs(20),
+		gap: s(12),
 	},
 	questionLabel: {
-		fontSize: 13,
+		fontSize: ms(13),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textMuted,
 		textTransform: "uppercase",
 		letterSpacing: 0.5,
 	},
 	questionText: {
-		fontSize: 17,
+		fontSize: ms(17),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textPrimary,
-		lineHeight: 26,
+		lineHeight: ms(26),
 	},
 	criticalBadge: {
 		alignSelf: "flex-start",
 	},
 	optionsList: {
-		gap: 10,
-		marginTop: 4,
+		gap: s(10),
+		marginTop: vs(4),
 	},
 	bottomNav: {
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
-		paddingHorizontal: 20,
-		paddingVertical: 14,
+		paddingHorizontal: s(20),
+		paddingVertical: vs(14),
 		borderTopWidth: 1,
 		borderTopColor: AUTH_UI.colors.border,
 	},
 	navArrow: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
+		width: s(40),
+		height: s(40),
+		borderRadius: ms(20),
 	},
 	dots: {
 		flexDirection: "row",
-		gap: 8,
+		gap: s(8),
 		alignItems: "center",
 	},
 	dot: {
-		width: 8,
-		height: 8,
-		borderRadius: 4,
+		width: s(8),
+		height: s(8),
+		borderRadius: ms(4),
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
 	},
 	dotActive: {
-		width: 24,
-		height: 8,
-		borderRadius: 4,
+		width: s(24),
+		height: s(8),
+		borderRadius: ms(4),
 		backgroundColor: AUTH_UI.colors.accent,
 	},
 	overlay: {
@@ -536,97 +537,97 @@ const styles = StyleSheet.create({
 	},
 	sheet: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		padding: 20,
-		paddingBottom: 36,
+		borderTopLeftRadius: ms(20),
+		borderTopRightRadius: ms(20),
+		padding: s(20),
+		paddingBottom: vs(36),
 	},
 	sheetHandle: {
-		width: 36,
-		height: 4,
+		width: s(36),
+		height: vs(4),
 		backgroundColor: AUTH_UI.colors.border,
-		borderRadius: 2,
+		borderRadius: ms(2),
 		alignSelf: "center",
-		marginBottom: 16,
+		marginBottom: vs(16),
 	},
 	sheetTitle: {
-		fontSize: 16,
+		fontSize: ms(16),
 		fontWeight: "700",
 		color: AUTH_UI.colors.textPrimary,
-		marginBottom: 16,
+		marginBottom: vs(16),
 	},
 	navGrid: {
 		flexDirection: "row",
 		flexWrap: "wrap",
-		gap: 10,
+		gap: s(10),
 	},
 	navGridItem: {
-		width: 40,
-		height: 40,
-		borderRadius: AUTH_UI.radius.lg,
+		width: s(40),
+		height: s(40),
+		borderRadius: ms(AUTH_UI.radius.lg),
 		alignItems: "center",
 		justifyContent: "center",
 	},
 	navGridText: {
-		fontSize: 14,
+		fontSize: ms(14),
 		fontWeight: "700",
 	},
 	navLegend: {
 		flexDirection: "row",
-		gap: 16,
-		marginTop: 16,
+		gap: s(16),
+		marginTop: vs(16),
 		flexWrap: "wrap",
 	},
 	legendItem: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 6,
+		gap: s(6),
 	},
 	legendDot: {
-		width: 12,
-		height: 12,
-		borderRadius: 6,
+		width: s(12),
+		height: s(12),
+		borderRadius: ms(6),
 	},
 	legendText: {
-		fontSize: 12,
+		fontSize: ms(12),
 		color: AUTH_UI.colors.textSecondary,
 	},
 	submitTitle: {
-		fontSize: 20,
+		fontSize: ms(20),
 		fontWeight: "700",
 		color: AUTH_UI.colors.textPrimary,
 		textAlign: "center",
-		marginBottom: 6,
+		marginBottom: vs(6),
 	},
 	submitSubtitle: {
-		fontSize: 14,
+		fontSize: ms(14),
 		color: AUTH_UI.colors.textSecondary,
 		textAlign: "center",
-		marginBottom: 20,
+		marginBottom: vs(20),
 	},
 	submitStats: {
 		flexDirection: "row",
-		gap: 10,
-		marginBottom: 20,
+		gap: s(10),
+		marginBottom: vs(20),
 	},
 	submitActions: {
 		flexDirection: "row",
-		gap: 10,
+		gap: s(10),
 	},
 	submitActionBtn: {
-		height: 50,
+		height: vs(50),
 	},
 	errorCenter: {
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
-		gap: 12,
+		gap: s(12),
 	},
 	errorText: {
-		fontSize: 16,
+		fontSize: ms(16),
 		color: AUTH_UI.colors.textSecondary,
 	},
 	backButton: {
-		paddingHorizontal: 24,
+		paddingHorizontal: s(24),
 	},
 });

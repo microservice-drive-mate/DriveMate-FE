@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import {
   ActivityIndicator,
@@ -46,7 +47,7 @@ export function Button({
         {icon && (
           <Ionicons
             name={icon}
-            size={20}
+            size={ms(20)}
             color={disabled ? AUTH_UI.colors.disabled : AUTH_UI.colors.textPrimary}
           />
         )}
@@ -77,7 +78,7 @@ export function Button({
           {icon && (
             <Ionicons
               name={icon}
-              size={18}
+              size={ms(18)}
               color={isPrimary || isDanger ? AUTH_UI.colors.accentText : AUTH_UI.colors.textSecondary}
               style={label ? styles.iconMargin : undefined}
             />
@@ -104,9 +105,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: AUTH_UI.radius.lg,
-    height: 50,
-    paddingHorizontal: 16,
+    borderRadius: ms(AUTH_UI.radius.lg),
+    height: vs(50),
+    paddingHorizontal: s(16),
   },
   primary: {
     backgroundColor: AUTH_UI.colors.accent,
@@ -123,15 +124,15 @@ const styles = StyleSheet.create({
     backgroundColor: AUTH_UI.colors.disabled,
   },
   iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: s(36),
+    height: s(36),
+    borderRadius: ms(18),
     backgroundColor: AUTH_UI.colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   label: {
-    fontSize: 15,
+    fontSize: ms(15),
     fontWeight: "700",
   },
   labelPrimary: {
@@ -145,6 +146,6 @@ const styles = StyleSheet.create({
     color: AUTH_UI.colors.accentText,
   },
   iconMargin: {
-    marginRight: 8,
+    marginRight: s(8),
   },
 });

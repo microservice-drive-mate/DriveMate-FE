@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -69,7 +70,7 @@ export function OptionCard({
       {trailingIcon && (
         <Ionicons
           name={trailingIcon}
-          size={18}
+          size={ms(18)}
           color={trailingIconColor ?? AUTH_UI.colors.textMuted}
         />
       )}
@@ -81,10 +82,10 @@ const styles = StyleSheet.create({
   option: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: s(12),
     backgroundColor: AUTH_UI.colors.surface,
-    borderRadius: AUTH_UI.radius.xl,
-    padding: 12,
+    borderRadius: ms(AUTH_UI.radius.xl),
+    padding: s(12),
     borderWidth: 1.5,
     borderColor: "transparent",
   },
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(248,113,113,0.12)",
   },
   badge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: s(32),
+    height: s(32),
+    borderRadius: ms(16),
     backgroundColor: AUTH_UI.colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: AUTH_UI.colors.danger,
   },
   badgeText: {
-    fontSize: 13,
+    fontSize: ms(13),
     fontWeight: "700",
     color: AUTH_UI.colors.textSecondary,
   },
@@ -127,9 +128,9 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
-    fontSize: 13,
+    fontSize: ms(13),
     color: AUTH_UI.colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: ms(20),
   },
   textSelected: {
     color: AUTH_UI.colors.textPrimary,

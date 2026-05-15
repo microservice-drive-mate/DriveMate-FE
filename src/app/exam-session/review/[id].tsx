@@ -3,6 +3,7 @@ import { OptionCard } from "@/components/exam/OptionCard";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { MOCK_EXAMS } from "@/data/exams.mock";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,7 +30,7 @@ function WrongQuestionCard({ item, number }: { item: WrongItem; number: number }
 					</View>
 					<Text style={styles.wrongLabel}>Trả lời sai</Text>
 				</View>
-				<Ionicons name="close-circle" size={20} color={AUTH_UI.colors.danger} />
+				<Ionicons name="close-circle" size={ms(20)} color={AUTH_UI.colors.danger} />
 			</View>
 
 			<Text style={styles.questionText}>{item.questionText}</Text>
@@ -152,15 +153,15 @@ const styles = StyleSheet.create({
 		backgroundColor: AUTH_UI.colors.background,
 	},
 	listContent: {
-		padding: 16,
-		gap: 14,
-		paddingBottom: 40,
+		padding: s(16),
+		gap: vs(14),
+		paddingBottom: vs(40),
 	},
 	card: {
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.xl,
-		padding: 16,
-		gap: 12,
+		borderRadius: ms(AUTH_UI.radius.xl),
+		padding: s(16),
+		gap: s(12),
 	},
 	cardHeader: {
 		flexDirection: "row",
@@ -170,12 +171,12 @@ const styles = StyleSheet.create({
 	cardHeaderLeft: {
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 8,
+		gap: s(8),
 	},
 	wrongNumBadge: {
-		width: 28,
-		height: 28,
-		borderRadius: 14,
+		width: s(28),
+		height: s(28),
+		borderRadius: ms(14),
 		backgroundColor: "rgba(248,113,113,0.15)",
 		borderWidth: 1,
 		borderColor: "rgba(248,113,113,0.3)",
@@ -183,40 +184,40 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	wrongNumText: {
-		fontSize: 13,
+		fontSize: ms(13),
 		fontWeight: "700",
 		color: AUTH_UI.colors.danger,
 	},
 	wrongLabel: {
-		fontSize: 13,
+		fontSize: ms(13),
 		fontWeight: "600",
 		color: AUTH_UI.colors.danger,
 	},
 	questionText: {
-		fontSize: 14,
+		fontSize: ms(14),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textPrimary,
-		lineHeight: 22,
+		lineHeight: ms(22),
 	},
 	optionsList: {
-		gap: 8,
+		gap: s(8),
 	},
 	explanationBox: {
 		flexDirection: "row",
-		gap: 8,
+		gap: s(8),
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
-		borderRadius: AUTH_UI.radius.lg,
-		padding: 12,
+		borderRadius: ms(AUTH_UI.radius.lg),
+		padding: s(12),
 	},
 	explanationBulb: {
-		fontSize: 14,
-		marginTop: 1,
+		fontSize: ms(14),
+		marginTop: vs(1),
 	},
 	explanationText: {
 		flex: 1,
-		fontSize: 13,
+		fontSize: ms(13),
 		color: AUTH_UI.colors.textSecondary,
-		lineHeight: 20,
+		lineHeight: ms(20),
 	},
 	highlightWrong: {
 		color: AUTH_UI.colors.danger,
@@ -230,22 +231,22 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
-		gap: 12,
+		gap: s(12),
 	},
 	errorText: {
-		fontSize: 16,
+		fontSize: ms(16),
 		color: AUTH_UI.colors.textSecondary,
 	},
 	backButton: {
-		paddingHorizontal: 24,
-		paddingVertical: 10,
+		paddingHorizontal: s(24),
+		paddingVertical: vs(10),
 		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: AUTH_UI.radius.lg,
+		borderRadius: ms(AUTH_UI.radius.lg),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
 	},
 	backButtonText: {
-		fontSize: 14,
+		fontSize: ms(14),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textPrimary,
 	},

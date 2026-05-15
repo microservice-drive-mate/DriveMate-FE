@@ -4,6 +4,7 @@ import { InputField } from "@/components/common/InputField";
 import { StepProgressBar } from "@/components/ui/StepProgressBar";
 import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
 import { AUTH_MESSAGES } from "@/constants/messages";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -146,7 +147,7 @@ export default function ForgotPasswordScreen() {
 		<View style={styles.ruleRow}>
 			<Ionicons
 				name={isPassed ? "checkmark-circle" : "ellipse-outline"}
-				size={14}
+				size={ms(14)}
 				color={isPassed ? AUTH_UI.colors.success : AUTH_UI.colors.textMuted}
 			/>
 			<Text style={[styles.ruleText, isPassed && styles.ruleTextPassed]}>
@@ -300,85 +301,85 @@ const styles = StyleSheet.create({
 	content: {
 		flex: 1,
 		paddingHorizontal: AUTH_LAYOUT.horizontalPadding,
-		paddingTop: 16,
+		paddingTop: vs(16),
 		overflow: "hidden",
 	},
 	backButton: {
-		marginBottom: 16,
+		marginBottom: vs(16),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
-		borderRadius: 10,
+		borderRadius: ms(10),
 	},
 	slideContent: { flex: 1 },
 	title: {
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 24,
+		fontSize: ms(24),
 		fontWeight: "700",
-		marginBottom: 6,
+		marginBottom: vs(6),
 	},
 	subtitle: {
 		color: AUTH_UI.colors.textSecondary,
-		fontSize: 13,
-		marginBottom: 18,
+		fontSize: ms(13),
+		marginBottom: vs(18),
 	},
 	errorText: {
 		color: AUTH_UI.colors.danger,
-		fontSize: 12,
-		marginBottom: 10,
-		marginTop: -8,
+		fontSize: ms(12),
+		marginBottom: vs(10),
+		marginTop: vs(-8),
 	},
 	instruction: {
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 14,
-		marginBottom: 14,
+		fontSize: ms(14),
+		marginBottom: vs(14),
 	},
 	otpRow: {
 		flexDirection: "row",
 		justifyContent: "space-between",
-		marginBottom: 18,
+		marginBottom: vs(18),
 	},
 	otpInput: {
-		width: 44,
-		height: 50,
-		borderRadius: AUTH_UI.radius.lg,
+		width: s(44),
+		height: vs(50),
+		borderRadius: ms(AUTH_UI.radius.lg),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
 		backgroundColor: AUTH_UI.colors.surface,
 		color: AUTH_UI.colors.textPrimary,
-		fontSize: 20,
+		fontSize: ms(20),
 		fontWeight: "700",
 		textAlign: "center",
 	},
 	resendButton: {
 		alignItems: "center",
-		marginBottom: 14,
+		marginBottom: vs(14),
 	},
 	resendText: {
 		color: AUTH_UI.colors.accent,
-		fontSize: 13,
+		fontSize: ms(13),
 		fontWeight: "600",
 	},
 	resendTextDisabled: {
 		color: AUTH_UI.colors.textMuted,
 	},
 	rulesBox: {
-		borderRadius: AUTH_UI.radius.lg,
+		borderRadius: ms(AUTH_UI.radius.lg),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
 		backgroundColor: AUTH_UI.colors.surface,
-		paddingVertical: 10,
-		paddingHorizontal: 12,
-		marginBottom: 14,
+		paddingVertical: vs(10),
+		paddingHorizontal: s(12),
+		marginBottom: vs(14),
 	},
 	ruleRow: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginBottom: 6,
+		marginBottom: vs(6),
 	},
 	ruleText: {
 		color: AUTH_UI.colors.textMuted,
-		fontSize: 12,
-		marginLeft: 8,
+		fontSize: ms(12),
+		marginLeft: s(8),
 	},
 	ruleTextPassed: {
 		color: AUTH_UI.colors.success,

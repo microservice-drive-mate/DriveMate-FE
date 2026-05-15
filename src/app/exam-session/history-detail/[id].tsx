@@ -5,6 +5,7 @@ import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { historyService } from "@/services/history.service";
 import { formatDateTime, formatDuration } from "@/utils/examFormat";
+import { ms, s, vs } from "@/utils/responsive";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -130,15 +131,15 @@ const styles = StyleSheet.create({
 		backgroundColor: AUTH_UI.colors.background,
 	},
 	content: {
-		paddingHorizontal: 16,
-		paddingTop: 16,
-		paddingBottom: 40,
-		gap: 12,
+		paddingHorizontal: s(16),
+		paddingTop: vs(16),
+		paddingBottom: vs(40),
+		gap: s(12),
 	},
 	heroCard: {
-		borderRadius: 18,
+		borderRadius: ms(18),
 		borderWidth: 1,
-		padding: 20,
+		padding: s(20),
 		flexDirection: "row",
 		alignItems: "center",
 	},
@@ -152,15 +153,15 @@ const styles = StyleSheet.create({
 	},
 	heroLeft: {
 		flex: 1,
-		gap: 4,
+		gap: vs(4),
 	},
 	heroTitle: {
-		fontSize: 15,
+		fontSize: ms(15),
 		fontWeight: "800",
 		color: AUTH_UI.colors.textPrimary,
 	},
 	heroSubtitle: {
-		fontSize: 14,
+		fontSize: ms(14),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textPrimary,
 		opacity: 0.85,
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
 		alignItems: "flex-end",
 	},
 	heroScore: {
-		fontSize: 24,
+		fontSize: ms(24),
 		fontWeight: "900",
 	},
 	heroScorePass: {
@@ -179,41 +180,41 @@ const styles = StyleSheet.create({
 		color: "#FF8F8F",
 	},
 	heroTotal: {
-		fontSize: 16,
+		fontSize: ms(16),
 		fontWeight: "700",
 		color: AUTH_UI.colors.textPrimary,
 	},
 	statsRow: {
 		flexDirection: "row",
-		gap: 8,
+		gap: s(8),
 	},
 	questionSection: {
-		gap: 12,
-		marginTop: 4,
+		gap: s(12),
+		marginTop: vs(4),
 	},
 	questionSectionTitle: {
-		fontSize: 15,
+		fontSize: ms(15),
 		fontWeight: "800",
 		color: AUTH_UI.colors.textPrimary,
 	},
 	questionGrid: {
 		flexDirection: "row",
 		flexWrap: "wrap",
-		gap: 8,
+		gap: s(8),
 	},
 	reviewButton: {
-		height: 54,
-		marginTop: 4,
+		height: vs(54),
+		marginTop: vs(4),
 	},
 	notFoundWrap: {
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
-		paddingHorizontal: 20,
+		paddingHorizontal: s(20),
 	},
 	notFoundText: {
 		color: AUTH_UI.colors.textSecondary,
-		fontSize: 15,
+		fontSize: ms(15),
 		textAlign: "center",
 	},
 });

@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
@@ -27,7 +28,7 @@ export function ScreenHeader({
     <View style={[styles.header, bordered && styles.bordered, style]}>
       {onBack ? (
         <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-          <Ionicons name="arrow-back" size={20} color={AUTH_UI.colors.textPrimary} />
+          <Ionicons name="arrow-back" size={ms(20)} color={AUTH_UI.colors.textPrimary} />
         </TouchableOpacity>
       ) : (
         centered && <View style={styles.backBtn} />
@@ -44,7 +45,7 @@ export function ScreenHeader({
 
       {rightIcon ? (
         <TouchableOpacity style={styles.backBtn} onPress={onRightPress}>
-          <Ionicons name={rightIcon} size={20} color={AUTH_UI.colors.textPrimary} />
+          <Ionicons name={rightIcon} size={ms(20)} color={AUTH_UI.colors.textPrimary} />
         </TouchableOpacity>
       ) : (
         centered && onBack && <View style={styles.backBtn} />
@@ -57,40 +58,40 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
+    paddingHorizontal: s(16),
+    paddingVertical: vs(12),
+    gap: s(12),
   },
   bordered: {
     borderBottomWidth: 1,
     borderBottomColor: AUTH_UI.colors.border,
   },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: s(36),
+    height: s(36),
+    borderRadius: ms(18),
     backgroundColor: AUTH_UI.colors.surface,
     alignItems: "center",
     justifyContent: "center",
   },
   textBlock: {
     flex: 1,
-    gap: 2,
+    gap: vs(2),
   },
   textCentered: {
     alignItems: "center",
   },
   title: {
-    fontSize: 17,
+    fontSize: ms(17),
     fontWeight: "700",
     color: AUTH_UI.colors.textPrimary,
   },
   titleCentered: {
     textAlign: "center",
-    fontSize: 18,
+    fontSize: ms(18),
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: ms(12),
     color: AUTH_UI.colors.textSecondary,
   },
 });
