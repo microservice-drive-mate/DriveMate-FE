@@ -1,5 +1,6 @@
 import { API_CONFIG, AUTH_CONFIG, ENDPOINTS, ROUTES } from '@/constants';
 import type { ApiResponse } from '@/types/api.types';
+import type { LoginResponse } from '@/models/auth.model';
 import {
 	getAuthToken,
 	getStorageItem,
@@ -111,8 +112,12 @@ class ApiService {
 						const refreshResponse = await this._performTokenRefresh(refreshToken);
 
 						if (refreshResponse.data.success === true && refreshResponse.data.data) {
-							const { accessToken: newAccessToken } = refreshResponse.data.data;
+							const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+								refreshResponse.data.data;
 							await setStorageItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, newAccessToken);
+							if (newRefreshToken) {
+								await setStorageItem(AUTH_CONFIG.REFRESH_TOKEN_KEY, newRefreshToken);
+							}
 
 							originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 							this._processQueue(null, newAccessToken);
@@ -156,7 +161,7 @@ class ApiService {
 	}
 
 	private _isLoginEndpoint(url: string | undefined) {
-		return url?.includes('login') || url?.includes('register');
+		return url?.endsWith('/login');
 	}
 
 	private _isRefreshEndpoint(url: string | undefined) {
@@ -164,7 +169,7 @@ class ApiService {
 	}
 
 	private async _performTokenRefresh(refreshToken: string) {
-		return axios.post<ApiResponse<{ accessToken: string }>>(
+		return axios.post<ApiResponse<LoginResponse>>(
 			`${this.baseUrl}${ENDPOINTS.AUTH.REFRESH}`,
 			{ refreshToken },
 		);

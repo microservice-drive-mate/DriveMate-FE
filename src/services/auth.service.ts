@@ -1,7 +1,13 @@
 import { apiService as api } from '@/lib/api';
 import { ENDPOINTS } from '@/constants';
 import type { ApiResponse } from '@/types/api.types';
-import type { LoginRequest, LoginResponse, RegisterRequest, RefreshTokenResponse } from '@/models/auth.model';
+import type {
+	LoginRequest,
+	LoginResponse,
+	RefreshTokenResponse,
+	ForgotPasswordRequest,
+	ForgotPasswordResponse,
+} from '@/models/auth.model';
 import { withErrorHandling } from '@/utils';
 
 export const authService = {
@@ -9,15 +15,18 @@ export const authService = {
 		api.post<ApiResponse<LoginResponse>>(ENDPOINTS.AUTH.LOGIN, data),
 	),
 
-	register: withErrorHandling((data: RegisterRequest) =>
-		api.post<ApiResponse<LoginResponse>>(ENDPOINTS.AUTH.REGISTER, data),
-	),
-
 	refreshToken: withErrorHandling((refreshToken: string) =>
 		api.post<ApiResponse<RefreshTokenResponse>>(ENDPOINTS.AUTH.REFRESH, { refreshToken }),
 	),
 
 	logout: withErrorHandling((refreshToken: string) =>
-		api.post<ApiResponse<{ message: string }>>(ENDPOINTS.AUTH.LOGOUT, { refreshToken }),
+		api.post<ApiResponse<{ success: boolean; message: string; instruction: string }>>(
+			ENDPOINTS.AUTH.LOGOUT,
+			{ refreshToken },
+		),
+	),
+
+	forgotPassword: withErrorHandling((data: ForgotPasswordRequest) =>
+		api.post<ApiResponse<ForgotPasswordResponse>>(ENDPOINTS.AUTH.FORGOT_PASSWORD, data),
 	),
 };

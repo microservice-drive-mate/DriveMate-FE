@@ -3,6 +3,8 @@ import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/InputField";
 import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
 import { AUTH_MESSAGES } from "@/constants/messages";
+import { authService } from "@/services/auth.service";
+import { useAuthStore } from "@/store/auth.store";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -14,19 +16,31 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function LoginScreen() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [loading] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const router = useRouter();
+	const setTokens = useAuthStore((s) => s.setTokens);
+	const fetchUser = useAuthStore((s) => s.fetchUser);
 
 	const handleLogin = async () => {
 		if (!email.trim() || !password.trim() || !EMAIL_REGEX.test(email.trim())) {
 			Alert.alert("Thông báo", AUTH_MESSAGES.MSG01);
 			return;
 		}
-		// TODO: gọi authService.login() khi có API
-		// MSG02 – tài khoản bị khóa (BR02)
-		// MSG03 – sai mật khẩu (BR03)
-		router.replace("/(tabs)");
+
+		setLoading(true);
+		try {
+			const result = await authService.login({ username: email.trim(), password });
+			if (result.success) {
+				await setTokens(result.data.accessToken, result.data.refreshToken);
+				await fetchUser();
+				router.replace("/(tabs)");
+			} else {
+				Alert.alert("Lỗi đăng nhập", result.error);
+			}
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (

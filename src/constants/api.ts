@@ -2,9 +2,9 @@ import { Platform } from 'react-native';
 
 export const API_CONFIG = {
 	BASE_URL: Platform.select({
-		android: 'http://10.0.2.2:3000/api',
-		ios: 'http://localhost:3000/api',
-		default: 'http://10.0.2.2:3000/api',
+		android: 'http://10.0.2.2:8000',
+		ios: 'http://localhost:8000',
+		default: 'http://10.0.2.2:8000',
 	})!,
 	TIMEOUT: 10000,
 };
@@ -19,9 +19,13 @@ export const AUTH_CONFIG = {
 export const ENDPOINTS = {
 	AUTH: {
 		LOGIN: '/auth/login',
-		REGISTER: '/auth/register',
 		REFRESH: '/auth/refresh',
 		LOGOUT: '/auth/logout',
+		FORGOT_PASSWORD: '/auth/forgot-password',
+	},
+	USERS: {
+		GET_ME: '/users/me',
+		UPDATE_ME: '/users/me',
 	},
 };
 
@@ -36,6 +40,11 @@ export const ERROR_CODES = {
 	SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
 	INTERNAL_ERROR: 'INTERNAL_ERROR',
 	NETWORK_ERROR: 'NETWORK_ERROR',
+	IDENTITY_USER_NOT_FOUND: 'IDENTITY_USER_NOT_FOUND',
+	IDENTITY_USER_ALREADY_EXISTS: 'IDENTITY_USER_ALREADY_EXISTS',
+	USER_PROFILE_NOT_FOUND: 'USER_PROFILE_NOT_FOUND',
+	USER_ALREADY_EXISTS: 'USER_ALREADY_EXISTS',
+	USER_NOT_STUDENT: 'USER_NOT_STUDENT',
 };
 
 export const ERROR_MESSAGES = {
@@ -59,4 +68,5 @@ export const ROUTES = {
 	FORGOT_PASSWORD: '/(auth)/forgot-password' as const,
 	TABS: '/(tabs)' as const,
 	ONBOARDING: '/(onboarding)' as const,
+	PROFILE_EDIT: '/profile/edit' as const,
 };

@@ -1,4 +1,6 @@
-import { User } from '@/models/user.model';
+import { User, UpdateProfileRequest } from '@/models/user.model';
+import { authService } from '@/services/auth.service';
+import { userService } from '@/services/user.service';
 import {
 	clearStorage,
 	getAuthToken,
@@ -24,6 +26,8 @@ interface AuthActions {
 	initialize: () => Promise<void>;
 	setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
 	setUser: (user: User) => void;
+	fetchUser: () => Promise<void>;
+	updateProfile: (data: UpdateProfileRequest) => Promise<void>;
 	completeOnboarding: () => Promise<void>;
 	resetOnboardingForDev: () => Promise<void>;
 	logout: () => Promise<void>;
@@ -63,6 +67,22 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 
 	setUser: (user) => set({ user }),
 
+	fetchUser: async () => {
+		const result = await userService.getMe();
+		if (result.success) {
+			set({ user: result.data });
+		}
+	},
+
+	updateProfile: async (data: UpdateProfileRequest) => {
+		const result = await userService.updateMe(data);
+		if (result.success) {
+			set({ user: result.data });
+		} else {
+			throw new Error(result.error);
+		}
+	},
+
 	completeOnboarding: async () => {
 		await saveOnboardingSeen();
 		set({ hasSeenOnboarding: true });
@@ -77,12 +97,21 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 	},
 
 	logout: async () => {
-		await clearStorage();
-		set({
-			user: null,
-			accessToken: null,
-			refreshToken: null,
-			isAuthenticated: false,
-		});
+		try {
+			const currentRefreshToken = await getRefreshToken();
+			if (currentRefreshToken) {
+				await authService.logout(currentRefreshToken);
+			}
+		} catch {
+			// Logout locally even if API call fails
+		} finally {
+			await clearStorage();
+			set({
+				user: null,
+				accessToken: null,
+				refreshToken: null,
+				isAuthenticated: false,
+			});
+		}
 	},
 }));

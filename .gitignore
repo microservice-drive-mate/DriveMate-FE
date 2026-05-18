@@ -47,4 +47,5 @@ app-example
 CLAUDE.md
 
 #Documents
-docs
+docs/*.pdf
+docs/*.docx

@@ -1,24 +1,24 @@
-import { User } from './user.model';
-
 export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  phone: string;
+  username: string;
   password: string;
 }
 
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
-  user: User;
+  expiresIn: number;
+  refreshExpiresIn: number;
+  tokenType: string;
+  scope: string;
 }
 
-export interface RefreshTokenResponse {
-  accessToken: string;
-  refreshToken: string;
+export type RefreshTokenResponse = LoginResponse;
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
 }

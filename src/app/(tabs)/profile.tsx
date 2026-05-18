@@ -6,17 +6,36 @@ import { MenuRow } from "@/components/profile/MenuRow";
 import { StatCard } from "@/components/profile/StatCard";
 import { ToggleRow } from "@/components/profile/ToggleRow";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ROUTES } from "@/constants/api";
 import { ms, s, vs } from "@/utils/responsive";
 import { useAuthStore } from "@/store/auth.store";
+import { UserRole } from "@/models/user.model";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+function formatDate(iso: string | null): string {
+	if (!iso) return "Chưa cập nhật";
+	const d = new Date(iso);
+	if (isNaN(d.getTime())) return "Chưa cập nhật";
+	return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+function getInitials(name: string | null | undefined): string {
+	if (!name) return "?";
+	const parts = name.trim().split(" ");
+	if (parts.length === 1) return parts[0][0].toUpperCase();
+	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export default function Me() {
 	const [notif, setNotif] = useState(true);
 	const [darkMode, setDarkMode] = useState(true);
-	const { logout } = useAuthStore();
+	const { logout, user } = useAuthStore();
 	const router = useRouter();
+
+	const isStudent = user?.role === UserRole.STUDENT;
+	const licenseTier = isStudent ? user?.studentDetail?.licenseTier : null;
 
 	const handleLogout = async () => {
 		await logout();
@@ -30,32 +49,72 @@ export default function Me() {
 			edges={["top", "bottom"]}>
 			<View style={styles.container}>
 				<View style={styles.headerCard}>
-					<View style={styles.headerLeft}>
-						<View style={styles.avatar}>
-							<Text style={styles.avatarText}>NA</Text>
+					<View style={styles.headerTop}>
+						<View style={styles.headerLeft}>
+							<View style={styles.avatar}>
+								{user?.avatarUrl ? (
+									<Image
+										source={{ uri: user.avatarUrl }}
+										style={styles.avatarImage}
+									/>
+								) : (
+									<Text style={styles.avatarText}>{getInitials(user?.fullName)}</Text>
+								)}
+							</View>
+							<View style={styles.headerInfo}>
+								<Text style={styles.fullName}>{user?.fullName ?? "—"}</Text>
+								<Text style={styles.email}>{user?.email ?? "—"}</Text>
+							</View>
 						</View>
-						<View style={styles.headerInfo}>
-							<Text style={styles.fullName}>Nguyễn Văn An</Text>
-							<Text style={styles.email}>nguyenvanan@email.com</Text>
-						</View>
+						<TouchableOpacity
+							style={styles.editButton}
+							onPress={() => router.push(ROUTES.PROFILE_EDIT)}>
+							<Text style={styles.editButtonText}>Sửa</Text>
+						</TouchableOpacity>
 					</View>
 
 					<View style={styles.badgesRow}>
-						<View style={styles.badgePrimary}>
-							<Text style={styles.badgePrimaryText}>Hạng B1</Text>
-						</View>
-						<View style={styles.badgePill}>
-							<Text style={styles.badgePillText}>Đang học</Text>
-						</View>
+						{licenseTier && (
+							<View style={styles.badgePrimary}>
+								<Text style={styles.badgePrimaryText}>Hạng {licenseTier}</Text>
+							</View>
+						)}
+						{isStudent && (
+							<View style={styles.badgePill}>
+								<Text style={styles.badgePillText}>Đang học</Text>
+							</View>
+						)}
 					</View>
 				</View>
 
 				<View style={styles.infoCard}>
-					<InfoRow icon="call-outline" label="Số điện thoại" value="0901 234 567" />
+					<InfoRow
+						icon="call-outline"
+						label="Số điện thoại"
+						value={user?.phoneNumber ?? "Chưa cập nhật"}
+					/>
 					<Divider />
-					<InfoRow icon="calendar-outline" label="Ngày sinh" value="15/03/1998" />
+					<InfoRow
+						icon="calendar-outline"
+						label="Ngày sinh"
+						value={formatDate(user?.dateOfBirth ?? null)}
+					/>
 					<Divider />
-					<InfoRow icon="mail-outline" label="Email" value="nguyenvanan@email.com" />
+					<InfoRow
+						icon="mail-outline"
+						label="Email"
+						value={user?.email ?? "—"}
+					/>
+					{user?.address && (
+						<>
+							<Divider />
+							<InfoRow
+								icon="location-outline"
+								label="Địa chỉ"
+								value={user.address}
+							/>
+						</>
+					)}
 				</View>
 
 				<View style={styles.statsRow}>
@@ -83,12 +142,20 @@ export default function Me() {
 					<MenuRow icon="globe-outline" label="Ngôn ngữ" value="Tiếng Việt" />
 				</View>
 
-				<Text style={styles.sectionTitle}>Khóa học</Text>
-				<View style={styles.sectionCard}>
-					<MenuRow icon="ribbon-outline" label="Hạng bằng đang học" value="B1" />
-					<Divider />
-					<MenuRow icon="star-outline" label="Đánh giá ứng dụng" />
-				</View>
+				{isStudent && (
+					<>
+						<Text style={styles.sectionTitle}>Khóa học</Text>
+						<View style={styles.sectionCard}>
+							<MenuRow
+								icon="ribbon-outline"
+								label="Hạng bằng đang học"
+								value={licenseTier ?? "Chưa phân hạng"}
+							/>
+							<Divider />
+							<MenuRow icon="star-outline" label="Đánh giá ứng dụng" />
+						</View>
+					</>
+				)}
 
 				<Text style={styles.sectionTitle}>Hỗ trợ</Text>
 				<View style={styles.sectionCard}>
@@ -121,7 +188,12 @@ const styles = StyleSheet.create({
 		borderRadius: ms(AUTH_UI.radius.xl),
 		padding: s(16),
 	},
-	headerLeft: { flexDirection: "row", alignItems: "center" },
+	headerTop: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+	},
+	headerLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
 	headerInfo: { marginLeft: s(12), flex: 1 },
 	avatar: {
 		width: s(64),
@@ -130,7 +202,9 @@ const styles = StyleSheet.create({
 		backgroundColor: AUTH_UI.colors.accent,
 		alignItems: "center",
 		justifyContent: "center",
+		overflow: "hidden",
 	},
+	avatarImage: { width: "100%", height: "100%" },
 	avatarText: {
 		color: AUTH_UI.colors.accentText,
 		fontWeight: "800",
@@ -142,6 +216,18 @@ const styles = StyleSheet.create({
 		fontSize: ms(16),
 	},
 	email: { color: AUTH_UI.colors.textSecondary, marginTop: vs(4), fontSize: ms(12) },
+	editButton: {
+		paddingHorizontal: s(12),
+		paddingVertical: vs(6),
+		borderRadius: ms(8),
+		borderWidth: 1,
+		borderColor: AUTH_UI.colors.accent,
+	},
+	editButtonText: {
+		color: AUTH_UI.colors.accent,
+		fontSize: ms(12),
+		fontWeight: "600",
+	},
 	badgesRow: { flexDirection: "row", gap: s(8), marginTop: vs(12) },
 	badgePrimary: {
 		backgroundColor: AUTH_UI.colors.accent,
