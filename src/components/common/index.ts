@@ -5,5 +5,6 @@ export { Divider } from "./Divider";
 export { EmptyState } from "./EmptyState";
 export { IconBox } from "./IconBox";
 export { InputField } from "./InputField";
+export { MediaImage } from "./MediaImage";
 export { ProgressBar } from "./ProgressBar";
 export { StatBox } from "./StatBox";

@@ -32,7 +32,7 @@ export function ScreenWrapper({
 	edges = ["top", "bottom"],
 }: Props) {
 	const colorScheme = useColorScheme();
-	const bg = backgroundColor ?? Colors[colorScheme ?? "light"].background;
+	const bg = backgroundColor ?? Colors[colorScheme].background;
 
 	const content = scroll ? (
 		<ScrollView

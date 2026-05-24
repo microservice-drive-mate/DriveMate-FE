@@ -95,10 +95,5 @@ export function extractErrorMessage(err: unknown, fallback = 'Có lỗi xảy ra
 
 export const shouldLogout = (error: unknown): boolean => {
 	if (!(error instanceof ApiError)) return false;
-	return (
-		error.status === 401 ||
-		error.status === 403 ||
-		error.code === ERROR_CODES.UNAUTHORIZED ||
-		error.code === ERROR_CODES.FORBIDDEN
-	);
+	return error.status === 401 || error.code === ERROR_CODES.UNAUTHORIZED;
 };
