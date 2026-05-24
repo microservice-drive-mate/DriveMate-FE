@@ -9,6 +9,8 @@
 **OpenAPI JSON qua Kong:** `http://localhost:8000/course-service/docs-json`  
 **Version:** 1.0.0
 
+Course list/detail endpoints use Redis cache-aside for high read traffic. Cache TTL is 600 seconds and cache entries are invalidated when course content, lessons, materials, activation state, or enrollment capacity-affecting state changes. If Redis is unavailable, course-service falls back to PostgreSQL and keeps the public response shape unchanged.
+
 Course-service validate JWT/RBAC tại service bằng Keycloak guard. Frontend gọi qua Kong và gửi `Authorization: Bearer <access_token>`. Service lấy actor id từ `JWT.sub`; `x-user-id` chỉ là fallback cho debug/local script cũ.
 
 ---
@@ -21,6 +23,7 @@ Course-service validate JWT/RBAC tại service bằng Keycloak guard. Frontend g
 | `GET /admin/courses` | `ADMIN`, `CENTER_MANAGER`, `INSTRUCTOR` |
 | `GET /admin/courses/:id` | `ADMIN`, `CENTER_MANAGER`, `INSTRUCTOR` |
 | `PATCH /admin/courses/:id` | `ADMIN`, `CENTER_MANAGER`, `INSTRUCTOR` |
+| `DELETE /admin/courses/:id` | `ADMIN`, `CENTER_MANAGER` |
 | `PATCH /admin/courses/:id/activate` | `ADMIN`, `CENTER_MANAGER` |
 | `POST /admin/courses/:id/lessons` | `ADMIN`, `CENTER_MANAGER`, `INSTRUCTOR` |
 | `DELETE /admin/courses/:id/lessons/:lessonId` | `ADMIN`, `CENTER_MANAGER`, `INSTRUCTOR` |
@@ -31,6 +34,7 @@ Course-service validate JWT/RBAC tại service bằng Keycloak guard. Frontend g
 | `GET /enrollments` | `STUDENT` |
 | `GET /enrollments/:id` | `STUDENT`, `ADMIN`, `CENTER_MANAGER` |
 | `POST /enrollments/:id/lessons/:lessonId/complete` | `STUDENT` |
+| `POST /enrollments/:id/reset-progress` | `STUDENT`, owner only |
 
 ---
 
@@ -77,13 +81,15 @@ Lỗi domain:
 | 422 | `COURSE_HAS_NO_LESSON` | Khóa học chưa có bài học |
 | 422 | `ENROLLMENT_ALREADY_COMPLETED` | Enrollment đã completed |
 | 422 | `COURSE_CAPACITY_EXCEEDED` | Vượt quá sức chứa khóa học |
+| 422 | `STUDENT_LICENSE_NOT_ASSIGNED` | Course-service chưa có license tier của student từ user-service |
+| 422 | `STUDENT_LICENSE_MISMATCH` | License tier của student không khớp `licenseCategory` của khóa học |
 
 ---
 
 ## Enums
 
 `LicenseCategory`: `A1` | `A2` | `B1` | `B2` | `C` | `D` | `E` | `F`  
-`CourseStatus`: `DRAFT` | `ACTIVE`  
+`CourseStatus`: `DRAFT` | `ACTIVE` | `ARCHIVED`  
 `EnrollmentStatus`: `ACTIVE` | `COMPLETED` | `DROPPED`
 
 ---
@@ -167,7 +173,7 @@ Danh sách khóa học cho admin dashboard.
 | Param | Type | Default | Validation |
 | --- | --- | ---: | --- |
 | `page` | number | 1 | integer, `>= 1` |
-| `size` | number | 20 | integer, `>= 1` |
+| `size` | number | 20 | integer, `1..100` |
 | `licenseCategory` | LicenseCategory | - | enum |
 | `status` | CourseStatus | - | enum |
 
@@ -620,6 +626,8 @@ Thêm tài liệu học tập. Nếu có `mediaFileId`, course-service phát eve
 
 Đăng ký khóa học. `studentId` lấy từ `sub` trong JWT của caller; endpoint không cần request body.
 
+Course-service kiểm tra license tier của student từ local read model được đồng bộ bởi event `user.student.license-assigned`. Student chỉ được enroll khóa học khi license tier đã assign trong user-service khớp với `licenseCategory` của khóa học. Nếu event chưa được consume hoặc student chưa được assign license, API trả `STUDENT_LICENSE_NOT_ASSIGNED`; nếu khác hạng, API trả `STUDENT_LICENSE_MISMATCH`.
+
 **Auth:** `STUDENT`
 
 **Response `201 Created`**
@@ -658,7 +666,7 @@ Danh sách enrollment của student hiện tại.
 | Param | Type | Default | Validation |
 | --- | --- | ---: | --- |
 | `page` | number | 1 | integer, `>= 1` |
-| `size` | number | 20 | integer, `>= 1` |
+| `size` | number | 20 | integer, `1..100` |
 | `status` | EnrollmentStatus | - | enum |
 
 **Response `200 OK`**
@@ -768,10 +776,13 @@ Course-service consume queue `course_service_events`.
 {
   "eventName": "user.student.license-assigned",
   "studentId": "student-uuid",
-  "newTier": "B2",
-  "oldTier": null
+  "oldLicenseTier": null,
+  "newLicenseTier": "B2",
+  "changedById": "admin-uuid"
 }
 ```
+
+Course-service lưu event này vào read model `student_license_profiles` để enforce rule enroll theo hạng bằng lái.
 
 ### `media.file.deleted`
 
@@ -787,6 +798,63 @@ Course-service consume queue `course_service_events`.
 ---
 
 ## Events Published
+
+## Security Audit
+
+Access logging is emitted for every HTTP request. Successful audited mutations write `security.audit.recorded` into `course_db.outbox_messages` in the same transaction as the business change. The outbox relay publishes it to RabbitMQ, and `audit-service` persists it into `audit_db.audit_logs`.
+
+Frontend does not call audit-service for write operations. The audit trail is a backend side effect. Admin screens may later query audit-service for investigation/history.
+
+| Endpoint | Audit action | Resource | Metadata |
+| --- | --- | --- | --- |
+| `POST /admin/courses` | `COURSE_CREATED` | `COURSE/:id` | `{ "title": "...", "licenseCategory": "B1" }` |
+| `PATCH /admin/courses/:id` | `COURSE_UPDATED` | `COURSE/:id` | `{ "title": "..." }` |
+| `PATCH /admin/courses/:id/activate` | `COURSE_ACTIVATED` | `COURSE/:id` | `{ "status": "ACTIVE" }` |
+| `DELETE /admin/courses/:id` | `COURSE_ARCHIVED` | `COURSE/:id` | `{ "status": "ARCHIVED" }` |
+| `POST /admin/courses/:id/lessons` | `COURSE_LESSON_ADDED` | `COURSE/:id` | `{ "title": "...", "order": 1 }` |
+| `DELETE /admin/courses/:id/lessons/:lessonId` | `COURSE_LESSON_REMOVED` | `COURSE/:id` | `{ "lessonId": "lesson-id" }` |
+| `POST /admin/courses/:id/materials` | `COURSE_MATERIAL_ADDED` | `COURSE/:id` | `{ "title": "...", "mediaFileId": "media-file-id" }` |
+| `POST /enrollments/:id/reset-progress` | `ENROLLMENT_PROGRESS_RESET` | `COURSE_ENROLLMENT/:id` | `{ "courseId": "course-id" }` |
+
+Example audit event persisted from course-service:
+
+```json
+{
+  "eventId": "audit-event-uuid",
+  "eventName": "security.audit.recorded",
+  "schemaVersion": 1,
+  "serviceName": "course-service",
+  "actorId": "admin-keycloak-sub",
+  "actorRole": "ADMIN",
+  "action": "COURSE_ARCHIVED",
+  "resourceType": "COURSE",
+  "resourceId": "course-id",
+  "outcome": "SUCCESS",
+  "occurredAt": "2026-05-24T10:00:00.000Z",
+  "correlationId": "request-correlation-id",
+  "requestPath": "/admin/courses/course-id",
+  "httpMethod": "DELETE",
+  "metadata": {
+    "status": "ARCHIVED"
+  }
+}
+```
+
+Verification:
+
+```sql
+SELECT payload->>'action' AS action, status, attempts, "publishedAt", "lastError"
+FROM outbox_messages
+ORDER BY "createdAt" DESC
+LIMIT 10;
+```
+
+Centralized query:
+
+```http
+GET /admin/audit-logs?serviceName=course-service&resourceId=<course-id>
+Authorization: Bearer <admin_access_token>
+```
 
 ### `course.material.linked`
 
@@ -831,3 +899,31 @@ Course-service consume queue `course_service_events`.
   "courseId": "course-uuid"
 }
 ```
+
+## ASR Additions: Course Archive And Progress Reset
+
+### DELETE `/admin/courses/{id}`
+
+Archives a course instead of hard deleting it. Archived courses are excluded from list endpoints unless explicitly filtered by status.
+
+Response contains the archived course with `status = "ARCHIVED"`.
+
+**Response `200`**
+
+Same `Course` shape as `GET /admin/courses/:id`, with `status = "ARCHIVED"`.
+
+### POST `/enrollments/{id}/reset-progress`
+
+Role: `STUDENT`.
+
+Resets only the current student's enrollment progress to baseline:
+
+- `progress = 0`
+- `status = ACTIVE`
+- `completedAt = null`
+- historical exam sessions are preserved
+- publishes `course.enrollment.progress-reset` for analytics invalidation
+
+**Response `200`**
+
+Same `Enrollment` shape as `GET /enrollments/:id`, with `progress = 0`, `status = "ACTIVE"`, and `completedAt = null`.

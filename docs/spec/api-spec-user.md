@@ -482,11 +482,30 @@ Gán hạng giấy phép cho học viên và ghi audit trail. `changedById = JWT
 }
 ```
 
-**Response `204 No Content`**
+**Response `200 OK`**
 
-Không có body.
+Trả về profile đã cập nhật để Swagger UI/Postman thấy rõ kết quả thành công.
 
-**Event published:** `user.student.license-assigned`.
+```json
+{
+  "success": true,
+  "code": "SUCCESS",
+  "message": "OK",
+  "data": {
+    "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "fullName": "Nguyễn Văn A",
+    "email": "a@example.com",
+    "role": "STUDENT",
+    "studentDetail": {
+      "licenseTier": "B2",
+      "enrolledAt": "2026-05-14T10:00:00.000Z",
+      "notes": "Ghi chú"
+    }
+  }
+}
+```
+
+**Event published:** `user.student.license-assigned` tới queue `course_service_events` để course-service sync read model license tier trước khi cho enroll.
 
 ```json
 {
@@ -585,6 +604,56 @@ Nếu profile nào đang dùng `mediaFileId = fileId`, user-service set `avatarU
 ---
 
 ## Events Published
+
+## Security Audit
+
+Access logging is emitted for every HTTP request. Successful license assignment writes `security.audit.recorded` into `user_db.outbox_messages` in the same database transaction as the profile/license update. The outbox relay publishes it to RabbitMQ, and `audit-service` persists the centralized audit record.
+
+Frontend không cần gọi audit-service sau khi update thành công. Audit trail là side effect backend để admin/security tra cứu.
+
+| Endpoint | Audit action | Resource | Metadata |
+| --- | --- | --- | --- |
+| `PATCH /admin/users/:id/license-tier` | `USER_LICENSE_ASSIGNED` | `USER_PROFILE/:id` | `{ "newLicenseTier": "B1" }` |
+
+Audit event contract emitted through outbox:
+
+```json
+{
+  "eventId": "audit-event-uuid",
+  "eventName": "security.audit.recorded",
+  "schemaVersion": 1,
+  "serviceName": "user-service",
+  "actorId": "admin-keycloak-sub",
+  "actorRole": "ADMIN",
+  "action": "USER_LICENSE_ASSIGNED",
+  "resourceType": "USER_PROFILE",
+  "resourceId": "student-user-id",
+  "outcome": "SUCCESS",
+  "occurredAt": "2026-05-24T10:00:00.000Z",
+  "correlationId": "request-correlation-id",
+  "requestPath": "/admin/users/student-user-id/license-tier",
+  "httpMethod": "PATCH",
+  "metadata": {
+    "newLicenseTier": "B1"
+  }
+}
+```
+
+Verification:
+
+```sql
+SELECT payload->>'action' AS action, status, attempts, "publishedAt"
+FROM outbox_messages
+ORDER BY "createdAt" DESC
+LIMIT 5;
+```
+
+Centralized query:
+
+```http
+GET /admin/audit-logs?action=USER_LICENSE_ASSIGNED&resourceId=<student-id>
+Authorization: Bearer <admin_access_token>
+```
 
 ### `user.avatar.linked`
 
