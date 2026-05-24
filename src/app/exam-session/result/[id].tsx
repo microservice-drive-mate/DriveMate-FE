@@ -3,36 +3,107 @@ import { StatBox } from "@/components/common/StatBox";
 import { CircularProgress } from "@/components/exam/CircularProgress";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ERROR_MESSAGES } from "@/constants/api";
+import { ExamSession } from "@/models/examSession.model";
+import { examService } from "@/services/exam.service";
+import { formatDuration } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const elapsedSeconds = (session: ExamSession) => {
+	if (!session.finishedAt) return 0;
+	return Math.max(
+		0,
+		Math.round(
+			(new Date(session.finishedAt).getTime() -
+				new Date(session.startedAt).getTime()) /
+				1000,
+		),
+	);
+};
+
 export default function ExamResultScreen() {
-	const { id, correct, wrong, skipped, elapsed, hitCritical, total, answersJson } =
-		useLocalSearchParams<{
-			id: string;
-			correct: string;
-			wrong: string;
-			skipped: string;
-			elapsed: string;
-			hitCritical: string;
-			total: string;
-			answersJson: string;
-		}>();
-
+	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
+	const sessionId = id ?? "";
 
-	const correctCount = parseInt(correct ?? "0", 10);
-	const wrongCount = parseInt(wrong ?? "0", 10);
-	const skippedCount = parseInt(skipped ?? "0", 10);
-	const totalCount = parseInt(total ?? "1", 10);
-	const isCritical = hitCritical === "1";
+	const [session, setSession] = useState<ExamSession | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	const percentage = Math.round((correctCount / totalCount) * 100);
-	const isPassed = percentage >= 80 && !isCritical;
+	useEffect(() => {
+		let cancelled = false;
+		const load = async () => {
+			setIsLoading(true);
+			setError(null);
+			const result = await examService.getSessionResult(sessionId);
+			if (cancelled) return;
+			if (result.success) {
+				setSession(result.data);
+			} else {
+				setError(
+					ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ??
+						result.error,
+				);
+			}
+			setIsLoading(false);
+		};
+		load();
+		return () => {
+			cancelled = true;
+		};
+	}, [sessionId]);
+
+	if (isLoading) {
+		return (
+			<SafeAreaView style={styles.container}>
+				<ScreenHeader title="Kết Quả Thi" onBack={() => router.back()} centered />
+				<View style={styles.centerState}>
+					<ActivityIndicator color={AUTH_UI.colors.accent} size="large" />
+					<Text style={styles.stateText}>Đang tải kết quả...</Text>
+				</View>
+			</SafeAreaView>
+		);
+	}
+
+	if (error || !session) {
+		return (
+			<SafeAreaView style={styles.container}>
+				<ScreenHeader title="Kết Quả Thi" onBack={() => router.back()} centered />
+				<View style={styles.centerState}>
+					<Text style={styles.stateText}>
+						{error ?? "Không tìm thấy kết quả bài thi."}
+					</Text>
+					<Button
+						variant="secondary"
+						label="Quay lại"
+						onPress={() => router.back()}
+						style={styles.backBtn}
+					/>
+				</View>
+			</SafeAreaView>
+		);
+	}
+
+	const total = session.questions.length;
+	const scoreCount = session.score ?? 0;
+	const skippedCount = session.questions.filter((q) => !q.selectedOptionId).length;
+	const wrongCount = Math.max(0, total - scoreCount - skippedCount);
+	const isPassed = session.isPassed === true;
+	const isCritical = session.failedByCritical;
+	const percentage = total > 0 ? Math.round((scoreCount / total) * 100) : 0;
 	const fillColor = isPassed ? AUTH_UI.colors.success : AUTH_UI.colors.danger;
+	const elapsedStr = formatDuration(elapsedSeconds(session));
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -53,7 +124,7 @@ export default function ExamResultScreen() {
 							{percentage}%
 						</Text>
 						<Text style={styles.correctLabel}>
-							{correctCount}/{totalCount} đúng
+							{scoreCount}/{total} đúng
 						</Text>
 					</View>
 				</View>
@@ -91,7 +162,7 @@ export default function ExamResultScreen() {
 
 				<View style={styles.statsRow}>
 					<StatBox
-						value={correctCount}
+						value={scoreCount}
 						label="Đúng"
 						bg="#1B4332"
 						valueColor={AUTH_UI.colors.success}
@@ -112,7 +183,7 @@ export default function ExamResultScreen() {
 						labelColor={AUTH_UI.colors.textSecondary}
 					/>
 					<StatBox
-						value={elapsed ?? "0:00"}
+						value={elapsedStr}
 						label="Thời gian"
 						bg="#2A2200"
 						valueColor="#C9A227"
@@ -123,13 +194,13 @@ export default function ExamResultScreen() {
 				{wrongCount > 0 && (
 					<Button
 						variant="secondary"
-						label={`Xem lại câu sai (${wrongCount})`}
+						label="Xem câu sai"
 						icon="eye-outline"
 						style={styles.reviewBtn}
 						onPress={() =>
 							(router.push as any)({
 								pathname: "/exam-session/review/[id]",
-								params: { id: id ?? "", answersJson: answersJson ?? "{}" },
+								params: { id: sessionId },
 							})
 						}
 					/>
@@ -138,16 +209,11 @@ export default function ExamResultScreen() {
 				<View style={styles.actions}>
 					<Button
 						variant="secondary"
-						label="Làm lại"
+						label="Thi lại"
 						icon="refresh-outline"
 						flex
 						style={styles.actionBtn}
-						onPress={() =>
-							(router.replace as any)({
-								pathname: "/exam-session/take/[id]",
-								params: { id: id ?? "" },
-							})
-						}
+						onPress={() => router.replace("/(tabs)/exam" as never)}
 					/>
 					<Button
 						variant="primary"
@@ -155,7 +221,7 @@ export default function ExamResultScreen() {
 						icon="home-outline"
 						flex
 						style={styles.actionBtn}
-						onPress={() => (router.replace as any)("/")}
+						onPress={() => router.replace("/" as never)}
 					/>
 				</View>
 			</ScrollView>
@@ -167,6 +233,21 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: AUTH_UI.colors.background,
+	},
+	centerState: {
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
+		gap: vs(14),
+		paddingHorizontal: s(32),
+	},
+	stateText: {
+		fontSize: ms(14),
+		color: AUTH_UI.colors.textSecondary,
+		textAlign: "center",
+	},
+	backBtn: {
+		paddingHorizontal: s(24),
 	},
 	content: {
 		paddingHorizontal: s(20),
@@ -245,8 +326,8 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	reviewBtn: {
-		width: "100%",
 		height: vs(50),
+		width: "100%",
 	},
 	actions: {
 		flexDirection: "row",

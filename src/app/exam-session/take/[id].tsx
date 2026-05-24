@@ -1,15 +1,19 @@
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
+import { MediaImage } from "@/components/common/MediaImage";
 import { StatBox } from "@/components/common/StatBox";
 import { OptionCard } from "@/components/exam/OptionCard";
 import { AUTH_UI } from "@/constants/auth-ui";
-import { MOCK_EXAMS } from "@/data/exams.mock";
+import { ERROR_MESSAGES } from "@/constants/api";
+import { ExamSessionQuestion } from "@/models/examSession.model";
+import { examService } from "@/services/exam.service";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+	ActivityIndicator,
 	Alert,
 	Animated,
 	Modal,
@@ -29,35 +33,72 @@ const formatTime = (seconds: number) => {
 };
 
 export default function ExamTakeScreen() {
-	const { id } = useLocalSearchParams<{ id: string }>();
+	const { id, durationMinutes: durationParam } = useLocalSearchParams<{
+		id: string;
+		durationMinutes: string;
+	}>();
 	const router = useRouter();
-	const exam = MOCK_EXAMS.find((e) => e.id === id);
+	const sessionId = id ?? "";
+	const durationMinutes = parseInt(durationParam ?? "20", 10);
 
+	const [questions, setQuestions] = useState<ExamSessionQuestion[]>([]);
+	const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-	const [answers, setAnswers] = useState<Record<number, number>>({});
-	const [flaggedQuestions, setFlaggedQuestions] = useState<number[]>([]);
-	const [remainingSeconds, setRemainingSeconds] = useState(
-		(exam?.durationMinutes ?? 0) * 60,
-	);
-	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [answers, setAnswers] = useState<Record<string, string | null>>({});
+	const [bookmarks, setBookmarks] = useState<Record<string, boolean>>({});
+	const [remainingSeconds, setRemainingSeconds] = useState(durationMinutes * 60);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const [showNavSheet, setShowNavSheet] = useState(false);
 	const [showSubmitSheet, setShowSubmitSheet] = useState(false);
 
 	const navSheetAnim = useRef(new Animated.Value(0)).current;
 	const submitSheetAnim = useRef(new Animated.Value(0)).current;
+	const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const isSubmittingRef = useRef(false);
 
 	useEffect(() => {
-		if (isSubmitted) return;
+		let cancelled = false;
+		const load = async () => {
+			const result = await examService.getSessionQuestions(sessionId);
+			if (cancelled) return;
+			if (result.success) {
+				const sorted = [...result.data.items].sort(
+					(a, b) => a.displayOrder - b.displayOrder,
+				);
+				setQuestions(sorted);
+				const initAnswers: Record<string, string | null> = {};
+				const initBookmarks: Record<string, boolean> = {};
+				sorted.forEach((q) => {
+					initAnswers[q.questionId] = q.selectedOptionId;
+					initBookmarks[q.questionId] = q.isBookmarked;
+				});
+				setAnswers(initAnswers);
+				setBookmarks(initBookmarks);
+			} else {
+				const message =
+					ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
+				Alert.alert("Không thể tải câu hỏi", message, [
+					{ text: "Quay lại", onPress: () => router.back() },
+				]);
+			}
+			setIsLoadingQuestions(false);
+		};
+		load();
+		return () => { cancelled = true; };
+	}, [sessionId]);
+
+	useEffect(() => {
+		if (isLoadingQuestions || isSubmittingRef.current) return;
 		if (remainingSeconds <= 0) {
 			handleSubmit();
 			return;
 		}
 		const timer = setInterval(() => {
-			setRemainingSeconds((s) => Math.max(0, s - 1));
+			setRemainingSeconds((prev) => Math.max(0, prev - 1));
 		}, 1000);
 		return () => clearInterval(timer);
-	}, [remainingSeconds, isSubmitted]);
+	}, [remainingSeconds, isLoadingQuestions]);
 
 	const openSheet = (anim: Animated.Value, setter: (v: boolean) => void) => {
 		setter(true);
@@ -87,7 +128,7 @@ export default function ExamTakeScreen() {
 	const handleBack = () => {
 		Alert.alert(
 			"Bạn có chắc muốn thoát?",
-			"Tiến độ bài thi sẽ bị mất.",
+			"Tiến độ bài thi sẽ bị mất nếu thoát.",
 			[
 				{ text: "Ở lại", style: "cancel" },
 				{ text: "Thoát", style: "destructive", onPress: () => router.back() },
@@ -95,69 +136,59 @@ export default function ExamTakeScreen() {
 		);
 	};
 
-	const handleAnswerSelect = (questionIndex: number, optionIndex: number) => {
-		setAnswers((prev) => {
-			if (prev[questionIndex] === optionIndex) {
-				const next = { ...prev };
-				delete next[questionIndex];
-				return next;
+	const scheduleAutosave = (questionId: string, selectedOptionId: string | null) => {
+		if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+		autosaveTimerRef.current = setTimeout(async () => {
+			const res = await examService.saveAnswer(sessionId, { questionId, selectedOptionId });
+			if (res.success && (res.data.status === 'TIMED_OUT' || res.data.status === 'COMPLETED')) {
+				router.replace({
+					pathname: '/exam-session/result/[id]',
+					params: { id: sessionId },
+				} as never);
 			}
-			return { ...prev, [questionIndex]: optionIndex };
-		});
+		}, 1500);
 	};
 
-	const handleToggleFlag = (questionIndex: number) => {
-		setFlaggedQuestions((prev) =>
-			prev.includes(questionIndex)
-				? prev.filter((i) => i !== questionIndex)
-				: [...prev, questionIndex],
-		);
+	const handleAnswerSelect = (questionId: string, optionId: string) => {
+		const current = answers[questionId] ?? null;
+		const next = current === optionId ? null : optionId;
+		setAnswers((prev) => ({ ...prev, [questionId]: next }));
+		scheduleAutosave(questionId, next);
 	};
 
-	const handleSubmit = () => {
-		if (!exam) return;
-		const totalSeconds = exam.durationMinutes * 60;
-		const elapsed = totalSeconds - remainingSeconds;
+	const handleToggleBookmark = (questionId: string) => {
+		const newVal = !bookmarks[questionId];
+		setBookmarks((prev) => ({ ...prev, [questionId]: newVal }));
+		examService.saveAnswer(sessionId, { questionId, isBookmarked: newVal });
+	};
 
-		let correct = 0;
-		let wrong = 0;
-		let hitCritical = false;
-		exam.questions.forEach((q, idx) => {
-			const userAnswer = answers[idx];
-			if (userAnswer === undefined) return;
-			if (userAnswer === q.correctAnswerIndex) {
-				correct++;
-			} else {
-				wrong++;
-				if (q.isCritical) hitCritical = true;
-			}
-		});
-		const skipped = exam.questions.length - correct - wrong;
-		const elapsedMin = Math.floor(elapsed / 60);
-		const elapsedSec = elapsed % 60;
-		const elapsedStr = `${elapsedMin}:${String(elapsedSec).padStart(2, "0")}`;
+	const handleSubmit = async () => {
+		if (isSubmittingRef.current) return;
+		isSubmittingRef.current = true;
+		setIsSubmitting(true);
 
-		setIsSubmitted(true);
+		if (autosaveTimerRef.current) {
+			clearTimeout(autosaveTimerRef.current);
+			autosaveTimerRef.current = null;
+		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		(router.replace as any)({
-			pathname: "/exam-session/result/[id]",
-			params: {
-				id: id ?? "",
-				correct: String(correct),
-				wrong: String(wrong),
-				skipped: String(skipped),
-				elapsed: elapsedStr,
-				hitCritical: hitCritical ? "1" : "0",
-				total: String(exam.questions.length),
-				answersJson: JSON.stringify(answers),
-			},
-		});
+		const result = await examService.submitSession(sessionId);
+		if (result.success) {
+			router.replace({
+				pathname: "/exam-session/result/[id]",
+				params: { id: sessionId },
+			} as never);
+		} else {
+			isSubmittingRef.current = false;
+			setIsSubmitting(false);
+			const message =
+				ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
+			Alert.alert("Nộp bài thất bại", message);
+		}
 	};
 
 	const handleNext = () => {
-		if (!exam) return;
-		if (currentQuestionIndex < exam.questions.length - 1) {
+		if (currentQuestionIndex < questions.length - 1) {
 			setCurrentQuestionIndex((i) => i + 1);
 		} else {
 			openSheet(submitSheetAnim, setShowSubmitSheet);
@@ -170,11 +201,22 @@ export default function ExamTakeScreen() {
 		}
 	};
 
-	if (!exam) {
+	if (isLoadingQuestions) {
 		return (
 			<SafeAreaView style={styles.container}>
 				<View style={styles.errorCenter}>
-					<Text style={styles.errorText}>Không tìm thấy đề thi</Text>
+					<ActivityIndicator color={AUTH_UI.colors.accent} size="large" />
+					<Text style={styles.loadingText}>Đang tải câu hỏi...</Text>
+				</View>
+			</SafeAreaView>
+		);
+	}
+
+	if (questions.length === 0) {
+		return (
+			<SafeAreaView style={styles.container}>
+				<View style={styles.errorCenter}>
+					<Text style={styles.errorText}>Không có câu hỏi nào</Text>
 					<Button
 						variant="secondary"
 						label="Quay lại"
@@ -186,14 +228,16 @@ export default function ExamTakeScreen() {
 		);
 	}
 
-	const question = exam.questions[currentQuestionIndex];
-	const totalQuestions = exam.questions.length;
+	const question = questions[currentQuestionIndex];
+	const totalQuestions = questions.length;
 	const totalGroups = Math.ceil(totalQuestions / QUESTIONS_PER_GROUP);
 	const currentGroup = Math.floor(currentQuestionIndex / QUESTIONS_PER_GROUP);
-	const isFlagged = flaggedQuestions.includes(currentQuestionIndex);
-	const selectedOption = answers[currentQuestionIndex];
+	const isBookmarked = bookmarks[question.questionId] ?? false;
+	const selectedOptionId = answers[question.questionId] ?? null;
 	const isTimeLow = remainingSeconds <= 60;
-	const answeredCount = Object.keys(answers).length;
+	const isTimeCritical = remainingSeconds <= 10;
+	const answeredCount = Object.values(answers).filter((v) => v !== null).length;
+	const sortedOptions = [...question.options].sort((a, b) => a.displayOrder - b.displayOrder);
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -215,9 +259,9 @@ export default function ExamTakeScreen() {
 
 				<Button
 					variant="icon"
-					icon={isFlagged ? "flag" : "flag-outline"}
-					onPress={() => handleToggleFlag(currentQuestionIndex)}
-					style={isFlagged ? styles.flaggedBtn : undefined}
+					icon={isBookmarked ? "flag" : "flag-outline"}
+					onPress={() => handleToggleBookmark(question.questionId)}
+					style={isBookmarked ? styles.flaggedBtn : undefined}
 				/>
 
 				<TouchableOpacity
@@ -229,25 +273,41 @@ export default function ExamTakeScreen() {
 				</TouchableOpacity>
 			</View>
 
+			{isTimeCritical && (
+				<View style={styles.criticalTimerBanner}>
+					<Ionicons name="warning-outline" size={ms(14)} color={AUTH_UI.colors.danger} />
+					<Text style={styles.criticalTimerText}>
+						Còn {remainingSeconds} giây! Bài thi sắp kết thúc.
+					</Text>
+				</View>
+			)}
+
 			<ScrollView
 				style={styles.scroll}
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={false}>
 				<Text style={styles.questionLabel}>Câu {currentQuestionIndex + 1}</Text>
-				<Text style={styles.questionText}>{question.questionText}</Text>
+				<Text style={styles.questionText}>{question.content}</Text>
+
+				{(question.mediaFileId || question.imageUrl) && (
+					<MediaImage
+						mediaFileId={question.mediaFileId}
+						imageUrl={question.imageUrl}
+					/>
+				)}
 
 				{question.isCritical && (
 					<Badge text="⚡ Câu điểm liệt" variant="critical" style={styles.criticalBadge} />
 				)}
 
 				<View style={styles.optionsList}>
-					{question.options.map((opt, i) => (
+					{sortedOptions.map((opt, i) => (
 						<OptionCard
-							key={i}
+							key={opt.id}
 							letter={String.fromCharCode(65 + i)}
-							text={opt}
-							state={selectedOption === i ? "selected" : "default"}
-							onPress={() => handleAnswerSelect(currentQuestionIndex, i)}
+							text={opt.content}
+							state={selectedOptionId === opt.id ? "selected" : "default"}
+							onPress={() => handleAnswerSelect(question.questionId, opt.id)}
 						/>
 					))}
 				</View>
@@ -305,16 +365,16 @@ export default function ExamTakeScreen() {
 							<Text style={styles.sheetTitle}>Điều hướng câu hỏi</Text>
 
 							<View style={styles.navGrid}>
-								{exam.questions.map((_, idx) => {
+								{questions.map((q, idx) => {
 									const isCurrent = idx === currentQuestionIndex;
-									const isAnswered = answers[idx] !== undefined;
-									const isQFlagged = flaggedQuestions.includes(idx);
+									const isAnswered = answers[q.questionId] !== null && answers[q.questionId] !== undefined;
+									const isQBookmarked = bookmarks[q.questionId];
 									let bg = AUTH_UI.colors.surface;
 									let textColor = AUTH_UI.colors.textSecondary;
 									if (isCurrent) {
 										bg = AUTH_UI.colors.accent;
 										textColor = AUTH_UI.colors.accentText;
-									} else if (isQFlagged) {
+									} else if (isQBookmarked) {
 										bg = "#3D2E00";
 										textColor = "#C9A227";
 									} else if (isAnswered) {
@@ -323,7 +383,7 @@ export default function ExamTakeScreen() {
 									}
 									return (
 										<TouchableOpacity
-											key={idx}
+											key={q.questionId}
 											style={[styles.navGridItem, { backgroundColor: bg }]}
 											onPress={() =>
 												closeSheet(navSheetAnim, setShowNavSheet, () =>
@@ -391,7 +451,13 @@ export default function ExamTakeScreen() {
 							<View style={styles.submitStats}>
 								<StatBox value={answeredCount} label="Đã làm" bg="#1B4332" valueColor={AUTH_UI.colors.success} labelColor={AUTH_UI.colors.success} />
 								<StatBox value={totalQuestions - answeredCount} label="Bỏ qua" bg="#3B0F0F" valueColor={AUTH_UI.colors.danger} labelColor={AUTH_UI.colors.danger} />
-								<StatBox value={flaggedQuestions.length} label="Gắn cờ" bg="#3D2E00" valueColor="#C9A227" labelColor="#C9A227" />
+								<StatBox
+									value={Object.values(bookmarks).filter(Boolean).length}
+									label="Gắn cờ"
+									bg="#3D2E00"
+									valueColor="#C9A227"
+									labelColor="#C9A227"
+								/>
 							</View>
 
 							<View style={styles.submitActions}>
@@ -404,8 +470,9 @@ export default function ExamTakeScreen() {
 								/>
 								<Button
 									variant="primary"
-									label="✓ Nộp bài"
+									label={isSubmitting ? "Đang nộp..." : "✓ Nộp bài"}
 									flex
+									disabled={isSubmitting}
 									onPress={() =>
 										closeSheet(submitSheetAnim, setShowSubmitSheet, handleSubmit)
 									}
@@ -471,6 +538,24 @@ const styles = StyleSheet.create({
 		fontSize: ms(14),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textPrimary,
+	},
+	criticalTimerBanner: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: s(8),
+		marginHorizontal: s(16),
+		marginBottom: vs(8),
+		paddingHorizontal: s(12),
+		paddingVertical: vs(6),
+		backgroundColor: "rgba(248,113,113,0.1)",
+		borderWidth: 1,
+		borderColor: "rgba(248,113,113,0.3)",
+		borderRadius: ms(AUTH_UI.radius.lg),
+	},
+	criticalTimerText: {
+		fontSize: ms(12),
+		fontWeight: "600",
+		color: AUTH_UI.colors.danger,
 	},
 	scroll: { flex: 1 },
 	scrollContent: {
@@ -622,6 +707,10 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		gap: s(12),
+	},
+	loadingText: {
+		fontSize: ms(14),
+		color: AUTH_UI.colors.textSecondary,
 	},
 	errorText: {
 		fontSize: ms(16),

@@ -4,21 +4,15 @@ import { InputField } from "@/components/common/InputField";
 import { FilterTabs, TabItem } from "@/components/layout/FilterTabs";
 import { ExamCard } from "@/components/exam/ExamCard";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ERROR_MESSAGES } from "@/constants/api";
 import { ms, s, vs } from "@/utils/responsive";
-import { MOCK_EXAMS } from "@/data/exams.mock";
-import { ExamType, LicenseClass } from "@/models/exam.model";
+import { ExamType } from "@/models/exam.model";
+import { ExamTemplate } from "@/models/examSession.model";
+import { examService } from "@/services/exam.service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
-
-const LICENSE_TABS: TabItem[] = [
-  { key: "B1", label: "B1" },
-  { key: "B2", label: "B2" },
-  { key: "A1", label: "A1" },
-  { key: "A2", label: "A2" },
-  { key: "C", label: "C" },
-];
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const TYPE_TABS: TabItem[] = [
   { key: "on-tap", label: "Ôn tập", icon: "book-outline" },
@@ -27,27 +21,71 @@ const TYPE_TABS: TabItem[] = [
 
 export default function ExamScreen() {
   const router = useRouter();
-  const [activeClass, setActiveClass] = useState<LicenseClass>("B1");
-  const [activeType, setActiveType] = useState<ExamType>("on-tap");
+  const [activeType, setActiveType] = useState<ExamType>("sat-hach");
   const [searchText, setSearchText] = useState("");
+  const [templates, setTemplates] = useState<ExamTemplate[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredExams = useMemo(
+  const loadTemplates = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    const result = await examService.getAvailableExams();
+    if (result.success) {
+      setTemplates(result.data.items);
+    } else {
+      const message =
+        ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
+      setError(message);
+    }
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+
+  const filteredTemplates = useMemo(
     () =>
-      MOCK_EXAMS.filter(
-        (e) =>
-          e.licenseClass === activeClass &&
-          e.examType === activeType &&
-          e.name.toLowerCase().includes(searchText.toLowerCase().trim()),
+      templates.filter((t) =>
+        t.name.toLowerCase().includes(searchText.toLowerCase().trim()),
       ),
-    [activeClass, activeType, searchText],
+    [templates, searchText],
   );
+
+  const handleStart = async (template: ExamTemplate) => {
+    if (isStarting) return;
+    setIsStarting(true);
+    const result = await examService.startSession(template.id);
+    setIsStarting(false);
+    if (result.success) {
+      const session = result.data;
+      const durationMinutes = Math.max(
+        1,
+        Math.round(
+          (new Date(session.expiresAt).getTime() -
+            new Date(session.startedAt).getTime()) /
+            60000,
+        ),
+      );
+      router.push({
+        pathname: "/exam-session/take/[id]",
+        params: { id: session.id, durationMinutes: String(durationMinutes) },
+      } as never);
+    } else {
+      const message =
+        ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
+      Alert.alert("Không thể bắt đầu thi", message);
+    }
+  };
 
   return (
     <ScreenWrapper backgroundColor={AUTH_UI.colors.background} edges={["top"]} scroll={false}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Đề Thi Lý Thuyết</Text>
-          <Text style={styles.headerSub}>Chọn hạng bằng và loại đề để bắt đầu</Text>
+          <Text style={styles.headerSub}>Chọn loại đề và bắt đầu luyện tập</Text>
         </View>
 
         <InputField
@@ -59,14 +97,6 @@ export default function ExamScreen() {
           onChangeText={setSearchText}
           returnKeyType="search"
           containerStyle={styles.searchContainer}
-        />
-
-        <FilterTabs
-          tabs={LICENSE_TABS}
-          activeKey={activeClass}
-          onChange={(k) => setActiveClass(k as LicenseClass)}
-          variant="pills"
-          style={styles.classTabs}
         />
 
         <FilterTabs
@@ -93,29 +123,49 @@ export default function ExamScreen() {
           </View>
         )}
 
-        <FlatList
-          data={filteredExams}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ExamCard
-              exam={item}
-              activeType={activeType}
-              onStart={() => router.push(`/exam-session/take/${item.id}` as never)}
-              onPreview={() => router.push(`/exam-session/preview/${item.id}` as never)}
-            />
-          )}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          style={styles.list}
-          ListEmptyComponent={
-            <EmptyState
-              icon="search-outline"
-              title="Không tìm thấy đề thi phù hợp"
-              style={styles.emptyState}
-            />
-          }
-        />
+        {isLoading ? (
+          <View style={styles.centerState}>
+            <ActivityIndicator color={AUTH_UI.colors.accent} size="large" />
+          </View>
+        ) : error ? (
+          <View style={styles.centerState}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity onPress={loadTemplates} style={styles.retryBtn}>
+              <Ionicons name="refresh-outline" size={ms(16)} color={AUTH_UI.colors.accent} />
+              <Text style={styles.retryText}>Thử lại</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredTemplates}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ExamCard
+                template={item}
+                activeType={activeType}
+                onStart={() => handleStart(item)}
+              />
+            )}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            style={styles.list}
+            ListEmptyComponent={
+              <EmptyState
+                icon="search-outline"
+                title="Không tìm thấy đề thi phù hợp"
+                style={styles.emptyState}
+              />
+            }
+          />
+        )}
       </View>
+
+      {isStarting && (
+        <View style={styles.startingOverlay}>
+          <ActivityIndicator color={AUTH_UI.colors.accent} size="large" />
+          <Text style={styles.startingText}>Đang tạo buổi thi...</Text>
+        </View>
+      )}
     </ScreenWrapper>
   );
 }
@@ -139,9 +189,6 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     marginHorizontal: s(16),
-    marginBottom: vs(12),
-  },
-  classTabs: {
     marginBottom: vs(12),
   },
   typeToggle: {
@@ -186,4 +233,42 @@ const styles = StyleSheet.create({
     gap: vs(12),
   },
   emptyState: { paddingTop: vs(60) },
+  centerState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: vs(12),
+  },
+  errorText: {
+    fontSize: ms(14),
+    color: AUTH_UI.colors.textSecondary,
+    textAlign: "center",
+    paddingHorizontal: s(32),
+  },
+  retryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: s(6),
+    paddingHorizontal: s(16),
+    paddingVertical: vs(8),
+    borderRadius: ms(AUTH_UI.radius.lg),
+    borderWidth: 1,
+    borderColor: AUTH_UI.colors.accent,
+  },
+  retryText: {
+    fontSize: ms(14),
+    fontWeight: "600",
+    color: AUTH_UI.colors.accent,
+  },
+  startingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(9,11,15,0.8)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: vs(12),
+  },
+  startingText: {
+    fontSize: ms(14),
+    color: AUTH_UI.colors.textSecondary,
+  },
 });

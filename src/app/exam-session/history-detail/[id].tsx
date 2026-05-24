@@ -3,22 +3,53 @@ import { StatBox } from "@/components/common/StatBox";
 import { QuestionStatusCell } from "@/components/history";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ExamHistoryAttempt } from "@/models/history.model";
 import { historyService } from "@/services/history.service";
 import { formatDateTime, formatDuration } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HistoryDetailScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
 
-	const attempt = useMemo(
-		() => historyService.getAttemptById(id ?? ""),
-		[id],
-	);
+	const [attempt, setAttempt] = useState<ExamHistoryAttempt | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		let cancelled = false;
+		const load = async () => {
+			setIsLoading(true);
+			const result = await historyService.getAttemptById(id ?? "");
+			if (cancelled) return;
+			setAttempt(result.success ? (result.attempt ?? null) : null);
+			setIsLoading(false);
+		};
+		load();
+		return () => {
+			cancelled = true;
+		};
+	}, [id]);
+
+	if (isLoading) {
+		return (
+			<SafeAreaView style={styles.container}>
+				<ScreenHeader title="Chi Tiết Bài Thi" onBack={() => router.back()} />
+				<View style={styles.notFoundWrap}>
+					<ActivityIndicator color={AUTH_UI.colors.accent} size="large" />
+				</View>
+			</SafeAreaView>
+		);
+	}
 
 	if (!attempt) {
 		return (
@@ -113,10 +144,7 @@ export default function HistoryDetailScreen() {
 					onPress={() =>
 						(router.push as any)({
 							pathname: "/exam-session/review/[id]",
-							params: {
-								id: attempt.examId,
-								answersJson: JSON.stringify(attempt.answersByQuestionIndex),
-							},
+							params: { id: attempt.id },
 						})
 					}
 				/>

@@ -1,25 +1,40 @@
+import { Button } from "@/components/common/Button";
 import { EmptyState } from "@/components/common/EmptyState";
+import { MediaImage } from "@/components/common/MediaImage";
 import { OptionCard } from "@/components/exam/OptionCard";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { AUTH_UI } from "@/constants/auth-ui";
-import { MOCK_EXAMS } from "@/data/exams.mock";
+import { ERROR_MESSAGES } from "@/constants/api";
+import { ExamSessionQuestion } from "@/models/examSession.model";
+import { examService } from "@/services/exam.service";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	FlatList,
+	StyleSheet,
+	Text,
+	View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-type WrongItem = {
-	questionIndex: number;
-	userAnswer: number;
-	correctAnswer: number;
-	questionText: string;
-	options: string[];
-	explanation?: string;
-};
+const OPTION_LABELS = ["A", "B", "C", "D", "E", "F"];
 
-function WrongQuestionCard({ item, number }: { item: WrongItem; number: number }) {
-	const optionLabels = ["A", "B", "C", "D"];
+function WrongQuestionCard({
+	question,
+	number,
+}: {
+	question: ExamSessionQuestion;
+	number: number;
+}) {
+	const sortedOptions = [...question.options].sort(
+		(a, b) => a.displayOrder - b.displayOrder,
+	);
+	const selectedIndex = sortedOptions.findIndex(
+		(o) => o.id === question.selectedOptionId,
+	);
 
 	return (
 		<View style={styles.card}>
@@ -33,50 +48,50 @@ function WrongQuestionCard({ item, number }: { item: WrongItem; number: number }
 				<Ionicons name="close-circle" size={ms(20)} color={AUTH_UI.colors.danger} />
 			</View>
 
-			<Text style={styles.questionText}>{item.questionText}</Text>
+			<Text style={styles.questionText}>{question.content}</Text>
+
+			{(question.mediaFileId || question.imageUrl) && (
+				<MediaImage
+					mediaFileId={question.mediaFileId}
+					imageUrl={question.imageUrl}
+				/>
+			)}
 
 			<View style={styles.optionsList}>
-				{item.options.map((opt, i) => {
-					const isCorrect = i === item.correctAnswer;
-					const isUserWrong = i === item.userAnswer;
-
-					let state: "correct" | "wrong" | "dimmed" = "dimmed";
-					if (isCorrect) state = "correct";
-					else if (isUserWrong) state = "wrong";
-
+				{sortedOptions.map((opt, i) => {
+					const isUserChoice = opt.id === question.selectedOptionId;
 					return (
 						<OptionCard
-							key={i}
-							letter={optionLabels[i]}
-							text={opt}
-							state={state}
-							trailingIcon={
-								isCorrect
-									? "checkmark-circle"
-									: isUserWrong
-									? "close-circle"
-									: undefined
-							}
-							trailingIconColor={
-								isCorrect ? AUTH_UI.colors.success : AUTH_UI.colors.danger
-							}
+							key={opt.id}
+							letter={OPTION_LABELS[i] ?? String(i + 1)}
+							text={opt.content}
+							state={isUserChoice ? "wrong" : "dimmed"}
+							trailingIcon={isUserChoice ? "close-circle" : undefined}
+							trailingIconColor={AUTH_UI.colors.danger}
 						/>
 					);
 				})}
 			</View>
 
-			<View style={styles.explanationBox}>
-				<Text style={styles.explanationBulb}>💡</Text>
-				<Text style={styles.explanationText}>
-					Bạn chọn{" "}
-					<Text style={styles.highlightWrong}>
-						{optionLabels[item.userAnswer]} — {item.options[item.userAnswer]}
-					</Text>
-					. Đáp án đúng là{" "}
-					<Text style={styles.highlightCorrect}>
-						{optionLabels[item.correctAnswer]} — {item.options[item.correctAnswer]}
-					</Text>
-					.{item.explanation ? ` ${item.explanation}` : ""}
+			<View style={styles.noteBox}>
+				<Ionicons
+					name="information-circle-outline"
+					size={ms(16)}
+					color={AUTH_UI.colors.textSecondary}
+				/>
+				<Text style={styles.noteText}>
+					{selectedIndex >= 0 ? (
+						<>
+							Bạn đã chọn{" "}
+							<Text style={styles.highlightWrong}>
+								{OPTION_LABELS[selectedIndex] ?? selectedIndex + 1} —{" "}
+								{sortedOptions[selectedIndex].content}
+							</Text>
+							.
+						</>
+					) : (
+						"Bạn chưa trả lời câu này."
+					)}
 				</Text>
 			</View>
 		</View>
@@ -84,60 +99,85 @@ function WrongQuestionCard({ item, number }: { item: WrongItem; number: number }
 }
 
 export default function ExamReviewScreen() {
-	const { id, answersJson } = useLocalSearchParams<{ id: string; answersJson: string }>();
+	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
-	const answers: Record<number, number> = JSON.parse(answersJson ?? "{}");
+	const sessionId = id ?? "";
 
-	const exam = MOCK_EXAMS.find((e) => e.id === id);
+	const [questions, setQuestions] = useState<ExamSessionQuestion[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	if (!exam) {
+	useEffect(() => {
+		let cancelled = false;
+		const load = async () => {
+			setIsLoading(true);
+			setError(null);
+			const result = await examService.getSessionResult(sessionId);
+			if (cancelled) return;
+			if (result.success) {
+				const wrong = result.data.questions
+					.filter((q) => q.isCorrect === false)
+					.sort((a, b) => a.displayOrder - b.displayOrder);
+				setQuestions(wrong);
+			} else {
+				setError(
+					ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ??
+						result.error,
+				);
+			}
+			setIsLoading(false);
+		};
+		load();
+		return () => {
+			cancelled = true;
+		};
+	}, [sessionId]);
+
+	if (isLoading) {
 		return (
 			<SafeAreaView style={styles.container}>
+				<ScreenHeader title="Câu Sai" onBack={() => router.back()} bordered />
 				<View style={styles.errorCenter}>
-					<Text style={styles.errorText}>Không tìm thấy đề thi</Text>
-					<TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-						<Text style={styles.backButtonText}>Quay lại</Text>
-					</TouchableOpacity>
+					<ActivityIndicator color={AUTH_UI.colors.accent} size="large" />
 				</View>
 			</SafeAreaView>
 		);
 	}
 
-	const wrongItems: WrongItem[] = exam.questions.reduce<WrongItem[]>((acc, q, idx) => {
-		const userAnswer = answers[idx];
-		if (userAnswer !== undefined && userAnswer !== q.correctAnswerIndex) {
-			acc.push({
-				questionIndex: idx,
-				userAnswer,
-				correctAnswer: q.correctAnswerIndex,
-				questionText: q.questionText,
-				options: q.options,
-				explanation: q.explanation,
-			});
-		}
-		return acc;
-	}, []);
+	if (error) {
+		return (
+			<SafeAreaView style={styles.container}>
+				<ScreenHeader title="Câu Sai" onBack={() => router.back()} bordered />
+				<View style={styles.errorCenter}>
+					<Text style={styles.errorText}>{error}</Text>
+					<Button
+						variant="secondary"
+						label="Quay lại"
+						onPress={() => router.back()}
+						style={styles.backButton}
+					/>
+				</View>
+			</SafeAreaView>
+		);
+	}
 
 	return (
 		<SafeAreaView style={styles.container}>
 			<ScreenHeader
 				title="Câu Sai"
-				subtitle={`${wrongItems.length} câu cần ôn lại`}
+				subtitle={`${questions.length} câu cần ôn lại`}
 				onBack={() => router.back()}
 				bordered
 			/>
 
-			{wrongItems.length === 0 ? (
-				<EmptyState
-					icon="checkmark-circle-outline"
-					title="Không có câu sai!"
-				/>
+			{questions.length === 0 ? (
+				<EmptyState icon="checkmark-circle-outline" title="Không có câu sai!" />
 			) : (
 				<FlatList
-					data={wrongItems}
-					keyExtractor={(item) => String(item.questionIndex)}
+					data={questions}
+					keyExtractor={(item) => item.questionId}
 					renderItem={({ item, index }) => (
-						<WrongQuestionCard item={item} number={index + 1} />
+						<WrongQuestionCard question={item} number={index + 1} />
 					)}
 					contentContainerStyle={styles.listContent}
 					showsVerticalScrollIndicator={false}
@@ -202,18 +242,14 @@ const styles = StyleSheet.create({
 	optionsList: {
 		gap: s(8),
 	},
-	explanationBox: {
+	noteBox: {
 		flexDirection: "row",
 		gap: s(8),
 		backgroundColor: AUTH_UI.colors.surfaceMuted,
 		borderRadius: ms(AUTH_UI.radius.lg),
 		padding: s(12),
 	},
-	explanationBulb: {
-		fontSize: ms(14),
-		marginTop: vs(1),
-	},
-	explanationText: {
+	noteText: {
 		flex: 1,
 		fontSize: ms(13),
 		color: AUTH_UI.colors.textSecondary,
@@ -223,31 +259,19 @@ const styles = StyleSheet.create({
 		color: AUTH_UI.colors.danger,
 		fontWeight: "600",
 	},
-	highlightCorrect: {
-		color: AUTH_UI.colors.success,
-		fontWeight: "600",
-	},
 	errorCenter: {
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
 		gap: s(12),
+		paddingHorizontal: s(32),
 	},
 	errorText: {
 		fontSize: ms(16),
 		color: AUTH_UI.colors.textSecondary,
+		textAlign: "center",
 	},
 	backButton: {
 		paddingHorizontal: s(24),
-		paddingVertical: vs(10),
-		backgroundColor: AUTH_UI.colors.surface,
-		borderRadius: ms(AUTH_UI.radius.lg),
-		borderWidth: 1,
-		borderColor: AUTH_UI.colors.border,
-	},
-	backButtonText: {
-		fontSize: ms(14),
-		fontWeight: "600",
-		color: AUTH_UI.colors.textPrimary,
 	},
 });

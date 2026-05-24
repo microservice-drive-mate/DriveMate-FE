@@ -5,11 +5,11 @@ import { HistoryCard } from "@/components/history";
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { ms, s, vs } from "@/utils/responsive";
-import { HistoryFilterStatus } from "@/models/history.model";
+import { ExamHistoryAttempt, HistoryFilterStatus } from "@/models/history.model";
 import { historyService } from "@/services/history.service";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
@@ -59,6 +59,28 @@ export default function History() {
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+	const [attempts, setAttempts] = useState<ExamHistoryAttempt[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const loadAttempts = useCallback(async () => {
+		setIsLoading(true);
+		setError(null);
+		const result = await historyService.getAttempts();
+		if (result.success) {
+			setAttempts(result.items);
+		} else {
+			setError(result.error ?? "Không tải được lịch sử thi.");
+		}
+		setIsLoading(false);
+	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			loadAttempts();
+		}, [loadAttempts]),
+	);
+
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			setDebouncedSearch(searchText.trim());
@@ -67,25 +89,40 @@ export default function History() {
 		return () => clearTimeout(timeout);
 	}, [searchText]);
 
-	const result = useMemo(
-		() =>
-			historyService.getHistory({
-				status: activeFilter,
-				searchText: debouncedSearch,
-			}),
-		[activeFilter, debouncedSearch],
+	const stats = useMemo(
+		() => ({
+			total: attempts.length,
+			passed: attempts.filter((a) => a.passed).length,
+			failed: attempts.filter((a) => !a.passed).length,
+		}),
+		[attempts],
 	);
+
+	const filteredItems = useMemo(() => {
+		const search = debouncedSearch.toLowerCase();
+		return attempts
+			.filter((a) =>
+				activeFilter === "all"
+					? true
+					: activeFilter === "passed"
+						? a.passed
+						: !a.passed,
+			)
+			.filter((a) =>
+				search.length === 0 ? true : a.title.toLowerCase().includes(search),
+			);
+	}, [attempts, activeFilter, debouncedSearch]);
 
 	useEffect(() => {
 		setVisibleCount(PAGE_SIZE);
 	}, [activeFilter, debouncedSearch]);
 
 	const visibleItems = useMemo(
-		() => result.items.slice(0, visibleCount),
-		[result.items, visibleCount],
+		() => filteredItems.slice(0, visibleCount),
+		[filteredItems, visibleCount],
 	);
 
-	const hasMore = visibleCount < result.items.length;
+	const hasMore = visibleCount < filteredItems.length;
 
 	const handleLoadMore = () => {
 		if (!hasMore) return;
@@ -107,25 +144,25 @@ export default function History() {
 				<View style={styles.header}>
 					<Text style={styles.title}>Lịch Sử Thi</Text>
 					<Text style={styles.subtitle}>
-						{result.stats.total} bài thi đã thực hiện
+						{stats.total} bài thi đã thực hiện
 					</Text>
 				</View>
 
 				<View style={styles.statRow}>
 					<StatBox
-						value={result.stats.total}
+						value={stats.total}
 						label="Tổng bài"
 						bg={AUTH_UI.colors.surfaceMuted}
 						valueColor={AUTH_UI.colors.accent}
 					/>
 					<StatBox
-						value={result.stats.passed}
+						value={stats.passed}
 						label="Đã đạt"
 						bg={AUTH_UI.colors.surfaceMuted}
 						valueColor={AUTH_UI.colors.success}
 					/>
 					<StatBox
-						value={result.stats.failed}
+						value={stats.failed}
 						label="Chưa đạt"
 						bg={AUTH_UI.colors.surfaceMuted}
 						valueColor={AUTH_UI.colors.danger}
@@ -177,42 +214,65 @@ export default function History() {
 					})}
 				</View>
 
-				<FlatList
-					data={visibleItems}
-					keyExtractor={(item) => item.id}
-					onEndReached={handleLoadMore}
-					onEndReachedThreshold={0.4}
-					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.listContent}
-					renderItem={({ item }) => (
-						<HistoryCard
-							title={item.title}
-							meta={`${formatDate(item.takenAt)} • ${formatTime(item.takenAt)} • ${formatDuration(item.durationSeconds)}`}
-							score={item.score}
-							total={item.totalQuestions}
-							passed={item.passed}
-							onPress={() => handleOpenAttempt(item.id)}
+				{isLoading ? (
+					<View style={styles.centerState}>
+						<ActivityIndicator
+							color={AUTH_UI.colors.accent}
+							size="large"
 						/>
-					)}
-					ListFooterComponent={
-						hasMore ? (
-							<View style={styles.footerLoading}>
-								<ActivityIndicator
-									color={AUTH_UI.colors.accent}
-									size="small"
-								/>
-							</View>
-						) : null
-					}
-					ListEmptyComponent={
-						<EmptyState
-							icon="file-tray-outline"
-							title="Không có kết quả phù hợp"
-							subtitle="Thử đổi bộ lọc hoặc từ khóa tìm kiếm"
-							style={styles.emptyState}
-						/>
-					}
-				/>
+					</View>
+				) : error ? (
+					<View style={styles.centerState}>
+						<Text style={styles.errorText}>{error}</Text>
+						<TouchableOpacity
+							onPress={loadAttempts}
+							style={styles.retryBtn}>
+							<Ionicons
+								name="refresh-outline"
+								size={ms(16)}
+								color={AUTH_UI.colors.accent}
+							/>
+							<Text style={styles.retryText}>Thử lại</Text>
+						</TouchableOpacity>
+					</View>
+				) : (
+					<FlatList
+						data={visibleItems}
+						keyExtractor={(item) => item.id}
+						onEndReached={handleLoadMore}
+						onEndReachedThreshold={0.4}
+						showsVerticalScrollIndicator={false}
+						contentContainerStyle={styles.listContent}
+						renderItem={({ item }) => (
+							<HistoryCard
+								title={item.title}
+								meta={`${formatDate(item.takenAt)} • ${formatTime(item.takenAt)} • ${formatDuration(item.durationSeconds)}`}
+								score={item.score}
+								total={item.totalQuestions}
+								passed={item.passed}
+								onPress={() => handleOpenAttempt(item.id)}
+							/>
+						)}
+						ListFooterComponent={
+							hasMore ? (
+								<View style={styles.footerLoading}>
+									<ActivityIndicator
+										color={AUTH_UI.colors.accent}
+										size="small"
+									/>
+								</View>
+							) : null
+						}
+						ListEmptyComponent={
+							<EmptyState
+								icon="file-tray-outline"
+								title="Không có kết quả phù hợp"
+								subtitle="Thử đổi bộ lọc hoặc từ khóa tìm kiếm"
+								style={styles.emptyState}
+							/>
+						}
+					/>
+				)}
 			</View>
 		</ScreenWrapper>
 	);
@@ -284,5 +344,32 @@ const styles = StyleSheet.create({
 	},
 	emptyState: {
 		paddingTop: vs(48),
+	},
+	centerState: {
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
+		gap: vs(12),
+		paddingHorizontal: s(32),
+	},
+	errorText: {
+		fontSize: ms(14),
+		color: AUTH_UI.colors.textSecondary,
+		textAlign: "center",
+	},
+	retryBtn: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: s(6),
+		paddingHorizontal: s(16),
+		paddingVertical: vs(8),
+		borderRadius: ms(AUTH_UI.radius.lg),
+		borderWidth: 1,
+		borderColor: AUTH_UI.colors.accent,
+	},
+	retryText: {
+		fontSize: ms(14),
+		fontWeight: "600",
+		color: AUTH_UI.colors.accent,
 	},
 });

@@ -2,24 +2,18 @@ import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { ms, s, vs } from "@/utils/responsive";
-import { Exam, ExamType } from "@/models/exam.model";
+import { ExamTemplate } from "@/models/examSession.model";
+import { ExamType } from "@/models/exam.model";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 
 interface ExamCardProps {
-  exam: Exam;
+  template: ExamTemplate;
   activeType: ExamType;
   onStart: () => void;
-  onPreview: () => void;
 }
 
-function passRateColor(rate: number): string {
-  if (rate >= 90) return AUTH_UI.colors.success;
-  if (rate >= 75) return AUTH_UI.colors.accent;
-  return AUTH_UI.colors.danger;
-}
-
-export function ExamCard({ exam, activeType, onStart, onPreview }: ExamCardProps) {
+export function ExamCard({ template, activeType, onStart }: ExamCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.badgeRow}>
@@ -27,35 +21,25 @@ export function ExamCard({ exam, activeType, onStart, onPreview }: ExamCardProps
           text={activeType === "on-tap" ? "Ôn tập" : "Sát hạch"}
           variant={activeType === "on-tap" ? "on-tap" : "sat-hach"}
         />
-        {exam.hasCriticalQuestions && (
-          <Badge text="⚡ Có câu liệt" variant="critical" />
-        )}
+        <Badge text={`Hạng ${template.licenseCategory}`} variant="accent" />
       </View>
 
-      <View style={styles.nameRow}>
-        <Text style={styles.examName} numberOfLines={2}>
-          {exam.name}
-        </Text>
-        <View style={styles.passRateBox}>
-          <Text style={[styles.passRate, { color: passRateColor(exam.passRate) }]}>
-            {exam.passRate}%
-          </Text>
-          <Text style={styles.passRateLabel}>tỷ lệ đạt</Text>
-        </View>
-      </View>
+      <Text style={styles.examName} numberOfLines={2}>
+        {template.name}
+      </Text>
 
       <View style={styles.statsRow}>
         <View style={styles.statChip}>
           <Ionicons name="help-circle-outline" size={ms(13)} color={AUTH_UI.colors.textMuted} />
-          <Text style={styles.statText}>{exam.totalQuestions} câu</Text>
+          <Text style={styles.statText}>{template.totalQuestions} câu</Text>
         </View>
         <View style={styles.statChip}>
           <Ionicons name="time-outline" size={ms(13)} color={AUTH_UI.colors.textMuted} />
-          <Text style={styles.statText}>{exam.durationMinutes} phút</Text>
+          <Text style={styles.statText}>{template.durationMinutes} phút</Text>
         </View>
         <View style={styles.statChip}>
-          <Ionicons name="people-outline" size={ms(13)} color={AUTH_UI.colors.textMuted} />
-          <Text style={styles.statText}>{exam.attemptCount.toLocaleString()} lượt</Text>
+          <Ionicons name="checkmark-circle-outline" size={ms(13)} color={AUTH_UI.colors.textMuted} />
+          <Text style={styles.statText}>Cần đạt {template.passingScore}/{template.totalQuestions}</Text>
         </View>
       </View>
 
@@ -66,14 +50,6 @@ export function ExamCard({ exam, activeType, onStart, onPreview }: ExamCardProps
           onPress={onStart}
           flex
           style={styles.primaryBtn}
-        />
-        <Button
-          variant="secondary"
-          label="Xem đề"
-          icon="eye-outline"
-          onPress={onPreview}
-          flex
-          style={styles.secondaryBtn}
         />
       </View>
     </View>
@@ -91,33 +67,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: s(6),
   },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: s(8),
-  },
   examName: {
-    flex: 1,
     fontSize: ms(15),
     fontWeight: "700",
     color: AUTH_UI.colors.textPrimary,
     lineHeight: ms(22),
   },
-  passRateBox: {
-    alignItems: "flex-end",
-  },
-  passRate: {
-    fontSize: ms(18),
-    fontWeight: "800",
-  },
-  passRateLabel: {
-    fontSize: ms(10),
-    color: AUTH_UI.colors.textMuted,
-    marginTop: 1,
-  },
   statsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: s(12),
   },
   statChip: {
