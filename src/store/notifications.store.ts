@@ -1,27 +1,39 @@
-import { MOCK_NOTIFICATIONS } from "@/data/notifications.mock";
 import { Notification } from "@/models/notification.model";
+import { notificationService } from "@/services/notification.service";
 import { create } from "zustand";
 
 interface NotificationsState {
 	notifications: Notification[];
+	isLoading: boolean;
 }
 
 interface NotificationsActions {
 	markAsRead: (id: string) => void;
-	refresh: () => void;
+	refresh: () => Promise<void>;
 }
 
 export const useNotificationsStore = create<
 	NotificationsState & NotificationsActions
->((set) => ({
-	notifications: MOCK_NOTIFICATIONS,
+>((set, get) => ({
+	notifications: [],
+	isLoading: false,
 
-	markAsRead: (id) =>
+	markAsRead: async (id) => {
 		set((state) => ({
 			notifications: state.notifications.map((n) =>
 				n.id === id ? { ...n, isRead: true } : n,
 			),
-		})),
+		}));
+		await notificationService.markAsRead(id);
+	},
 
-	refresh: () => set({ notifications: MOCK_NOTIFICATIONS }),
+	refresh: async () => {
+		set({ isLoading: true });
+		const result = await notificationService.getMine({ size: 50 });
+		if (result.success) {
+			set({ notifications: result.data.items, isLoading: false });
+		} else {
+			set({ isLoading: false });
+		}
+	},
 }));

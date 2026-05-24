@@ -13,6 +13,18 @@ import {
 	View,
 } from "react-native";
 
+function formatTimeAgo(iso: string | null): string {
+	if (!iso) return "";
+	const diff = Date.now() - new Date(iso).getTime();
+	const minutes = Math.floor(diff / 60000);
+	if (minutes < 1) return "Vừa xong";
+	if (minutes < 60) return `${minutes} phút trước`;
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) return `${hours} giờ trước`;
+	const days = Math.floor(hours / 24);
+	return `${days} ngày trước`;
+}
+
 export default function NotificationDetailScreen() {
 	const router = useRouter();
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -73,10 +85,11 @@ export default function NotificationDetailScreen() {
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={false}>
 				<View style={styles.card}>
-					<Text style={styles.detail}>{notification.detail}</Text>
+					<Text style={styles.title}>{notification.title}</Text>
+					<Text style={styles.detail}>{notification.body}</Text>
 					<View style={styles.timeRow}>
 						<View style={styles.dot} />
-						<Text style={styles.timeAgo}>{notification.timeAgo}</Text>
+						<Text style={styles.timeAgo}>{formatTimeAgo(notification.sentAt ?? notification.createdAt)}</Text>
 					</View>
 				</View>
 			</ScrollView>
@@ -120,7 +133,12 @@ const styles = StyleSheet.create({
 		backgroundColor: AUTH_UI.colors.surface,
 		borderRadius: ms(AUTH_UI.radius.xl),
 		padding: s(20),
-		gap: vs(16),
+		gap: vs(12),
+	},
+	title: {
+		color: AUTH_UI.colors.textPrimary,
+		fontSize: ms(16),
+		fontWeight: "700",
 	},
 	detail: {
 		color: AUTH_UI.colors.textPrimary,

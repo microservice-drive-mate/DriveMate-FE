@@ -1,6 +1,7 @@
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { Button } from "@/components/common/Button";
 import { Divider } from "@/components/common/Divider";
+import { Avatar } from "@/components/profile";
 import { InfoRow } from "@/components/profile/InfoRow";
 import { MenuRow } from "@/components/profile/MenuRow";
 import { StatCard } from "@/components/profile/StatCard";
@@ -12,20 +13,13 @@ import { useAuthStore } from "@/store/auth.store";
 import { UserRole } from "@/models/user.model";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 function formatDate(iso: string | null): string {
 	if (!iso) return "Chưa cập nhật";
 	const d = new Date(iso);
 	if (isNaN(d.getTime())) return "Chưa cập nhật";
 	return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-}
-
-function getInitials(name: string | null | undefined): string {
-	if (!name) return "?";
-	const parts = name.trim().split(" ");
-	if (parts.length === 1) return parts[0][0].toUpperCase();
-	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export default function Me() {
@@ -51,16 +45,13 @@ export default function Me() {
 				<View style={styles.headerCard}>
 					<View style={styles.headerTop}>
 						<View style={styles.headerLeft}>
-							<View style={styles.avatar}>
-								{user?.avatarUrl ? (
-									<Image
-										source={{ uri: user.avatarUrl }}
-										style={styles.avatarImage}
-									/>
-								) : (
-									<Text style={styles.avatarText}>{getInitials(user?.fullName)}</Text>
-								)}
-							</View>
+							<Avatar
+								name={user?.fullName}
+								size={s(64)}
+								borderRadius={ms(16)}
+								mediaFileId={user?.mediaFileId}
+								avatarUrl={user?.avatarUrl}
+							/>
 							<View style={styles.headerInfo}>
 								<Text style={styles.fullName}>{user?.fullName ?? "—"}</Text>
 								<Text style={styles.email}>{user?.email ?? "—"}</Text>
@@ -68,7 +59,7 @@ export default function Me() {
 						</View>
 						<TouchableOpacity
 							style={styles.editButton}
-							onPress={() => router.push(ROUTES.PROFILE_EDIT)}>
+							onPress={() => router.push(ROUTES.PROFILE_EDIT as never)}>
 							<Text style={styles.editButtonText}>Sửa</Text>
 						</TouchableOpacity>
 					</View>
@@ -195,21 +186,6 @@ const styles = StyleSheet.create({
 	},
 	headerLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
 	headerInfo: { marginLeft: s(12), flex: 1 },
-	avatar: {
-		width: s(64),
-		height: s(64),
-		borderRadius: ms(16),
-		backgroundColor: AUTH_UI.colors.accent,
-		alignItems: "center",
-		justifyContent: "center",
-		overflow: "hidden",
-	},
-	avatarImage: { width: "100%", height: "100%" },
-	avatarText: {
-		color: AUTH_UI.colors.accentText,
-		fontWeight: "800",
-		fontSize: ms(20),
-	},
 	fullName: {
 		color: AUTH_UI.colors.textPrimary,
 		fontWeight: "800",

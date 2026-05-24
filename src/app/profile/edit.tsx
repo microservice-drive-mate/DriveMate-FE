@@ -1,17 +1,19 @@
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { Button } from "@/components/common/Button";
 import { InputField } from "@/components/common/InputField";
+import { Avatar } from "@/components/profile";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { ERROR_MESSAGES } from "@/constants/api";
 import { ms, s, vs } from "@/utils/responsive";
 import { useAuthStore } from "@/store/auth.store";
 import { Gender, UpdateProfileRequest } from "@/models/user.model";
+import { mediaService, PickedImageAsset } from "@/services/media.service";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
 	Alert,
-	Image,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -37,8 +39,10 @@ export default function EditProfileScreen() {
 	const [gender, setGender] = useState<Gender | undefined>(user?.gender ?? undefined);
 	const [address, setAddress] = useState(user?.address ?? "");
 	const [notes, setNotes] = useState(user?.studentDetail?.notes ?? "");
-	const [avatarUri, setAvatarUri] = useState<string | null>(user?.avatarUrl ?? null);
+	// Locally picked image awaiting upload (preview only).
+	const [pickedAsset, setPickedAsset] = useState<PickedImageAsset | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
 	const pickImage = async () => {
 		const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -55,17 +59,14 @@ export default function EditProfileScreen() {
 		});
 
 		if (!result.canceled && result.assets[0]) {
-			setAvatarUri(result.assets[0].uri);
-			// TODO: Upload to media-service to get mediaFileId + permanent avatarUrl
-			// After media-service API is available, replace local URI with the returned avatarUrl
+			const asset = result.assets[0];
+			setPickedAsset({
+				uri: asset.uri,
+				fileName: asset.fileName,
+				mimeType: asset.mimeType,
+				fileSize: asset.fileSize,
+			});
 		}
-	};
-
-	const getInitials = (name: string) => {
-		if (!name) return "?";
-		const parts = name.trim().split(" ");
-		if (parts.length === 1) return parts[0][0].toUpperCase();
-		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 	};
 
 	const handleSave = async () => {
@@ -85,11 +86,24 @@ export default function EditProfileScreen() {
 
 		setLoading(true);
 		try {
+			if (pickedAsset) {
+				setUploadingAvatar(true);
+				const upload = await mediaService.uploadAvatar(pickedAsset);
+				setUploadingAvatar(false);
+				if (!upload.success) {
+					Alert.alert("Không tải được ảnh", upload.error ?? ERROR_MESSAGES.FILE_UPLOAD_FAILED);
+					return;
+				}
+				payload.avatarUrl = upload.publicUrl;
+				payload.mediaFileId = upload.mediaFileId;
+			}
+
 			await updateProfile(payload);
 			router.back();
 		} catch {
 			Alert.alert("Lỗi", "Không thể cập nhật thông tin. Vui lòng thử lại.");
 		} finally {
+			setUploadingAvatar(false);
 			setLoading(false);
 		}
 	};
@@ -110,21 +124,22 @@ export default function EditProfileScreen() {
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={false}>
 				<TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
-					<View style={styles.avatar}>
-						{avatarUri ? (
-							<Image source={{ uri: avatarUri }} style={styles.avatarImage} />
-						) : (
-							<Text style={styles.avatarText}>{getInitials(fullName)}</Text>
-						)}
-					</View>
+					<Avatar
+						name={fullName}
+						size={s(88)}
+						borderRadius={ms(22)}
+						localUri={pickedAsset?.uri ?? null}
+						mediaFileId={user?.mediaFileId}
+						avatarUrl={user?.avatarUrl}
+					/>
 					<View style={styles.avatarEditBadge}>
 						<Ionicons name="camera-outline" size={ms(14)} color={AUTH_UI.colors.accentText} />
 					</View>
 				</TouchableOpacity>
 
-				{avatarUri && avatarUri !== user?.avatarUrl && (
+				{pickedAsset && (
 					<Text style={styles.avatarNote}>
-						Ảnh đã chọn. Upload sẽ hoàn thiện khi tích hợp media-service.
+						Ảnh sẽ được tải lên khi bạn lưu thay đổi.
 					</Text>
 				)}
 
@@ -196,7 +211,7 @@ export default function EditProfileScreen() {
 
 				<Button
 					variant="primary"
-					label="Lưu thay đổi"
+					label={uploadingAvatar ? "Đang tải ảnh..." : "Lưu thay đổi"}
 					onPress={handleSave}
 					loading={loading}
 					disabled={loading}
@@ -229,21 +244,6 @@ const styles = StyleSheet.create({
 		alignSelf: "center",
 		marginBottom: vs(20),
 		marginTop: vs(8),
-	},
-	avatar: {
-		width: s(88),
-		height: s(88),
-		borderRadius: ms(22),
-		backgroundColor: AUTH_UI.colors.accent,
-		alignItems: "center",
-		justifyContent: "center",
-		overflow: "hidden",
-	},
-	avatarImage: { width: "100%", height: "100%" },
-	avatarText: {
-		color: AUTH_UI.colors.accentText,
-		fontWeight: "800",
-		fontSize: ms(28),
 	},
 	avatarEditBadge: {
 		position: "absolute",

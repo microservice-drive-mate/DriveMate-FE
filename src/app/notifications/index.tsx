@@ -4,7 +4,7 @@ import { useNotificationsStore } from "@/store/notifications.store";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
 	FlatList,
 	StyleSheet,
@@ -22,10 +22,26 @@ const TABS: { key: FilterTab; label: string }[] = [
 	{ key: "unread", label: "Chưa đọc" },
 ];
 
+function formatTimeAgo(iso: string | null): string {
+	if (!iso) return "";
+	const diff = Date.now() - new Date(iso).getTime();
+	const minutes = Math.floor(diff / 60000);
+	if (minutes < 1) return "Vừa xong";
+	if (minutes < 60) return `${minutes} phút trước`;
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) return `${hours} giờ trước`;
+	const days = Math.floor(hours / 24);
+	return `${days} ngày trước`;
+}
+
 export default function NotificationsScreen() {
 	const router = useRouter();
 	const { notifications, refresh } = useNotificationsStore();
 	const [activeTab, setActiveTab] = useState<FilterTab>("all");
+
+	useEffect(() => {
+		refresh();
+	}, []);
 
 	const unreadCount = useMemo(
 		() => notifications.filter((n) => !n.isRead).length,
@@ -46,7 +62,7 @@ export default function NotificationsScreen() {
 				activeOpacity={0.75}
 				onPress={() => router.push(`/notifications/${item.id}`)}>
 				<View style={styles.cardTop}>
-					<Text style={styles.category}>{item.category}</Text>
+					<Text style={styles.category}>{item.title}</Text>
 					<View
 						style={[
 							styles.badge,
@@ -66,11 +82,11 @@ export default function NotificationsScreen() {
 				<Text
 					style={styles.preview}
 					numberOfLines={2}>
-					{item.preview}
+					{item.body}
 				</Text>
 				<View style={styles.timeRow}>
 					<View style={styles.dot} />
-					<Text style={styles.timeAgo}>{item.timeAgo}</Text>
+					<Text style={styles.timeAgo}>{formatTimeAgo(item.sentAt ?? item.createdAt)}</Text>
 				</View>
 			</TouchableOpacity>
 		);
