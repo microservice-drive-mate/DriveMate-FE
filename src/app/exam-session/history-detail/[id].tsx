@@ -142,7 +142,7 @@ export default function HistoryDetailScreen() {
 					disabled={attempt.wrongCount <= 0}
 					style={styles.reviewButton}
 					onPress={() =>
-						(router.push as any)({
+						router.push({
 							pathname: "/exam-session/review/[id]",
 							params: { id: attempt.id },
 						})

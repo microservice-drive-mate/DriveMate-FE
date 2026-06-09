@@ -7,29 +7,39 @@ import { MenuRow } from "@/components/profile/MenuRow";
 import { StatCard } from "@/components/profile/StatCard";
 import { ToggleRow } from "@/components/profile/ToggleRow";
 import { AUTH_UI } from "@/constants/auth-ui";
-import { ROUTES } from "@/constants/api";
+import { formatNullableDate } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { useAuthStore } from "@/store/auth.store";
 import { UserRole } from "@/models/user.model";
+import { analyticsService } from "@/services/analytics.service";
+import type { ProgressDashboard } from "@/models/analytics.model";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-function formatDate(iso: string | null): string {
-	if (!iso) return "Chưa cập nhật";
-	const d = new Date(iso);
-	if (isNaN(d.getTime())) return "Chưa cập nhật";
-	return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-}
 
 export default function Me() {
 	const [notif, setNotif] = useState(true);
 	const [darkMode, setDarkMode] = useState(true);
+	const [dashboard, setDashboard] = useState<ProgressDashboard | null>(null);
 	const { logout, user } = useAuthStore();
 	const router = useRouter();
 
 	const isStudent = user?.role === UserRole.STUDENT;
 	const licenseTier = isStudent ? user?.studentDetail?.licenseTier : null;
+
+	useEffect(() => {
+		let cancelled = false;
+		analyticsService.getMyProgress().then((result) => {
+			if (!cancelled && result.success) setDashboard(result.data);
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	const attemptValue = dashboard ? String(dashboard.attemptCount) : "—";
+	const passRateValue = dashboard ? `${dashboard.passRate}%` : "—";
+	const avgScoreValue = dashboard ? `${dashboard.avgExamScore}%` : "—";
 
 	const handleLogout = async () => {
 		await logout();
@@ -59,7 +69,7 @@ export default function Me() {
 						</View>
 						<TouchableOpacity
 							style={styles.editButton}
-							onPress={() => router.push(ROUTES.PROFILE_EDIT as never)}>
+							onPress={() => router.push("../profile/edit")}>
 							<Text style={styles.editButtonText}>Sửa</Text>
 						</TouchableOpacity>
 					</View>
@@ -88,7 +98,7 @@ export default function Me() {
 					<InfoRow
 						icon="calendar-outline"
 						label="Ngày sinh"
-						value={formatDate(user?.dateOfBirth ?? null)}
+						value={formatNullableDate(user?.dateOfBirth)}
 					/>
 					<Divider />
 					<InfoRow
@@ -109,9 +119,9 @@ export default function Me() {
 				</View>
 
 				<View style={styles.statsRow}>
-					<StatCard label="Ngày học" value="42" />
-					<StatCard label="Bài thi" value="34" />
-					<StatCard label="Điểm TB" value="87%" color={AUTH_UI.colors.success} />
+					<StatCard label="Bài thi" value={attemptValue} />
+					<StatCard label="Tỷ lệ đạt" value={passRateValue} />
+					<StatCard label="Điểm TB" value={avgScoreValue} color={AUTH_UI.colors.success} />
 				</View>
 
 				<Text style={styles.sectionTitle}>Tài khoản</Text>

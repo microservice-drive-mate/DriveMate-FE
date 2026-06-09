@@ -1,33 +1,24 @@
 import { AUTH_UI } from '@/constants/auth-ui';
 import { ms, s, vs } from '@/utils/responsive';
-import { CircuitExercise } from '@/models/practice.model';
-import { practiceService } from '@/services/practice.service';
+import { Maneuver } from '@/models/practice.model';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ExerciseListItemProps {
-  exercise: CircuitExercise;
+  maneuver: Maneuver;
   onPress: () => void;
 }
 
-export function ExerciseListItem({ exercise, onPress }: ExerciseListItemProps) {
-  const { correctCount, deductCount, eliminateCount } = practiceService.getExerciseStats(exercise);
-
-  const subtitle = [
-    correctCount > 0 ? `${correctCount} cách đúng` : null,
-    deductCount > 0 ? `${deductCount} lỗi trừ điểm` : null,
-    eliminateCount > 0 ? `${eliminateCount} lỗi loại` : null,
-  ]
-    .filter(Boolean)
-    .join(' • ');
+export function ExerciseListItem({ maneuver, onPress }: ExerciseListItemProps) {
+  const subtitle = `${maneuver.checkpoints.length} bước thực hiện`;
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.badge}>
-        <Text style={styles.badgeText}>{exercise.number}</Text>
+        <Text style={styles.badgeText}>{maneuver.displayOrder}</Text>
       </View>
       <View style={styles.textBlock}>
-        <Text style={styles.name}>{exercise.number}. {exercise.name}</Text>
+        <Text style={styles.name}>{maneuver.displayOrder}. {maneuver.title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
       <Ionicons name="chevron-forward" size={ms(16)} color={AUTH_UI.colors.textMuted} />

@@ -1,6 +1,7 @@
 import { AUTH_UI } from "@/constants/auth-ui";
 import { Notification } from "@/models/notification.model";
 import { useNotificationsStore } from "@/store/notifications.store";
+import { formatTimeAgo } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -22,18 +23,6 @@ const TABS: { key: FilterTab; label: string }[] = [
 	{ key: "unread", label: "Chưa đọc" },
 ];
 
-function formatTimeAgo(iso: string | null): string {
-	if (!iso) return "";
-	const diff = Date.now() - new Date(iso).getTime();
-	const minutes = Math.floor(diff / 60000);
-	if (minutes < 1) return "Vừa xong";
-	if (minutes < 60) return `${minutes} phút trước`;
-	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `${hours} giờ trước`;
-	const days = Math.floor(hours / 24);
-	return `${days} ngày trước`;
-}
-
 export default function NotificationsScreen() {
 	const router = useRouter();
 	const { notifications, refresh } = useNotificationsStore();
@@ -41,7 +30,7 @@ export default function NotificationsScreen() {
 
 	useEffect(() => {
 		refresh();
-	}, []);
+	}, [refresh]);
 
 	const unreadCount = useMemo(
 		() => notifications.filter((n) => !n.isRead).length,
@@ -60,7 +49,12 @@ export default function NotificationsScreen() {
 			<TouchableOpacity
 				style={styles.card}
 				activeOpacity={0.75}
-				onPress={() => router.push(`/notifications/${item.id}`)}>
+				onPress={() =>
+					router.push({
+						pathname: "/notifications/[id]",
+						params: { id: item.id },
+					})
+				}>
 				<View style={styles.cardTop}>
 					<Text style={styles.category}>{item.title}</Text>
 					<View

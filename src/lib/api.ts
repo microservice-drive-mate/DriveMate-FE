@@ -29,10 +29,10 @@ class ApiService {
 	private baseUrl: string;
 	private api: AxiosInstance;
 	private isRefreshing: boolean = false;
-	private failedQueue: Array<{
+	private failedQueue: {
 		resolve: (token: string) => void;
 		reject: (reason: unknown) => void;
-	}> = [];
+	}[] = [];
 
 	constructor() {
 		this.baseUrl = API_CONFIG.BASE_URL;

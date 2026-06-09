@@ -46,7 +46,7 @@ export default function ForgotPasswordScreen() {
 
 	const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
 	const [secondsLeft, setSecondsLeft] = useState(OTP_SECONDS);
-	const otpRefs = useRef<Array<TextInput | null>>([]);
+	const otpRefs = useRef<(TextInput | null)[]>([]);
 
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");

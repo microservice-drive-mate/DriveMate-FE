@@ -1,26 +1,30 @@
 export type PracticeLicense = 'B1' | 'B2' | 'C';
-export type StepType = 'correct' | 'deduct' | 'eliminate';
 export type PracticeCardType = 'circuit' | 'errors';
 
-export interface ExerciseStep {
+// Maps directly to the simulation-service `ManeuverCheckpoint` schema.
+export interface ManeuverCheckpoint {
   id: string;
-  type: StepType;
-  description: string;
-  points?: number;
+  title: string;
+  instruction: string;
+  penalty: string;
+  displayOrder: number;
 }
 
-export interface CircuitExercise {
+// Maps directly to the simulation-service `Maneuver` schema.
+export interface Maneuver {
   id: string;
-  license: PracticeLicense;
-  number: number;
-  name: string;
-  steps: ExerciseStep[];
+  title: string;
+  description: string;
+  licenseCategory: string;
+  displayOrder: number;
+  checkpoints: ManeuverCheckpoint[];
 }
 
-export interface CommonError {
+// Maps directly to the simulation-service `ManeuverError` schema.
+export interface ManeuverError {
   id: string;
-  license: PracticeLicense;
-  type: 'deduct' | 'eliminate';
+  licenseCategory: string;
+  code: string;
   description: string;
-  points?: number;
+  severity: string;
 }

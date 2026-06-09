@@ -1,29 +1,23 @@
-import { CIRCUIT_EXERCISES, COMMON_ERRORS } from '@/data/practice.mock';
-import { CircuitExercise, CommonError, PracticeLicense } from '@/models/practice.model';
-
-function getExercisesByLicense(license: PracticeLicense): CircuitExercise[] {
-  return CIRCUIT_EXERCISES.filter((e) => e.license === license);
-}
-
-function getExerciseById(id: string): CircuitExercise | undefined {
-  return CIRCUIT_EXERCISES.find((e) => e.id === id);
-}
-
-function getCommonErrors(license: PracticeLicense): CommonError[] {
-  return COMMON_ERRORS.filter((e) => e.license === license);
-}
-
-function getExerciseStats(exercise: CircuitExercise) {
-  return {
-    correctCount: exercise.steps.filter((s) => s.type === 'correct').length,
-    deductCount: exercise.steps.filter((s) => s.type === 'deduct').length,
-    eliminateCount: exercise.steps.filter((s) => s.type === 'eliminate').length,
-  };
-}
+import { apiService as api } from '@/lib/api';
+import { ENDPOINTS } from '@/constants';
+import type { ApiResponse } from '@/types/api.types';
+import type { Maneuver, ManeuverError } from '@/models/practice.model';
+import { withErrorHandling } from '@/utils';
 
 export const practiceService = {
-  getExercisesByLicense,
-  getExerciseById,
-  getCommonErrors,
-  getExerciseStats,
+  getManeuvers: withErrorHandling((licenseCategory: string) =>
+    api.get<ApiResponse<Maneuver[]>>(ENDPOINTS.SIMULATION.MANEUVERS, {
+      params: { licenseCategory },
+    }),
+  ),
+
+  getManeuverById: withErrorHandling((id: string) =>
+    api.get<ApiResponse<Maneuver>>(ENDPOINTS.SIMULATION.MANEUVER(id)),
+  ),
+
+  getManeuverErrors: withErrorHandling((licenseCategory: string) =>
+    api.get<ApiResponse<ManeuverError[]>>(ENDPOINTS.SIMULATION.MANEUVER_ERRORS, {
+      params: { licenseCategory },
+    }),
+  ),
 };

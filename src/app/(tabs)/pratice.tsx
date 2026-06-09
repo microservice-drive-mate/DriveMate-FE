@@ -20,12 +20,12 @@ export default function Practice() {
   const handleLicenseSelect = (license: PracticeLicense) => {
     setSheetVisible(false);
     if (cardType === 'circuit') {
-      (router.push as any)({
+      router.push({
         pathname: '/practice/circuit/[license]',
         params: { license },
       });
     } else {
-      (router.push as any)({
+      router.push({
         pathname: '/practice/errors/[license]',
         params: { license },
       });

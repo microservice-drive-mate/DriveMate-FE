@@ -198,7 +198,7 @@ export default function ExamResultScreen() {
 						icon="eye-outline"
 						style={styles.reviewBtn}
 						onPress={() =>
-							(router.push as any)({
+							router.push({
 								pathname: "/exam-session/review/[id]",
 								params: { id: sessionId },
 							})
@@ -213,7 +213,7 @@ export default function ExamResultScreen() {
 						icon="refresh-outline"
 						flex
 						style={styles.actionBtn}
-						onPress={() => router.replace("/(tabs)/exam" as never)}
+						onPress={() => router.replace("/(tabs)/exam")}
 					/>
 					<Button
 						variant="primary"
@@ -221,7 +221,7 @@ export default function ExamResultScreen() {
 						icon="home-outline"
 						flex
 						style={styles.actionBtn}
-						onPress={() => router.replace("/" as never)}
+						onPress={() => router.replace("/")}
 					/>
 				</View>
 			</ScrollView>

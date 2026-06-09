@@ -72,7 +72,7 @@ export default function ExamScreen() {
       router.push({
         pathname: "/exam-session/take/[id]",
         params: { id: session.id, durationMinutes: String(durationMinutes) },
-      } as never);
+      });
     } else {
       const message =
         ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;

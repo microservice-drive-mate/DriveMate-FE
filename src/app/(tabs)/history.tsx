@@ -4,6 +4,7 @@ import { StatBox } from "@/components/common/StatBox";
 import { HistoryCard } from "@/components/history";
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { formatDate, formatDuration, formatTime } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { ExamHistoryAttempt, HistoryFilterStatus } from "@/models/history.model";
 import { historyService } from "@/services/history.service";
@@ -30,26 +31,6 @@ const FILTER_OPTIONS: {
 	{ key: "passed", label: "Đạt", icon: "checkmark-outline" },
 	{ key: "failed", label: "Chưa đạt", icon: "close-outline" },
 ];
-
-const formatDate = (iso: string) =>
-	new Date(iso).toLocaleDateString("vi-VN", {
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-	});
-
-const formatTime = (iso: string) =>
-	new Date(iso).toLocaleTimeString("vi-VN", {
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false,
-	});
-
-const formatDuration = (seconds: number) => {
-	const mins = Math.floor(seconds / 60);
-	const secs = seconds % 60;
-	return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-};
 
 export default function History() {
 	const router = useRouter();
@@ -130,7 +111,7 @@ export default function History() {
 	};
 
 	const handleOpenAttempt = (attemptId: string) => {
-		(router.push as any)({
+		router.push({
 			pathname: "/exam-session/history-detail/[id]",
 			params: { id: attemptId },
 		});

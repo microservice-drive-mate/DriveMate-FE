@@ -1,5 +1,6 @@
 import { AUTH_UI } from "@/constants/auth-ui";
 import { useNotificationsStore } from "@/store/notifications.store";
+import { formatTimeAgo } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -12,18 +13,6 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-
-function formatTimeAgo(iso: string | null): string {
-	if (!iso) return "";
-	const diff = Date.now() - new Date(iso).getTime();
-	const minutes = Math.floor(diff / 60000);
-	if (minutes < 1) return "Vừa xong";
-	if (minutes < 60) return `${minutes} phút trước`;
-	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `${hours} giờ trước`;
-	const days = Math.floor(hours / 24);
-	return `${days} ngày trước`;
-}
 
 export default function NotificationDetailScreen() {
 	const router = useRouter();
@@ -42,7 +31,7 @@ export default function NotificationDetailScreen() {
 
 	useEffect(() => {
 		if (id) markAsRead(id);
-	}, [id]);
+	}, [id, markAsRead]);
 
 	if (!notification) {
 		return (

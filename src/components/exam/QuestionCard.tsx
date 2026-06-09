@@ -1,7 +1,7 @@
 import { Badge } from "@/components/common/Badge";
 import { OptionCard } from "@/components/exam/OptionCard";
 import { AUTH_UI } from "@/constants/auth-ui";
-import { ms, s, vs } from "@/utils/responsive";
+import { ms, s } from "@/utils/responsive";
 import { ExamQuestion } from "@/models/exam.model";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";

@@ -23,7 +23,7 @@ export default function RootLayout() {
 		if (!isLoading && !hasSeenOnboarding) {
 			router.replace("/(onboarding)");
 		}
-	}, [isLoading, hasSeenOnboarding]);
+	}, [hasSeenOnboarding, isLoading, router]);
 
 	if (isLoading) {
 		return null;

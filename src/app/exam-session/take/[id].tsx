@@ -10,7 +10,7 @@ import { examService } from "@/services/exam.service";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
 	ActivityIndicator,
@@ -57,6 +57,31 @@ export default function ExamTakeScreen() {
 	const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const isSubmittingRef = useRef(false);
 
+	const handleSubmit = useCallback(async () => {
+		if (isSubmittingRef.current) return;
+		isSubmittingRef.current = true;
+		setIsSubmitting(true);
+
+		if (autosaveTimerRef.current) {
+			clearTimeout(autosaveTimerRef.current);
+			autosaveTimerRef.current = null;
+		}
+
+		const result = await examService.submitSession(sessionId);
+		if (result.success) {
+			router.replace({
+				pathname: "/exam-session/result/[id]",
+				params: { id: sessionId },
+			});
+		} else {
+			isSubmittingRef.current = false;
+			setIsSubmitting(false);
+			const message =
+				ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
+			Alert.alert("Nộp bài thất bại", message);
+		}
+	}, [router, sessionId]);
+
 	useEffect(() => {
 		let cancelled = false;
 		const load = async () => {
@@ -86,7 +111,7 @@ export default function ExamTakeScreen() {
 		};
 		load();
 		return () => { cancelled = true; };
-	}, [sessionId]);
+	}, [router, sessionId]);
 
 	useEffect(() => {
 		if (isLoadingQuestions || isSubmittingRef.current) return;
@@ -98,7 +123,7 @@ export default function ExamTakeScreen() {
 			setRemainingSeconds((prev) => Math.max(0, prev - 1));
 		}, 1000);
 		return () => clearInterval(timer);
-	}, [remainingSeconds, isLoadingQuestions]);
+	}, [handleSubmit, remainingSeconds, isLoadingQuestions]);
 
 	const openSheet = (anim: Animated.Value, setter: (v: boolean) => void) => {
 		setter(true);
@@ -144,7 +169,7 @@ export default function ExamTakeScreen() {
 				router.replace({
 					pathname: '/exam-session/result/[id]',
 					params: { id: sessionId },
-				} as never);
+				});
 			}
 		}, 1500);
 	};
@@ -160,31 +185,6 @@ export default function ExamTakeScreen() {
 		const newVal = !bookmarks[questionId];
 		setBookmarks((prev) => ({ ...prev, [questionId]: newVal }));
 		examService.saveAnswer(sessionId, { questionId, isBookmarked: newVal });
-	};
-
-	const handleSubmit = async () => {
-		if (isSubmittingRef.current) return;
-		isSubmittingRef.current = true;
-		setIsSubmitting(true);
-
-		if (autosaveTimerRef.current) {
-			clearTimeout(autosaveTimerRef.current);
-			autosaveTimerRef.current = null;
-		}
-
-		const result = await examService.submitSession(sessionId);
-		if (result.success) {
-			router.replace({
-				pathname: "/exam-session/result/[id]",
-				params: { id: sessionId },
-			} as never);
-		} else {
-			isSubmittingRef.current = false;
-			setIsSubmitting(false);
-			const message =
-				ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
-			Alert.alert("Nộp bài thất bại", message);
-		}
 	};
 
 	const handleNext = () => {

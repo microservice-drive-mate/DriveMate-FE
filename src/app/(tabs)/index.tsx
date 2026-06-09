@@ -1,5 +1,7 @@
 import { ScreenWrapper } from "@/components/screen-wrapper";
+import { Avatar } from "@/components/profile";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { formatDate } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -7,19 +9,24 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { analyticsService } from "@/services/analytics.service";
 import { historyService } from "@/services/history.service";
+import { useAuthStore } from "@/store/auth.store";
+import { UserRole } from "@/models/user.model";
 import type { ProgressDashboard } from "@/models/analytics.model";
 import type { ExamHistoryAttempt } from "@/models/history.model";
 
 const successTint = "rgba(83,209,141,0.13)";
 const dangerTint = "rgba(248,113,113,0.13)";
 
-function formatDate(iso: string): string {
-	const d = new Date(iso);
-	return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-}
+// Short vehicle description per license tier, shown on the progress card.
+const LICENSE_VEHICLE: Record<string, string> = {
+	B1: "Ô tô số tự động dưới 9 chỗ",
+	B2: "Ô tô số sàn dưới 9 chỗ",
+	C: "Xe tải, xe chuyên dụng",
+};
 
 export default function Home() {
 	const router = useRouter();
+	const { user } = useAuthStore();
 	const [dashboard, setDashboard] = useState<ProgressDashboard | null>(null);
 	const [recentAttempts, setRecentAttempts] = useState<ExamHistoryAttempt[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +53,10 @@ export default function Home() {
 	const totalStudyMinutes = dashboard?.totalStudyMinutes ?? 0;
 	const weakTopics = dashboard?.weakTopics ?? [];
 
+	const licenseTier =
+		user?.role === UserRole.STUDENT ? user?.studentDetail?.licenseTier ?? null : null;
+	const vehicleLabel = licenseTier ? LICENSE_VEHICLE[licenseTier] ?? "" : "";
+
 	const metrics = [
 		{ id: "1", label: "Bài thi", value: String(attemptCount), icon: "document-text-outline" as const },
 		{ id: "2", label: "Tỷ lệ đạt", value: `${passRate}%`, icon: "stats-chart-outline" as const },
@@ -60,12 +71,16 @@ export default function Home() {
 			<View style={styles.container}>
 				{/* Header */}
 				<View style={styles.header}>
-					<View style={styles.avatar}>
-						<Text style={styles.avatarText}>NV</Text>
-					</View>
+					<Avatar
+						name={user?.fullName}
+						size={s(48)}
+						borderRadius={ms(24)}
+						mediaFileId={user?.mediaFileId}
+						avatarUrl={user?.avatarUrl}
+					/>
 					<View style={{ flex: 1, marginLeft: s(12) }}>
 						<Text style={styles.hello}>Xin chào 🔥</Text>
-						<Text style={styles.name}>Nguyễn Văn An</Text>
+						<Text style={styles.name}>{user?.fullName ?? "—"}</Text>
 					</View>
 					<TouchableOpacity
 						style={styles.bell}
@@ -82,8 +97,8 @@ export default function Home() {
 				<View style={styles.progressCard}>
 					<View>
 						<Text style={styles.levelLabel}>Hạng bằng đang học</Text>
-						<Text style={styles.level}>B1</Text>
-						<Text style={styles.vehicle}>Ô tô dưới 9 chỗ</Text>
+						<Text style={styles.level}>{licenseTier ?? "—"}</Text>
+						{!!vehicleLabel && <Text style={styles.vehicle}>{vehicleLabel}</Text>}
 					</View>
 					<View style={styles.progressRight}>
 						<Text style={styles.progressLabel}>Tiến độ</Text>
@@ -116,7 +131,7 @@ export default function Home() {
 				<View style={styles.quickRow}>
 					<TouchableOpacity
 						style={[styles.btn, styles.btnPrimary]}
-						onPress={() => router.push("/(tabs)/exam" as never)}>
+						onPress={() => router.push("/(tabs)/exam")}>
 						<Ionicons name="flash" size={ms(16)} color={AUTH_UI.colors.accentText} />
 						<Text style={styles.btnText}>Thi ngay</Text>
 					</TouchableOpacity>
@@ -160,7 +175,7 @@ export default function Home() {
 				{/* Recent Tests */}
 				<View style={styles.sectionHeader}>
 					<Text style={styles.sectionTitle}>Bài thi gần đây</Text>
-					<TouchableOpacity onPress={() => router.push("/(tabs)/history" as never)}>
+					<TouchableOpacity onPress={() => router.push("/(tabs)/history")}>
 						<Text style={styles.sectionLink}>Tất cả →</Text>
 					</TouchableOpacity>
 				</View>
@@ -201,15 +216,6 @@ const styles = StyleSheet.create({
 	container: { flex: 1, padding: s(16), paddingBottom: vs(32), gap: vs(10) },
 
 	header: { flexDirection: "row", alignItems: "center", marginBottom: vs(12) },
-	avatar: {
-		width: s(48),
-		height: s(48),
-		borderRadius: ms(24),
-		backgroundColor: AUTH_UI.colors.accent,
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	avatarText: { color: AUTH_UI.colors.accentText, fontWeight: "700" },
 	hello: { color: AUTH_UI.colors.textSecondary, fontSize: ms(12) },
 	name: { color: AUTH_UI.colors.textPrimary, fontSize: ms(16), fontWeight: "700" },
 	bell: {
