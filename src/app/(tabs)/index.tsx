@@ -1,6 +1,8 @@
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { Avatar } from "@/components/profile";
 import { AUTH_UI } from "@/constants/auth-ui";
+import { colors, radius, withAlpha } from "@/theme";
+import { LICENSE_VEHICLE } from "@/constants/license";
 import { formatDate } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,15 +16,8 @@ import { UserRole } from "@/models/user.model";
 import type { ProgressDashboard } from "@/models/analytics.model";
 import type { ExamHistoryAttempt } from "@/models/history.model";
 
-const successTint = "rgba(83,209,141,0.13)";
-const dangerTint = "rgba(248,113,113,0.13)";
-
-// Short vehicle description per license tier, shown on the progress card.
-const LICENSE_VEHICLE: Record<string, string> = {
-	B1: "Ô tô số tự động dưới 9 chỗ",
-	B2: "Ô tô số sàn dưới 9 chỗ",
-	C: "Xe tải, xe chuyên dụng",
-};
+const successTint = withAlpha(colors.success, 0.13);
+const dangerTint = withAlpha(colors.danger, 0.13);
 
 export default function Home() {
 	const router = useRouter();
@@ -244,7 +239,7 @@ const styles = StyleSheet.create({
 	progressRight: { alignItems: "flex-end" },
 	progressLabel: { color: AUTH_UI.colors.accentText, fontSize: ms(12), marginBottom: vs(2) },
 	progressPercent: { color: AUTH_UI.colors.accentText, fontWeight: "800", fontSize: ms(24) },
-	progressBarTrack: { position: "absolute", bottom: 0, left: 0, right: 0, height: vs(6), backgroundColor: "#D4A832" },
+	progressBarTrack: { position: "absolute", bottom: 0, left: 0, right: 0, height: vs(6), backgroundColor: colors.accentTrack },
 	progressBarFill: { height: vs(6), backgroundColor: AUTH_UI.colors.accentText },
 
 	loadingRow: { alignItems: "center", paddingVertical: vs(16) },
@@ -310,8 +305,8 @@ const styles = StyleSheet.create({
 	},
 	weakCenter: { flex: 1, gap: vs(6) },
 	weakLabel: { color: AUTH_UI.colors.textPrimary, fontSize: ms(13), fontWeight: "600" },
-	weakBarTrack: { height: vs(4), borderRadius: 999, backgroundColor: AUTH_UI.colors.surfaceMuted, overflow: "hidden" },
-	weakBarFill: { height: vs(4), borderRadius: 999 },
+	weakBarTrack: { height: vs(4), borderRadius: radius.pill, backgroundColor: AUTH_UI.colors.surfaceMuted, overflow: "hidden" },
+	weakBarFill: { height: vs(4), borderRadius: radius.pill },
 	weakPct: { fontSize: ms(13), fontWeight: "700", minWidth: s(36), textAlign: "right" },
 
 	testRow: {

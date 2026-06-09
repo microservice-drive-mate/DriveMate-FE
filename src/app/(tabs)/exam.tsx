@@ -1,18 +1,20 @@
 import { ScreenWrapper } from "@/components/screen-wrapper";
+import { AsyncContent } from "@/components/common/AsyncContent";
 import { EmptyState } from "@/components/common/EmptyState";
 import { InputField } from "@/components/common/InputField";
 import { FilterTabs, TabItem } from "@/components/layout/FilterTabs";
 import { ExamCard } from "@/components/exam/ExamCard";
 import { AUTH_UI } from "@/constants/auth-ui";
-import { ERROR_MESSAGES } from "@/constants/api";
+import { colors, withAlpha } from "@/theme";
 import { ms, s, vs } from "@/utils/responsive";
+import { getErrorMessage } from "@/utils/error";
 import { ExamType } from "@/models/exam.model";
 import { ExamTemplate } from "@/models/examSession.model";
 import { examService } from "@/services/exam.service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from "react-native";
 
 const TYPE_TABS: TabItem[] = [
   { key: "on-tap", label: "Ôn tập", icon: "book-outline" },
@@ -35,9 +37,7 @@ export default function ExamScreen() {
     if (result.success) {
       setTemplates(result.data.items);
     } else {
-      const message =
-        ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
-      setError(message);
+      setError(getErrorMessage(result.code, result.error));
     }
     setIsLoading(false);
   }, []);
@@ -74,9 +74,7 @@ export default function ExamScreen() {
         params: { id: session.id, durationMinutes: String(durationMinutes) },
       });
     } else {
-      const message =
-        ERROR_MESSAGES[result.code as keyof typeof ERROR_MESSAGES] ?? result.error;
-      Alert.alert("Không thể bắt đầu thi", message);
+      Alert.alert("Không thể bắt đầu thi", getErrorMessage(result.code, result.error));
     }
   };
 
@@ -116,26 +114,14 @@ export default function ExamScreen() {
           </View>
         ) : (
           <View style={styles.bannerSatHach}>
-            <Ionicons name="trophy-outline" size={ms(18)} color="#A78BFA" />
+            <Ionicons name="trophy-outline" size={ms(18)} color={colors.satHachText} />
             <Text style={[styles.bannerText, styles.bannerTextPurple]}>
               Mô phỏng sát hạch thực tế. Có câu điểm liệt. Thời gian giới hạn.
             </Text>
           </View>
         )}
 
-        {isLoading ? (
-          <View style={styles.centerState}>
-            <ActivityIndicator color={AUTH_UI.colors.accent} size="large" />
-          </View>
-        ) : error ? (
-          <View style={styles.centerState}>
-            <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={loadTemplates} style={styles.retryBtn}>
-              <Ionicons name="refresh-outline" size={ms(16)} color={AUTH_UI.colors.accent} />
-              <Text style={styles.retryText}>Thử lại</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
+        <AsyncContent loading={isLoading} error={error} onRetry={loadTemplates}>
           <FlatList
             data={filteredTemplates}
             keyExtractor={(item) => item.id}
@@ -157,7 +143,7 @@ export default function ExamScreen() {
               />
             }
           />
-        )}
+        </AsyncContent>
       </View>
 
       {isStarting && (
@@ -200,9 +186,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: s(16),
     marginBottom: vs(12),
-    backgroundColor: "#2D2A0F",
+    backgroundColor: colors.onTapBg,
     borderWidth: 1,
-    borderColor: "#4A3F10",
+    borderColor: colors.onTapBorder,
     borderRadius: ms(AUTH_UI.radius.lg),
     padding: s(12),
     gap: s(10),
@@ -212,9 +198,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: s(16),
     marginBottom: vs(12),
-    backgroundColor: "#1A1040",
+    backgroundColor: colors.satHachBg,
     borderWidth: 1,
-    borderColor: "#2D1F6B",
+    borderColor: colors.satHachBorder,
     borderRadius: ms(AUTH_UI.radius.lg),
     padding: s(12),
     gap: s(10),
@@ -225,7 +211,7 @@ const styles = StyleSheet.create({
     color: AUTH_UI.colors.textSecondary,
     lineHeight: ms(19),
   },
-  bannerTextPurple: { color: "#C4B5FD" },
+  bannerTextPurple: { color: colors.satHachTextLight },
   list: { flex: 1 },
   listContent: {
     paddingHorizontal: s(16),
@@ -233,36 +219,9 @@ const styles = StyleSheet.create({
     gap: vs(12),
   },
   emptyState: { paddingTop: vs(60) },
-  centerState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: vs(12),
-  },
-  errorText: {
-    fontSize: ms(14),
-    color: AUTH_UI.colors.textSecondary,
-    textAlign: "center",
-    paddingHorizontal: s(32),
-  },
-  retryBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: s(6),
-    paddingHorizontal: s(16),
-    paddingVertical: vs(8),
-    borderRadius: ms(AUTH_UI.radius.lg),
-    borderWidth: 1,
-    borderColor: AUTH_UI.colors.accent,
-  },
-  retryText: {
-    fontSize: ms(14),
-    fontWeight: "600",
-    color: AUTH_UI.colors.accent,
-  },
   startingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(9,11,15,0.8)",
+    backgroundColor: withAlpha(colors.background, 0.8),
     alignItems: "center",
     justifyContent: "center",
     gap: vs(12),

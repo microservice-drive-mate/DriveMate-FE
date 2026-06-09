@@ -1,3 +1,4 @@
+import { AsyncContent } from "@/components/common/AsyncContent";
 import { EmptyState } from "@/components/common/EmptyState";
 import { InputField } from "@/components/common/InputField";
 import { StatBox } from "@/components/common/StatBox";
@@ -195,28 +196,7 @@ export default function History() {
 					})}
 				</View>
 
-				{isLoading ? (
-					<View style={styles.centerState}>
-						<ActivityIndicator
-							color={AUTH_UI.colors.accent}
-							size="large"
-						/>
-					</View>
-				) : error ? (
-					<View style={styles.centerState}>
-						<Text style={styles.errorText}>{error}</Text>
-						<TouchableOpacity
-							onPress={loadAttempts}
-							style={styles.retryBtn}>
-							<Ionicons
-								name="refresh-outline"
-								size={ms(16)}
-								color={AUTH_UI.colors.accent}
-							/>
-							<Text style={styles.retryText}>Thử lại</Text>
-						</TouchableOpacity>
-					</View>
-				) : (
+				<AsyncContent loading={isLoading} error={error} onRetry={loadAttempts}>
 					<FlatList
 						data={visibleItems}
 						keyExtractor={(item) => item.id}
@@ -253,7 +233,7 @@ export default function History() {
 							/>
 						}
 					/>
-				)}
+				</AsyncContent>
 			</View>
 		</ScreenWrapper>
 	);
@@ -325,32 +305,5 @@ const styles = StyleSheet.create({
 	},
 	emptyState: {
 		paddingTop: vs(48),
-	},
-	centerState: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-		gap: vs(12),
-		paddingHorizontal: s(32),
-	},
-	errorText: {
-		fontSize: ms(14),
-		color: AUTH_UI.colors.textSecondary,
-		textAlign: "center",
-	},
-	retryBtn: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: s(6),
-		paddingHorizontal: s(16),
-		paddingVertical: vs(8),
-		borderRadius: ms(AUTH_UI.radius.lg),
-		borderWidth: 1,
-		borderColor: AUTH_UI.colors.accent,
-	},
-	retryText: {
-		fontSize: ms(14),
-		fontWeight: "600",
-		color: AUTH_UI.colors.accent,
 	},
 });

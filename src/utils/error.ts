@@ -93,6 +93,15 @@ export function extractErrorMessage(err: unknown, fallback = 'Có lỗi xảy ra
 	return err instanceof Error ? err.message : fallback;
 }
 
+/**
+ * Tra cứu thông điệp tiếng Việt theo mã lỗi, trả về `fallback` nếu không có.
+ * Thay cho pattern lặp `ERROR_MESSAGES[code as keyof ...] ?? error`.
+ */
+export function getErrorMessage(code: string | undefined, fallback: string): string {
+	const mapped = code ? ERROR_MESSAGES[code as keyof typeof ERROR_MESSAGES] : undefined;
+	return mapped ?? fallback;
+}
+
 export const shouldLogout = (error: unknown): boolean => {
 	if (!(error instanceof ApiError)) return false;
 	return error.status === 401 || error.code === ERROR_CODES.UNAUTHORIZED;

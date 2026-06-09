@@ -1,4 +1,4 @@
-import { AUTH_UI } from "@/constants/auth-ui";
+import { colors, withAlpha } from "@/theme";
 import { ms, s, vs } from "@/utils/responsive";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
 
@@ -12,52 +12,52 @@ interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, { container: object; text: object }> = {
   accent: {
-    container: { backgroundColor: AUTH_UI.colors.accent },
-    text: { color: AUTH_UI.colors.accentText },
+    container: { backgroundColor: colors.accent },
+    text: { color: colors.accentText },
   },
   success: {
     container: {
-      backgroundColor: "rgba(83,209,141,0.15)",
+      backgroundColor: withAlpha(colors.success, 0.15),
       borderWidth: 1,
-      borderColor: "rgba(83,209,141,0.3)",
+      borderColor: withAlpha(colors.success, 0.3),
     },
-    text: { color: AUTH_UI.colors.success },
+    text: { color: colors.success },
   },
   danger: {
     container: {
-      backgroundColor: "rgba(248,113,113,0.15)",
+      backgroundColor: withAlpha(colors.danger, 0.15),
       borderWidth: 1,
-      borderColor: "rgba(248,113,113,0.3)",
+      borderColor: withAlpha(colors.danger, 0.3),
     },
-    text: { color: AUTH_UI.colors.danger },
+    text: { color: colors.danger },
   },
   warning: {
-    container: { backgroundColor: "#2A2200" },
-    text: { color: "#C9A227" },
+    container: { backgroundColor: colors.warningBg },
+    text: { color: colors.warning },
   },
   "on-tap": {
     container: {
-      backgroundColor: "#2D2A0F",
+      backgroundColor: colors.onTapBg,
       borderWidth: 1,
-      borderColor: "#4A3F10",
+      borderColor: colors.onTapBorder,
     },
-    text: { color: AUTH_UI.colors.accent },
+    text: { color: colors.accent },
   },
   "sat-hach": {
     container: {
-      backgroundColor: "#1A1040",
+      backgroundColor: colors.satHachBg,
       borderWidth: 1,
-      borderColor: "#2D1F6B",
+      borderColor: colors.satHachBorder,
     },
-    text: { color: "#A78BFA" },
+    text: { color: colors.satHachText },
   },
   critical: {
     container: {
-      backgroundColor: "rgba(248,113,113,0.15)",
+      backgroundColor: withAlpha(colors.danger, 0.15),
       borderWidth: 1,
-      borderColor: "rgba(248,113,113,0.3)",
+      borderColor: withAlpha(colors.danger, 0.3),
     },
-    text: { color: AUTH_UI.colors.danger },
+    text: { color: colors.danger },
   },
 };
 

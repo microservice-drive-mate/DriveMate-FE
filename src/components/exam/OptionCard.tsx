@@ -1,4 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { colors, withAlpha } from "@/theme";
 import { ms, s } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -91,15 +92,15 @@ const styles = StyleSheet.create({
   },
   optionSelected: {
     borderColor: AUTH_UI.colors.accent,
-    backgroundColor: "rgba(243,201,66,0.08)",
+    backgroundColor: withAlpha(colors.accent, 0.08),
   },
   optionCorrect: {
     borderColor: AUTH_UI.colors.success,
-    backgroundColor: "rgba(83,209,141,0.1)",
+    backgroundColor: withAlpha(colors.success, 0.1),
   },
   optionWrong: {
     borderColor: AUTH_UI.colors.danger,
-    backgroundColor: "rgba(248,113,113,0.12)",
+    backgroundColor: withAlpha(colors.danger, 0.12),
   },
   badge: {
     width: s(32),
