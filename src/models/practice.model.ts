@@ -8,6 +8,9 @@ export interface ManeuverCheckpoint {
   instruction: string;
   penalty: string;
   displayOrder: number;
+  x?: number | null;
+  y?: number | null;
+  visualColor?: string | null;
 }
 
 // Maps directly to the simulation-service `Maneuver` schema.
@@ -27,4 +30,10 @@ export interface ManeuverError {
   code: string;
   description: string;
   severity: string;
+  pointsDeducted?: number | null;
+  isFatal?: boolean;
+  isGeneral?: boolean;
+  isActive?: boolean;
+  visualColor?: string | null;
+  icon?: string | null;
 }

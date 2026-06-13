@@ -27,6 +27,41 @@ const GENDER_OPTIONS: { label: string; value: Gender }[] = [
 	{ label: "Khác", value: Gender.OTHER },
 ];
 
+const BIRTH_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const getBirthDateError = (value: string): string | null => {
+	const trimmed = value.trim();
+	if (!trimmed) return null;
+
+	if (!BIRTH_DATE_PATTERN.test(trimmed)) {
+		return "Ngày sinh phải theo định dạng YYYY-MM-DD.";
+	}
+
+	const [year, month, day] = trimmed.split("-").map(Number);
+	const parsed = new Date(Date.UTC(year, month - 1, day));
+	const isRealDate =
+		parsed.getUTCFullYear() === year &&
+		parsed.getUTCMonth() === month - 1 &&
+		parsed.getUTCDate() === day;
+
+	if (!isRealDate) {
+		return "Ngày sinh không hợp lệ.";
+	}
+
+	const today = new Date();
+	const todayUtc = Date.UTC(
+		today.getFullYear(),
+		today.getMonth(),
+		today.getDate(),
+	);
+
+	if (parsed.getTime() > todayUtc) {
+		return "Ngày sinh không được lớn hơn hôm nay.";
+	}
+
+	return null;
+};
+
 export default function EditProfileScreen() {
 	const router = useRouter();
 	const { user, updateProfile } = useAuthStore();
@@ -36,6 +71,7 @@ export default function EditProfileScreen() {
 	const [dateOfBirth, setDateOfBirth] = useState(
 		user?.dateOfBirth ? user.dateOfBirth.split("T")[0] : "",
 	);
+	const [dateOfBirthError, setDateOfBirthError] = useState<string | null>(null);
 	const [gender, setGender] = useState<Gender | undefined>(user?.gender ?? undefined);
 	const [address, setAddress] = useState(user?.address ?? "");
 	const [notes, setNotes] = useState(user?.studentDetail?.notes ?? "");
@@ -69,17 +105,31 @@ export default function EditProfileScreen() {
 		}
 	};
 
+	const handleDateOfBirthChange = (value: string) => {
+		setDateOfBirth(value);
+		if (dateOfBirthError) {
+			setDateOfBirthError(getBirthDateError(value));
+		}
+	};
+
 	const handleSave = async () => {
 		if (!fullName.trim()) {
 			Alert.alert("Thông báo", "Họ tên không được để trống.");
 			return;
 		}
 
+		const normalizedDateOfBirth = dateOfBirth.trim();
+		const nextDateOfBirthError = getBirthDateError(normalizedDateOfBirth);
+		if (nextDateOfBirthError) {
+			setDateOfBirthError(nextDateOfBirthError);
+			return;
+		}
+
 		const payload: UpdateProfileRequest = {};
 		if (fullName !== user?.fullName) payload.fullName = fullName.trim();
 		if (phoneNumber !== (user?.phoneNumber ?? "")) payload.phoneNumber = phoneNumber.trim() || undefined;
-		if (dateOfBirth !== (user?.dateOfBirth ? user.dateOfBirth.split("T")[0] : ""))
-			payload.dateOfBirth = dateOfBirth || undefined;
+		if (normalizedDateOfBirth !== (user?.dateOfBirth ? user.dateOfBirth.split("T")[0] : ""))
+			payload.dateOfBirth = normalizedDateOfBirth || undefined;
 		if (gender !== (user?.gender ?? undefined)) payload.gender = gender;
 		if (address !== (user?.address ?? "")) payload.address = address.trim() || undefined;
 		if (notes !== (user?.studentDetail?.notes ?? "")) payload.notes = notes.trim() || undefined;
@@ -162,9 +212,14 @@ export default function EditProfileScreen() {
 
 				<InputField
 					leftIcon="calendar-outline"
-					placeholder="Ngày sinh (YYYY-MM-DD)"
+					placeholder="Ngày sinh (VD: 1998-05-20)"
 					value={dateOfBirth}
-					onChangeText={setDateOfBirth}
+					onChangeText={handleDateOfBirthChange}
+					onBlur={() => setDateOfBirthError(getBirthDateError(dateOfBirth))}
+					keyboardType="numbers-and-punctuation"
+					maxLength={10}
+					autoCapitalize="none"
+					error={dateOfBirthError}
 				/>
 
 				<InputField

@@ -8,6 +8,7 @@ import type {
 	ExamSessionStatus,
 	SaveAnswerRequest,
 	MissedQuestion,
+	MissedQuestionsQuery,
 } from '@/models/examSession.model';
 import { withErrorHandling } from '@/utils';
 
@@ -25,9 +26,9 @@ export const examService = {
 			api.get<ApiResponse<PaginatedResponse<ExamSession>>>(ENDPOINTS.EXAMS.SESSIONS, { params }),
 	),
 
-	getMissedQuestions: withErrorHandling((limit?: number) =>
+	getMissedQuestions: withErrorHandling((params?: MissedQuestionsQuery) =>
 		api.get<ApiResponse<MissedQuestion[]>>(ENDPOINTS.EXAMS.REVIEW_MISSED_QUESTIONS, {
-			params: limit !== undefined ? { limit } : undefined,
+			params,
 		}),
 	),
 

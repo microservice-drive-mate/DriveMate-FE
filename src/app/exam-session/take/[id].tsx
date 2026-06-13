@@ -1,4 +1,3 @@
-import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
 import { MediaImage } from "@/components/common/MediaImage";
 import { OptionCard } from "@/components/exam/OptionCard";
@@ -122,10 +121,6 @@ export default function ExamTakeScreen() {
 					<MediaImage mediaFileId={question.mediaFileId} imageUrl={question.imageUrl} />
 				)}
 
-				{question.isCritical && (
-					<Badge text="⚡ Câu điểm liệt" variant="critical" style={styles.criticalBadge} />
-				)}
-
 				<View style={styles.optionsList}>
 					{sortedOptions.map((opt, i) => (
 						<OptionCard
@@ -233,9 +228,6 @@ const styles = StyleSheet.create({
 		fontWeight: "600",
 		color: colors.textPrimary,
 		lineHeight: ms(26),
-	},
-	criticalBadge: {
-		alignSelf: "flex-start",
 	},
 	optionsList: {
 		gap: s(10),

@@ -53,7 +53,7 @@ export default function TabsLayout() {
 			/>
 
 			<Tabs.Screen
-				name="pratice"
+				name="practice"
 				options={{
 					headerShown: false,
 					title: "Luyện tập",

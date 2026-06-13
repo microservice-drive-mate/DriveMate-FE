@@ -29,16 +29,18 @@ export const parseError = (error: unknown): ApiError => {
 	const errorMessage =
 		data?.error?.message || data?.message || data?.error || ERROR_MESSAGES.GENERIC_ERROR;
 
-	const validCode = Object.values(ERROR_CODES).includes(errorCode)
-		? errorCode
-		: ERROR_CODES.INTERNAL_ERROR;
+	const finalCode =
+		typeof errorCode === 'string' && errorCode.length > 0
+			? errorCode
+			: ERROR_CODES.INTERNAL_ERROR;
+	const localizedMessage = ERROR_MESSAGES[finalCode as keyof typeof ERROR_MESSAGES];
 
 	const finalMessage =
 		errorMessage && errorMessage !== ERROR_MESSAGES.GENERIC_ERROR
 			? errorMessage
-			: ERROR_MESSAGES[validCode as keyof typeof ERROR_MESSAGES] || errorMessage;
+			: localizedMessage || errorMessage;
 
-	return new ApiError(finalMessage, status, validCode);
+	return new ApiError(finalMessage, status, finalCode);
 };
 
 export const withErrorHandling = <TArgs extends unknown[], TData>(
@@ -64,7 +66,7 @@ export const withErrorHandling = <TArgs extends unknown[], TData>(
 			return {
 				success: false,
 				error: response.data?.message ?? ERROR_MESSAGES.GENERIC_ERROR,
-				code: ERROR_CODES.INTERNAL_ERROR,
+				code: response.data?.code ?? ERROR_CODES.INTERNAL_ERROR,
 			};
 		} catch (error: unknown) {
 			const parsedError = parseError(error);

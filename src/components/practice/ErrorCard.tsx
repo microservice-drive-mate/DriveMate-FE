@@ -21,13 +21,22 @@ export function ErrorCard({ error }: ErrorCardProps) {
   const meta = SEVERITY_META[error.severity];
   const style = meta ?? FALLBACK;
   const label = meta?.label ?? error.severity;
+  const pointsLabel =
+    typeof error.pointsDeducted === 'number' ? `-${error.pointsDeducted} điểm` : null;
 
   return (
     <View style={[styles.card, { backgroundColor: style.bg, borderColor: style.border }]}>
       <Text style={[styles.description, { color: style.text }]}>{error.description}</Text>
       <View style={styles.footer}>
         <Text style={[styles.badge, { color: style.text, borderColor: style.border }]}>{label}</Text>
-        <Text style={styles.code}>{error.code}</Text>
+        <View style={styles.footerMeta}>
+          {pointsLabel && (
+            <Text style={[styles.points, { color: style.text, borderColor: style.border }]}>
+              {pointsLabel}
+            </Text>
+          )}
+          <Text style={styles.code}>{error.code}</Text>
+        </View>
       </View>
     </View>
   );
@@ -49,6 +58,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: s(8),
   },
   badge: {
     fontSize: ms(11),
@@ -62,5 +72,20 @@ const styles = StyleSheet.create({
   code: {
     fontSize: ms(11),
     color: AUTH_UI.colors.textMuted,
+    textAlign: 'right',
+  },
+  footerMeta: {
+    flexShrink: 1,
+    alignItems: 'flex-end',
+    gap: vs(4),
+  },
+  points: {
+    fontSize: ms(11),
+    fontWeight: '700',
+    borderWidth: 1,
+    borderRadius: ms(6),
+    paddingHorizontal: s(6),
+    paddingVertical: vs(2),
+    overflow: 'hidden',
   },
 });

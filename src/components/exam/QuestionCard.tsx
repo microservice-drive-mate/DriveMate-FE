@@ -19,7 +19,6 @@ export function QuestionCard({ question, index, mode = "preview" }: QuestionCard
     <View style={styles.card}>
       <View style={styles.topRow}>
         <Badge text={`Câu ${index + 1}`} variant="accent" />
-        {question.isCritical && <Badge text="⚡ Điểm liệt" variant="critical" />}
       </View>
 
       <Text style={styles.questionText}>{question.questionText}</Text>

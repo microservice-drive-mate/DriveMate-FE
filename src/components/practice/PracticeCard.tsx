@@ -18,9 +18,9 @@ const CARD_CONFIG = {
     description: 'Học chi tiết các bài thi sát hạch theo hạng bằng',
     licenses: ['B1', 'B2', 'C'] as const,
     tags: [
-      { icon: '✓', label: 'Cách đúng', color: colors.success },
-      { icon: '⚠', label: 'Trừ điểm', color: colors.accent },
-      { icon: '✕', label: 'Loại', color: colors.danger },
+      { icon: 'checkmark-circle-outline' as const, label: 'Cách đúng', color: colors.success },
+      { icon: 'warning-outline' as const, label: 'Trừ điểm', color: colors.accent },
+      { icon: 'close-circle-outline' as const, label: 'Loại', color: colors.danger },
     ],
   },
   errors: {
@@ -31,8 +31,8 @@ const CARD_CONFIG = {
     description: 'Học chi tiết các loại lỗi bị trừ điểm hoặc loại trực tiếp',
     licenses: [] as const,
     tags: [
-      { icon: '⚠', label: 'Trừ điểm', color: colors.accent },
-      { icon: '✕', label: 'Loại', color: colors.danger },
+      { icon: 'warning-outline' as const, label: 'Trừ điểm', color: colors.accent },
+      { icon: 'close-circle-outline' as const, label: 'Loại', color: colors.danger },
     ],
   },
 };
@@ -68,9 +68,12 @@ export function PracticeCard({ type, onPress }: PracticeCardProps) {
 
       <View style={[styles.tagsRow, { marginTop: config.licenses.length > 0 ? 8 : 12 }]}>
         {config.tags.map((tag) => (
-          <Text key={tag.label} style={[styles.tagText, { color: tag.color }]}>
-            {tag.icon} {tag.label}
-          </Text>
+          <View key={tag.label} style={styles.tagItem}>
+            <Ionicons name={tag.icon} size={ms(13)} color={tag.color} />
+            <Text style={[styles.tagText, { color: tag.color }]}>
+              {tag.label}
+            </Text>
+          </View>
         ))}
       </View>
     </TouchableOpacity>
@@ -131,6 +134,11 @@ const styles = StyleSheet.create({
     borderRadius: ms(8),
     paddingHorizontal: s(12),
     paddingVertical: vs(8),
+  },
+  tagItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: s(4),
   },
   tagText: {
     fontSize: ms(12),

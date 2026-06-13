@@ -27,7 +27,6 @@ export interface ExamSessionQuestion {
   mediaFileId?: string | null;
   options: QuestionOption[];
   displayOrder: number;
-  isCritical?: boolean;
   isBookmarked: boolean;
   selectedOptionId: string | null;
   // Only present in submit/result payloads; omitted for active sessions & question list.
@@ -65,11 +64,22 @@ export interface MissedQuestionOption {
   content: string;
 }
 
+export type MissedQuestionsMode = 'frequent' | 'recent';
+
+export interface MissedQuestionsQuery {
+  limit?: number;
+  size?: number;
+  periodDays?: number;
+  period?: number;
+  mode?: MissedQuestionsMode;
+}
+
 export interface MissedQuestion {
   questionId: string;
   content: string;
   topicId: string;
   topicName: string;
   options: MissedQuestionOption[];
+  missedCount: number;
   lastAnsweredAt: string;
 }

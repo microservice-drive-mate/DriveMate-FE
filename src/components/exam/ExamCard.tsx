@@ -46,7 +46,8 @@ export function ExamCard({ template, activeType, onStart }: ExamCardProps) {
       <View style={styles.buttonRow}>
         <Button
           variant="primary"
-          label={activeType === "on-tap" ? "🚀 Ôn tập ngay" : "🚀 Vào thi"}
+          icon="play-outline"
+          label={activeType === "on-tap" ? "Ôn tập ngay" : "Vào thi"}
           onPress={onStart}
           flex
           style={styles.primaryBtn}

@@ -7,7 +7,6 @@ export interface ExamQuestion {
   questionText: string;
   options: string[];
   correctAnswerIndex: number;
-  isCritical?: boolean;
   explanation?: string;
 }
 
