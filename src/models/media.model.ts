@@ -7,6 +7,7 @@ export interface MediaFile {
 	bucketName: string;
 	uploadedById: string;
 	isPublic: boolean;
+	status: "UNLINKED" | "UPLOADED" | "LINKED";
 	createdAt: string;
 }
 

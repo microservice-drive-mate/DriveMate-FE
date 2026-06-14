@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 
 export const API_CONFIG = {
 	BASE_URL: Platform.select({
-		android: "http://192.168.0.150:8000",
+		android: "http://192.168.1.17:8000",
 		ios: "http://localhost:8000",
 		default: "http://10.0.2.2:8000",
 	})!,
@@ -41,6 +41,7 @@ export const ENDPOINTS = {
 		FILES_INIT: "/media/files/init",
 		FILE: (id: string) => `/media/files/${id}`,
 		FILE_URL: (id: string) => `/media/files/${id}/url`,
+		FILE_COMPLETE: (id: string) => `/media/files/${id}/complete`,
 	},
 	NOTIFICATIONS: {
 		ME: "/notifications/me",
@@ -83,6 +84,7 @@ export const ERROR_CODES = {
 	FILE_TOO_LARGE: "FILE_TOO_LARGE",
 	INVALID_MIME_TYPE: "INVALID_MIME_TYPE",
 	FILE_UPLOAD_FAILED: "FILE_UPLOAD_FAILED",
+	FILE_UPLOAD_NOT_COMPLETED: "FILE_UPLOAD_NOT_COMPLETED",
 	// Exam — additional codes from updated spec
 	INVALID_EXAM_TEMPLATE: "INVALID_EXAM_TEMPLATE",
 	INVALID_EXAM_SESSION: "INVALID_EXAM_SESSION",
@@ -131,6 +133,7 @@ export const ERROR_MESSAGES = {
 	INVALID_MIME_TYPE:
 		"Định dạng tệp không được hỗ trợ. Vui lòng chọn ảnh khác.",
 	FILE_UPLOAD_FAILED: "Tải tệp lên thất bại. Vui lòng thử lại.",
+	FILE_UPLOAD_NOT_COMPLETED: "Tải tệp lên thất bại. Vui lòng thử lại.",
 	INVALID_EXAM_TEMPLATE: "Đề thi không hợp lệ. Vui lòng thử lại.",
 	INVALID_EXAM_SESSION: "Buổi thi không hợp lệ. Vui lòng thử lại.",
 	EXAM_SESSION_QUESTION_NOT_FOUND: "Không tìm thấy câu hỏi trong buổi thi.",

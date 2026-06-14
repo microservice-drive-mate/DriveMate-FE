@@ -59,6 +59,10 @@ export const mediaService = {
 		api.get<ApiResponse<MediaFile>>(ENDPOINTS.MEDIA.FILE(id)),
 	),
 
+	completeUpload: withErrorHandling((id: string) =>
+		api.post<ApiResponse<MediaFile>>(ENDPOINTS.MEDIA.FILE_COMPLETE(id), {}),
+	),
+
 	// Direct upload flow: init metadata -> PUT bytes straight to Azure (NOT through
 	// apiService, which targets the Kong base URL and attaches our Bearer token).
 	// Returns mediaFileId + publicUrl for the caller to persist on the business entity.
@@ -125,6 +129,15 @@ export const mediaService = {
 				success: false,
 				error: ERROR_MESSAGES.FILE_UPLOAD_FAILED,
 				code: ERROR_CODES.FILE_UPLOAD_FAILED,
+			};
+		}
+
+		const completeResult = await mediaService.completeUpload(mediaFileId);
+		if (!completeResult.success) {
+			return {
+				success: false,
+				error: completeResult.error,
+				code: completeResult.code,
 			};
 		}
 
