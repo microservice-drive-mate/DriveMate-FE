@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 
 export const API_CONFIG = {
 	BASE_URL: Platform.select({
-		android: "http://192.168.1.17:8000",
+		android: "http://192.168.0.150:8000",
 		ios: "http://localhost:8000",
 		default: "http://10.0.2.2:8000",
 	})!,
@@ -22,6 +22,7 @@ export const ENDPOINTS = {
 		REFRESH: "/auth/refresh",
 		LOGOUT: "/auth/logout",
 		FORGOT_PASSWORD: "/auth/forgot-password",
+		CHANGE_PASSWORD: "/auth/change-password",
 	},
 	USERS: {
 		GET_ME: "/users/me",
@@ -49,6 +50,8 @@ export const ENDPOINTS = {
 	},
 	ANALYTICS: {
 		ME_PROGRESS: "/analytics/me/progress",
+		ME_WEAK_TOPICS: "/analytics/me/weak-topics",
+		ME_STUDY_STREAK: "/analytics/me/study-streak",
 	},
 	SIMULATION: {
 		MANEUVERS: "/simulation/maneuvers",

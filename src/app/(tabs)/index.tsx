@@ -13,7 +13,7 @@ import { analyticsService } from "@/services/analytics.service";
 import { historyService } from "@/services/history.service";
 import { useAuthStore } from "@/store/auth.store";
 import { UserRole } from "@/models/user.model";
-import type { ProgressDashboard } from "@/models/analytics.model";
+import type { ProgressDashboard, StudyStreak } from "@/models/analytics.model";
 import type { ExamHistoryAttempt } from "@/models/history.model";
 
 const successTint = withAlpha(colors.success, 0.13);
@@ -23,19 +23,22 @@ export default function Home() {
 	const router = useRouter();
 	const { user } = useAuthStore();
 	const [dashboard, setDashboard] = useState<ProgressDashboard | null>(null);
+	const [studyStreak, setStudyStreak] = useState<StudyStreak | null>(null);
 	const [recentAttempts, setRecentAttempts] = useState<ExamHistoryAttempt[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		let cancelled = false;
 		const load = async () => {
-			const [analyticsResult, historyResult] = await Promise.all([
+			const [analyticsResult, historyResult, streakResult] = await Promise.all([
 				analyticsService.getMyProgress(),
 				historyService.getAttempts(),
+				analyticsService.getMyStudyStreak(),
 			]);
 			if (cancelled) return;
 			if (analyticsResult.success) setDashboard(analyticsResult.data);
 			if (historyResult.success) setRecentAttempts(historyResult.items.slice(0, 3));
+			if (streakResult.success) setStudyStreak(streakResult.data);
 			setIsLoading(false);
 		};
 		load();
@@ -103,6 +106,22 @@ export default function Home() {
 						<View style={[styles.progressBarFill, { width: `${completionPct}%` }]} />
 					</View>
 				</View>
+
+				{/* Study Streak */}
+				{!isLoading && studyStreak && (
+					<View style={styles.streakRow}>
+						<View style={styles.metricCard}>
+							<Ionicons name="flame-outline" size={ms(20)} color={AUTH_UI.colors.accent} />
+							<Text style={styles.metricValue}>{studyStreak.currentStreak}</Text>
+							<Text style={styles.metricLabel}>Ngày liên tiếp</Text>
+						</View>
+						<View style={styles.metricCard}>
+							<Ionicons name="trophy-outline" size={ms(20)} color={AUTH_UI.colors.accent} />
+							<Text style={styles.metricValue}>{studyStreak.longestStreak}</Text>
+							<Text style={styles.metricLabel}>Kỷ lục</Text>
+						</View>
+					</View>
+				)}
 
 				{/* Metrics */}
 				{isLoading ? (
@@ -244,6 +263,7 @@ const styles = StyleSheet.create({
 
 	loadingRow: { alignItems: "center", paddingVertical: vs(16) },
 
+	streakRow: { flexDirection: "row", gap: s(8) },
 	metricsRow: { flexDirection: "row", gap: s(8), marginTop: vs(12) },
 	metricCard: {
 		flex: 1,

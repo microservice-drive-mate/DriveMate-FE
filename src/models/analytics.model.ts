@@ -24,3 +24,9 @@ export interface ProgressDashboard {
 	weakTopics: WeakTopic[];
 	lastActivityAt: string | null;
 }
+
+export interface StudyStreak {
+	currentStreak: number;
+	longestStreak: number;
+	lastActivityDate: string | null;
+}
