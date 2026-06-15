@@ -221,7 +221,7 @@ export default function ExamResultScreen() {
 						icon="home-outline"
 						flex
 						style={styles.actionBtn}
-						onPress={() => router.replace("/")}
+						onPress={() => router.replace("/(tabs)")}
 					/>
 				</View>
 			</ScrollView>

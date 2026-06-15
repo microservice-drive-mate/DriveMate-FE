@@ -7,11 +7,7 @@ export default function ExamSessionLayout() {
 				name="take/[id]"
 				options={{ headerShown: false }}
 			/>
-			<Stack.Screen
-				name="preview/[id]"
-				options={{ headerShown: false }}
-			/>
-			<Stack.Screen
+<Stack.Screen
 				name="result/[id]"
 				options={{ headerShown: false }}
 			/>

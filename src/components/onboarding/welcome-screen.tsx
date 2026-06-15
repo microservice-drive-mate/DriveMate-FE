@@ -112,17 +112,19 @@ export function WelcomeScreen({
 				</Animated.View>
 
 				<View style={styles.bottomSection}>
-					<Animated.Text style={[styles.title, animatedSlideStyle]}>
-						{title}
-					</Animated.Text>
-					<Animated.Text style={[styles.description, animatedSlideStyle]}>
-						{description}
-					</Animated.Text>
+					<View style={styles.textContent}>
+						<Animated.Text style={[styles.title, animatedSlideStyle]}>
+							{title}
+						</Animated.Text>
+						<Animated.Text style={[styles.description, animatedSlideStyle]}>
+							{description}
+						</Animated.Text>
 
-					<View style={styles.pagination}>
-						<PaginationDot isActive={step === 1} />
-						<PaginationDot isActive={step === 2} />
-						<PaginationDot isActive={step === 3} />
+						<View style={styles.pagination}>
+							<PaginationDot isActive={step === 1} />
+							<PaginationDot isActive={step === 2} />
+							<PaginationDot isActive={step === 3} />
+						</View>
 					</View>
 
 					<View style={styles.bottomActions}>
@@ -196,6 +198,10 @@ const styles = StyleSheet.create({
 		paddingTop: vs(24),
 		paddingHorizontal: s(24),
 		paddingBottom: vs(16),
+		justifyContent: "space-between",
+	},
+	textContent: {
+		flexShrink: 1,
 	},
 	title: {
 		color: "#F5F7FA",
