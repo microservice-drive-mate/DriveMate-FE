@@ -1,5 +1,5 @@
 import { AUTH_UI } from "@/constants/auth-ui";
-import { ms, s, vs } from "@/utils/responsive";
+import { ms, vs } from "@/utils/responsive";
 import { HistoryQuestionState } from "@/models/history.model";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
@@ -39,7 +39,7 @@ export function QuestionStatusCell({ state, index }: QuestionStatusCellProps) {
 
 const styles = StyleSheet.create({
 	cell: {
-		width: s(54),
+		flex: 1,
 		height: vs(60),
 		borderRadius: ms(12),
 		alignItems: "center",

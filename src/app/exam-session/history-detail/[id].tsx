@@ -18,6 +18,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const GRID_COLUMNS = 5;
+
 export default function HistoryDetailScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
@@ -125,13 +127,36 @@ export default function HistoryDetailScreen() {
 				<View style={styles.questionSection}>
 					<Text style={styles.questionSectionTitle}>Danh sách câu hỏi</Text>
 					<View style={styles.questionGrid}>
-						{attempt.questionStates.map((state, index) => (
-							<QuestionStatusCell
-								key={`${attempt.id}-${index}`}
-								state={state}
-								index={index + 1}
-							/>
-						))}
+						{Array.from({
+							length: Math.ceil(
+								attempt.questionStates.length / GRID_COLUMNS,
+							),
+						}).map((_, rowIndex) => {
+							const start = rowIndex * GRID_COLUMNS;
+							const rowStates = attempt.questionStates.slice(
+								start,
+								start + GRID_COLUMNS,
+							);
+							return (
+								<View key={`row-${rowIndex}`} style={styles.questionRow}>
+									{rowStates.map((state, colIndex) => (
+										<QuestionStatusCell
+											key={`${attempt.id}-${start + colIndex}`}
+											state={state}
+											index={start + colIndex + 1}
+										/>
+									))}
+									{Array.from({
+										length: GRID_COLUMNS - rowStates.length,
+									}).map((_, i) => (
+										<View
+											key={`spacer-${rowIndex}-${i}`}
+											style={styles.cellSpacer}
+										/>
+									))}
+								</View>
+							);
+						})}
 					</View>
 				</View>
 
@@ -226,9 +251,14 @@ const styles = StyleSheet.create({
 		color: AUTH_UI.colors.textPrimary,
 	},
 	questionGrid: {
-		flexDirection: "row",
-		flexWrap: "wrap",
 		gap: s(8),
+	},
+	questionRow: {
+		flexDirection: "row",
+		gap: s(8),
+	},
+	cellSpacer: {
+		flex: 1,
 	},
 	reviewButton: {
 		height: vs(54),

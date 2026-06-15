@@ -8,7 +8,9 @@ import { useCountdownTimer } from "./useCountdownTimer";
 
 /**
  * Quản lý toàn bộ state cục bộ của một phiên thi: tải câu hỏi, lựa chọn đáp án
- * (autosave 1.5s), gắn cờ, đếm ngược + tự nộp khi hết giờ, và nộp bài thủ công.
+ * (autosave 1.5s theo từng câu), gắn cờ, đếm ngược + tự nộp khi hết giờ, và nộp
+ * bài thủ công. Khi nộp, mọi đáp án chưa lưu được flush và chờ xác nhận trước khi
+ * finalize để không mất câu trả lời lúc làm nhanh hoặc mạng chập chờn.
  */
 export function useExamSession(sessionId: string, durationMinutes: number) {
 	const router = useRouter();
@@ -20,30 +22,21 @@ export function useExamSession(sessionId: string, durationMinutes: number) {
 	const [bookmarks, setBookmarks] = useState<Record<string, boolean>>({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// Giá trị mới nhất của mọi câu — đọc đồng bộ để logic toggle không bị stale.
+	const latestAnswersRef = useRef<Record<string, string | null>>({});
+	// Mỗi câu một timer debounce riêng để chọn câu khác không huỷ lưu câu trước.
+	const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+	// Các câu đã đổi nhưng chưa xác nhận lưu thành công (cần gửi lại khi nộp).
+	const dirtyRef = useRef<Set<string>>(new Set());
+	// Các request lưu đang bay, để submit chờ hoàn tất trước khi finalize.
+	const inFlightRef = useRef<Set<Promise<unknown>>>(new Set());
 	const isSubmittingRef = useRef(false);
 
-	const submit = useCallback(async () => {
-		if (isSubmittingRef.current) return;
-		isSubmittingRef.current = true;
-		setIsSubmitting(true);
-
-		if (autosaveTimerRef.current) {
-			clearTimeout(autosaveTimerRef.current);
-			autosaveTimerRef.current = null;
-		}
-
-		const result = await examService.submitSession(sessionId);
-		if (result.success) {
-			router.replace({
-				pathname: "/exam-session/result/[id]",
-				params: { id: sessionId },
-			});
-		} else {
-			isSubmittingRef.current = false;
-			setIsSubmitting(false);
-			Alert.alert("Nộp bài thất bại", getErrorMessage(result.code, result.error));
-		}
+	const navigateToResult = useCallback(() => {
+		router.replace({
+			pathname: "/exam-session/result/[id]",
+			params: { id: sessionId },
+		});
 	}, [router, sessionId]);
 
 	useEffect(() => {
@@ -62,6 +55,7 @@ export function useExamSession(sessionId: string, durationMinutes: number) {
 					initAnswers[q.questionId] = q.selectedOptionId;
 					initBookmarks[q.questionId] = q.isBookmarked;
 				});
+				latestAnswersRef.current = { ...initAnswers };
 				setAnswers(initAnswers);
 				setBookmarks(initBookmarks);
 			} else {
@@ -77,49 +71,128 @@ export function useExamSession(sessionId: string, durationMinutes: number) {
 		};
 	}, [router, sessionId]);
 
+	// Gửi đáp án mới nhất của 1 câu lên server; theo dõi dirty + in-flight.
+	const persistAnswer = useCallback(
+		(questionId: string) => {
+			const value = latestAnswersRef.current[questionId] ?? null;
+			const promise = examService
+				.saveAnswer(sessionId, { questionId, selectedOptionId: value })
+				.then((res) => {
+					if (res.success) {
+						// Chỉ bỏ cờ dirty nếu giá trị chưa bị đổi tiếp trong lúc đang gửi.
+						if ((latestAnswersRef.current[questionId] ?? null) === value) {
+							dirtyRef.current.delete(questionId);
+						}
+						if (res.data.status === "TIMED_OUT" || res.data.status === "COMPLETED") {
+							navigateToResult();
+						}
+					}
+					// Lỗi: giữ nguyên trong dirtyRef để gửi lại khi nộp bài.
+					return res;
+				});
+			inFlightRef.current.add(promise);
+			promise.finally(() => {
+				inFlightRef.current.delete(promise);
+			});
+			return promise;
+		},
+		[sessionId, navigateToResult],
+	);
+
+	// Debounce 1.5s theo TỪNG câu: chọn câu khác không huỷ lưu câu trước.
+	const scheduleAutosave = useCallback(
+		(questionId: string) => {
+			dirtyRef.current.add(questionId);
+			const existing = timersRef.current.get(questionId);
+			if (existing) clearTimeout(existing);
+			const timer = setTimeout(() => {
+				timersRef.current.delete(questionId);
+				persistAnswer(questionId);
+			}, 1500);
+			timersRef.current.set(questionId, timer);
+		},
+		[persistAnswer],
+	);
+
+	const selectAnswer = useCallback(
+		(questionId: string, optionId: string) => {
+			const current = latestAnswersRef.current[questionId] ?? null;
+			const next = current === optionId ? null : optionId;
+			latestAnswersRef.current[questionId] = next;
+			setAnswers((prev) => ({ ...prev, [questionId]: next }));
+			scheduleAutosave(questionId);
+		},
+		[scheduleAutosave],
+	);
+
+	// Gửi ngay mọi đáp án chưa lưu và chờ tất cả request hoàn tất.
+	// Trả về true nếu không còn câu nào ở trạng thái dirty.
+	const flushPendingSaves = useCallback(async () => {
+		timersRef.current.forEach(clearTimeout);
+		timersRef.current.clear();
+
+		const pending = [...dirtyRef.current].map((questionId) =>
+			persistAnswer(questionId),
+		);
+		await Promise.all(pending);
+		await Promise.all([...inFlightRef.current]);
+
+		return dirtyRef.current.size === 0;
+	}, [persistAnswer]);
+
+	const submit = useCallback(async () => {
+		if (isSubmittingRef.current) return;
+		isSubmittingRef.current = true;
+		setIsSubmitting(true);
+
+		const allSaved = await flushPendingSaves();
+		if (!allSaved) {
+			isSubmittingRef.current = false;
+			setIsSubmitting(false);
+			Alert.alert(
+				"Chưa thể nộp bài",
+				"Một số đáp án chưa được lưu (có thể do mạng). Vui lòng kiểm tra kết nối và thử lại.",
+			);
+			return;
+		}
+
+		const result = await examService.submitSession(sessionId);
+		if (result.success) {
+			navigateToResult();
+		} else {
+			isSubmittingRef.current = false;
+			setIsSubmitting(false);
+			Alert.alert("Nộp bài thất bại", getErrorMessage(result.code, result.error));
+		}
+	}, [flushPendingSaves, navigateToResult, sessionId]);
+
 	const remainingSeconds = useCountdownTimer(
 		durationMinutes * 60,
 		!isLoadingQuestions && !isSubmitting,
 		submit,
 	);
 
-	const scheduleAutosave = useCallback(
-		(questionId: string, selectedOptionId: string | null) => {
-			if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
-			autosaveTimerRef.current = setTimeout(async () => {
-				const res = await examService.saveAnswer(sessionId, {
-					questionId,
-					selectedOptionId,
-				});
-				if (
-					res.success &&
-					(res.data.status === "TIMED_OUT" || res.data.status === "COMPLETED")
-				) {
-					router.replace({
-						pathname: "/exam-session/result/[id]",
-						params: { id: sessionId },
-					});
-				}
-			}, 1500);
+	// Dọn mọi timer debounce còn treo khi rời màn hình.
+	useEffect(
+		() => () => {
+			timersRef.current.forEach(clearTimeout);
+			timersRef.current.clear();
 		},
-		[router, sessionId],
-	);
-
-	const selectAnswer = useCallback(
-		(questionId: string, optionId: string) => {
-			const current = answers[questionId] ?? null;
-			const next = current === optionId ? null : optionId;
-			setAnswers((prev) => ({ ...prev, [questionId]: next }));
-			scheduleAutosave(questionId, next);
-		},
-		[answers, scheduleAutosave],
+		[],
 	);
 
 	const toggleBookmark = useCallback(
 		(questionId: string) => {
 			const newVal = !bookmarks[questionId];
 			setBookmarks((prev) => ({ ...prev, [questionId]: newVal }));
-			examService.saveAnswer(sessionId, { questionId, isBookmarked: newVal });
+			const promise = examService.saveAnswer(sessionId, {
+				questionId,
+				isBookmarked: newVal,
+			});
+			inFlightRef.current.add(promise);
+			promise.finally(() => {
+				inFlightRef.current.delete(promise);
+			});
 		},
 		[bookmarks, sessionId],
 	);
