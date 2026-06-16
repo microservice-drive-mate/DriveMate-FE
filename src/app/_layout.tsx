@@ -2,6 +2,7 @@ import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
+import { apiService } from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 import { useShallow } from "zustand/react/shallow";
 
@@ -18,6 +19,12 @@ export default function RootLayout() {
 	useEffect(() => {
 		initialize();
 	}, [initialize]);
+
+	useEffect(() => {
+		apiService.setLogoutCallback(() => {
+			useAuthStore.getState().clearAuth();
+		});
+	}, []);
 
 	useEffect(() => {
 		if (!isLoading && !hasSeenOnboarding) {

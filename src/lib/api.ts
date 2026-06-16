@@ -33,6 +33,11 @@ class ApiService {
 		resolve: (token: string) => void;
 		reject: (reason: unknown) => void;
 	}[] = [];
+	private _logoutCallback: (() => void) | null = null;
+
+	setLogoutCallback(callback: () => void) {
+		this._logoutCallback = callback;
+	}
 
 	constructor() {
 		this.baseUrl = API_CONFIG.BASE_URL;
@@ -181,6 +186,7 @@ class ApiService {
 			removeRefreshToken(),
 			removeUserData(),
 		]);
+		this._logoutCallback?.();
 		router.replace(ROUTES.LOGIN);
 	}
 

@@ -31,6 +31,7 @@ interface AuthActions {
 	completeOnboarding: () => Promise<void>;
 	resetOnboardingForDev: () => Promise<void>;
 	logout: () => Promise<void>;
+	clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({
@@ -113,5 +114,14 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 				isAuthenticated: false,
 			});
 		}
+	},
+
+	clearAuth: () => {
+		set({
+			user: null,
+			accessToken: null,
+			refreshToken: null,
+			isAuthenticated: false,
+		});
 	},
 }));
