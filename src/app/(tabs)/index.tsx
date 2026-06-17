@@ -6,12 +6,13 @@ import { LICENSE_VEHICLE } from "@/constants/license";
 import { formatDate } from "@/utils/examFormat";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { analyticsService } from "@/services/analytics.service";
 import { historyService } from "@/services/history.service";
 import { useAuthStore } from "@/store/auth.store";
+import { useNotificationsStore } from "@/store/notifications.store";
 import { UserRole } from "@/models/user.model";
 import type { ProgressDashboard, StudyStreak } from "@/models/analytics.model";
 import type { ExamHistoryAttempt } from "@/models/history.model";
@@ -22,6 +23,11 @@ const dangerTint = withAlpha(colors.danger, 0.13);
 export default function Home() {
 	const router = useRouter();
 	const { user } = useAuthStore();
+	const { notifications, refresh: refreshNotifications } = useNotificationsStore();
+	const unreadCount = useMemo(
+		() => notifications.filter((n) => !n.isRead).length,
+		[notifications],
+	);
 	const [dashboard, setDashboard] = useState<ProgressDashboard | null>(null);
 	const [studyStreak, setStudyStreak] = useState<StudyStreak | null>(null);
 	const [recentAttempts, setRecentAttempts] = useState<ExamHistoryAttempt[]>([]);
@@ -44,6 +50,12 @@ export default function Home() {
 		load();
 		return () => { cancelled = true; };
 	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			refreshNotifications();
+		}, [refreshNotifications]),
+	);
 
 	const completionPct = dashboard?.completionPct ?? 0;
 	const attemptCount = dashboard?.attemptCount ?? 0;
@@ -88,6 +100,13 @@ export default function Home() {
 							size={ms(20)}
 							color={AUTH_UI.colors.textSecondary}
 						/>
+						{unreadCount > 0 && (
+							<View style={styles.badge}>
+								<Text style={styles.badgeText}>
+									{unreadCount > 99 ? "99+" : unreadCount}
+								</Text>
+							</View>
+						)}
 					</TouchableOpacity>
 				</View>
 
@@ -239,6 +258,23 @@ const styles = StyleSheet.create({
 		backgroundColor: AUTH_UI.colors.surface,
 		alignItems: "center",
 		justifyContent: "center",
+	},
+	badge: {
+		position: "absolute",
+		top: vs(4),
+		right: s(4),
+		minWidth: s(16),
+		height: s(16),
+		borderRadius: ms(8),
+		paddingHorizontal: s(3),
+		backgroundColor: AUTH_UI.colors.danger,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	badgeText: {
+		color: "#FFFFFF",
+		fontSize: ms(9),
+		fontWeight: "700",
 	},
 
 	progressCard: {

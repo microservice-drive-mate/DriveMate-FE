@@ -1,6 +1,7 @@
 import { User, UpdateProfileRequest } from '@/models/user.model';
 import { authService } from '@/services/auth.service';
 import { userService } from '@/services/user.service';
+import { useNotificationsStore } from '@/store/notifications.store';
 import {
 	clearStorage,
 	getAuthToken,
@@ -107,6 +108,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 			// Logout locally even if API call fails
 		} finally {
 			await clearStorage();
+			useNotificationsStore.getState().clear();
 			set({
 				user: null,
 				accessToken: null,
@@ -117,6 +119,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 	},
 
 	clearAuth: () => {
+		useNotificationsStore.getState().clear();
 		set({
 			user: null,
 			accessToken: null,

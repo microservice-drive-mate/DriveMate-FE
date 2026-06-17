@@ -47,6 +47,7 @@ export const ENDPOINTS = {
 	NOTIFICATIONS: {
 		ME: "/notifications/me",
 		MARK_READ: (id: string) => `/notifications/${id}/read`,
+		MARK_ALL_READ: "/notifications/mark-all-read",
 	},
 	ANALYTICS: {
 		ME_PROGRESS: "/analytics/me/progress",

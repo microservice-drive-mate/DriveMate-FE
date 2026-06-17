@@ -12,4 +12,8 @@ export const notificationService = {
 	markAsRead: withErrorHandling((id: string) =>
 		api.patch<ApiResponse<Notification>>(ENDPOINTS.NOTIFICATIONS.MARK_READ(id), {}),
 	),
+
+	markAllRead: withErrorHandling(() =>
+		api.patch<ApiResponse<{ updated: number }>>(ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {}),
+	),
 };

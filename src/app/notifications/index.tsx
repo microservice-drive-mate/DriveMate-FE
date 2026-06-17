@@ -7,7 +7,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+	ActivityIndicator,
 	FlatList,
+	RefreshControl,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -25,7 +27,14 @@ const TABS: { key: FilterTab; label: string }[] = [
 
 export default function NotificationsScreen() {
 	const router = useRouter();
-	const { notifications, refresh } = useNotificationsStore();
+	const {
+		notifications,
+		isRefreshing,
+		isLoadingMore,
+		refresh,
+		loadMore,
+		markAllRead,
+	} = useNotificationsStore();
 	const [activeTab, setActiveTab] = useState<FilterTab>("all");
 
 	useEffect(() => {
@@ -105,15 +114,19 @@ export default function NotificationsScreen() {
 						{unreadCount} thông báo chưa đọc
 					</Text>
 				</View>
-				<TouchableOpacity
-					style={styles.iconBtn}
-					onPress={refresh}>
-					<Ionicons
-						name="refresh-outline"
-						size={ms(20)}
-						color={AUTH_UI.colors.textPrimary}
-					/>
-				</TouchableOpacity>
+				{unreadCount > 0 ? (
+					<TouchableOpacity
+						style={styles.iconBtn}
+						onPress={markAllRead}>
+						<Ionicons
+							name="checkmark-done-outline"
+							size={ms(20)}
+							color={AUTH_UI.colors.accent}
+						/>
+					</TouchableOpacity>
+				) : (
+					<View style={styles.iconBtn} />
+				)}
 			</View>
 
 			{/* Filter tabs */}
@@ -144,6 +157,23 @@ export default function NotificationsScreen() {
 				renderItem={renderCard}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
+				refreshControl={
+					<RefreshControl
+						refreshing={isRefreshing}
+						onRefresh={refresh}
+						tintColor={AUTH_UI.colors.accent}
+					/>
+				}
+				onEndReached={loadMore}
+				onEndReachedThreshold={0.4}
+				ListFooterComponent={
+					isLoadingMore ? (
+						<ActivityIndicator
+							style={styles.footerLoader}
+							color={AUTH_UI.colors.accent}
+						/>
+					) : null
+				}
 				ListEmptyComponent={
 					<Text style={styles.empty}>Không có thông báo</Text>
 				}
@@ -252,4 +282,6 @@ const styles = StyleSheet.create({
 		marginTop: vs(40),
 		fontSize: ms(14),
 	},
+
+	footerLoader: { paddingVertical: vs(16) },
 });
