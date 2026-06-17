@@ -148,6 +148,12 @@ export default function Me() {
 						<Text style={styles.sectionTitle}>Khóa học</Text>
 						<View style={styles.sectionCard}>
 							<MenuRow
+								icon="school-outline"
+								label="Khóa học của tôi"
+								onPress={() => router.push("/courses")}
+							/>
+							<Divider />
+							<MenuRow
 								icon="ribbon-outline"
 								label="Hạng bằng đang học"
 								value={licenseTier ?? "Chưa phân hạng"}

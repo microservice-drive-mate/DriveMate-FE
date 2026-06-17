@@ -58,6 +58,16 @@ export const ENDPOINTS = {
 		MANEUVER: (id: string) => `/simulation/maneuvers/${id}`,
 		MANEUVER_ERRORS: "/simulation/maneuver-errors",
 	},
+	COURSES: {
+		DETAIL: (id: string) => `/courses/${id}`,
+		LESSON: (id: string, lessonId: string) => `/courses/${id}/lessons/${lessonId}`,
+	},
+	ENROLLMENTS: {
+		LIST: "/enrollments",
+		DETAIL: (id: string) => `/enrollments/${id}`,
+		COMPLETE_LESSON: (id: string, lessonId: string) =>
+			`/enrollments/${id}/lessons/${lessonId}/complete`,
+	},
 };
 
 export const ERROR_CODES = {
