@@ -1,35 +1,51 @@
 {
-	"expo": {
-		"name": "DriveMate-FE",
-		"slug": "DriveMate-FE",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./src/assets/images/icon.png",
-		"scheme": "drivematefe",
-		"userInterfaceStyle": "automatic",
-		"newArchEnabled": true,
-		"ios": {
-			"supportsTablet": true
-		},
-		"android": {
-			"softwareKeyboardLayoutMode": "pan",
-			"adaptiveIcon": {
-				"backgroundColor": "#E6F4FE",
-				"foregroundImage": "./src/assets/images/android-icon-foreground.png",
-				"backgroundImage": "./src/assets/images/android-icon-background.png",
-				"monochromeImage": "./src/assets/images/android-icon-monochrome.png"
-			},
-			"edgeToEdgeEnabled": true,
-			"predictiveBackGestureEnabled": false,
-			"package": "com.anonymous.DriveMateFE"
-		},
-		"web": {
-			"output": "static",
-			"favicon": "./src/assets/images/favicon.png"
-		},
-		"plugins": ["expo-router", "expo-secure-store"],
-		"experiments": {
-			"typedRoutes": true
-		}
-	}
+  "expo": {
+    "name": "DriveMate-FE",
+    "slug": "DriveMate-FE",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/images/icon.png",
+    "scheme": "drivematefe",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "softwareKeyboardLayoutMode": "pan",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./src/assets/images/android-icon-foreground.png",
+        "backgroundImage": "./src/assets/images/android-icon-background.png",
+        "monochromeImage": "./src/assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.DriveMateFE"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./src/assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0a714c16-1d34-4b52-a52e-7fc9d95d51ee"
+      }
+    },
+    "owner": "toanhuynh0201",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0a714c16-1d34-4b52-a52e-7fc9d95d51ee"
+    }
+  }
 }
