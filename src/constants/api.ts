@@ -71,6 +71,11 @@ export const ENDPOINTS = {
 		COMPLETE_LESSON: (id: string, lessonId: string) =>
 			`/enrollments/${id}/lessons/${lessonId}/complete`,
 	},
+	QUESTIONS: {
+		TOPICS: "/questions/topics",
+		PRACTICE: "/questions/practice",
+		REPORT: (id: string) => `/questions/${id}/report`,
+	},
 };
 
 export const ERROR_CODES = {

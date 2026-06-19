@@ -3,7 +3,8 @@ import { Button } from "@/components/common/Button";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { ms, s, vs } from "@/utils/responsive";
 import { ExamTemplate } from "@/models/examSession.model";
-import { ExamType } from "@/models/exam.model";
+
+type ExamType = "on-tap" | "sat-hach";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 

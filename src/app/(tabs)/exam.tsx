@@ -5,7 +5,6 @@ import { ExamCard } from "@/components/exam/ExamCard";
 import { FilterTabs, TabItem } from "@/components/layout/FilterTabs";
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
-import { ExamType } from "@/models/exam.model";
 import { ExamTemplate } from "@/models/examSession.model";
 import { examService } from "@/services/exam.service";
 import { colors, withAlpha } from "@/theme";
@@ -20,8 +19,11 @@ import {
 	FlatList,
 	StyleSheet,
 	Text,
+	TouchableOpacity,
 	View,
 } from "react-native";
+
+type ExamType = "on-tap" | "sat-hach";
 
 const TYPE_TABS: TabItem[] = [
 	{ key: "on-tap", label: "Ôn tập", icon: "book-outline" },
@@ -106,19 +108,6 @@ export default function ExamScreen() {
 					</Text>
 				</View>
 
-				<InputField
-					leftIcon="search-outline"
-					rightIcon={
-						searchText.length > 0 ? "close-circle" : undefined
-					}
-					onRightPress={() => setSearchText("")}
-					placeholder="Tìm kiếm đề thi..."
-					value={searchText}
-					onChangeText={setSearchText}
-					returnKeyType="search"
-					containerStyle={styles.searchContainer}
-				/>
-
 				<FilterTabs
 					tabs={TYPE_TABS}
 					activeKey={activeType}
@@ -128,60 +117,98 @@ export default function ExamScreen() {
 				/>
 
 				{activeType === "on-tap" ? (
-					<View style={styles.bannerOnTap}>
-						<Ionicons
-							name="book-outline"
-							size={ms(18)}
-							color={AUTH_UI.colors.accent}
-						/>
-						<Text style={styles.bannerText}>
-							Không giới hạn lần làm. Xem đáp án ngay sau mỗi câu.
-						</Text>
+					<View style={styles.onTapContainer}>
+						<View style={styles.bannerOnTap}>
+							<Ionicons
+								name="book-outline"
+								size={ms(18)}
+								color={AUTH_UI.colors.accent}
+							/>
+							<Text style={styles.bannerText}>
+								Ôn tập câu hỏi theo từng chủ đề. Xem đáp án
+								ngay sau mỗi câu.
+							</Text>
+						</View>
+						<TouchableOpacity
+							style={styles.onTapButton}
+							onPress={() => router.push("/questions" as never)}
+							activeOpacity={0.7}>
+							<Ionicons
+								name="library-outline"
+								size={ms(20)}
+								color={AUTH_UI.colors.accent}
+							/>
+							<Text style={styles.onTapButtonText}>
+								Chọn chủ đề để bắt đầu
+							</Text>
+							<Ionicons
+								name="chevron-forward"
+								size={ms(18)}
+								color={AUTH_UI.colors.textSecondary}
+							/>
+						</TouchableOpacity>
 					</View>
 				) : (
-					<View style={styles.bannerSatHach}>
-						<Ionicons
-							name="trophy-outline"
-							size={ms(18)}
-							color={colors.satHachText}
+					<>
+						<InputField
+							leftIcon="search-outline"
+							rightIcon={
+								searchText.length > 0
+									? "close-circle"
+									: undefined
+							}
+							onRightPress={() => setSearchText("")}
+							placeholder="Tìm kiếm đề thi..."
+							value={searchText}
+							onChangeText={setSearchText}
+							returnKeyType="search"
+							containerStyle={styles.searchContainer}
 						/>
-						<Text
-							style={[
-								styles.bannerText,
-								styles.bannerTextPurple,
-							]}>
-							Mô phỏng sát hạch thực tế. Có câu điểm liệt. Thời
-							gian giới hạn.
-						</Text>
-					</View>
-				)}
 
-				<AsyncContent
-					loading={isLoading}
-					error={error}
-					onRetry={loadTemplates}>
-					<FlatList
-						data={filteredTemplates}
-						keyExtractor={(item) => item.id}
-						renderItem={({ item }) => (
-							<ExamCard
-								template={item}
-								activeType={activeType}
-								onStart={() => handleStart(item)}
+						<View style={styles.bannerSatHach}>
+							<Ionicons
+								name="trophy-outline"
+								size={ms(18)}
+								color={colors.satHachText}
 							/>
-						)}
-						contentContainerStyle={styles.listContent}
-						showsVerticalScrollIndicator={false}
-						style={styles.list}
-						ListEmptyComponent={
-							<EmptyState
-								icon="search-outline"
-								title="Không tìm thấy đề thi phù hợp"
-								style={styles.emptyState}
+							<Text
+								style={[
+									styles.bannerText,
+									styles.bannerTextPurple,
+								]}>
+								Mô phỏng sát hạch thực tế. Có câu điểm liệt.
+								Thời gian giới hạn.
+							</Text>
+						</View>
+
+						<AsyncContent
+							loading={isLoading}
+							error={error}
+							onRetry={loadTemplates}>
+							<FlatList
+								data={filteredTemplates}
+								keyExtractor={(item) => item.id}
+								renderItem={({ item }) => (
+									<ExamCard
+										template={item}
+										activeType={activeType}
+										onStart={() => handleStart(item)}
+									/>
+								)}
+								contentContainerStyle={styles.listContent}
+								showsVerticalScrollIndicator={false}
+								style={styles.list}
+								ListEmptyComponent={
+									<EmptyState
+										icon="search-outline"
+										title="Không tìm thấy đề thi phù hợp"
+										style={styles.emptyState}
+									/>
+								}
 							/>
-						}
-					/>
-				</AsyncContent>
+						</AsyncContent>
+					</>
+				)}
 			</View>
 
 			{isStarting && (
@@ -255,6 +282,27 @@ const styles = StyleSheet.create({
 		lineHeight: ms(19),
 	},
 	bannerTextPurple: { color: colors.satHachTextLight },
+	onTapContainer: {
+		flex: 1,
+		paddingHorizontal: s(16),
+		gap: vs(12),
+	},
+	onTapButton: {
+		flexDirection: "row",
+		alignItems: "center",
+		backgroundColor: AUTH_UI.colors.surface,
+		borderWidth: 1,
+		borderColor: AUTH_UI.colors.border,
+		borderRadius: ms(AUTH_UI.radius.lg),
+		padding: s(16),
+		gap: s(12),
+	},
+	onTapButtonText: {
+		flex: 1,
+		fontSize: ms(15),
+		fontWeight: "600",
+		color: AUTH_UI.colors.textPrimary,
+	},
 	list: { flex: 1 },
 	listContent: {
 		paddingHorizontal: s(16),
