@@ -50,6 +50,9 @@ export const ENDPOINTS = {
 		ME: "/notifications/me",
 		MARK_READ: (id: string) => `/notifications/${id}/read`,
 		MARK_ALL_READ: "/notifications/mark-all-read",
+		REGISTER_DEVICE: "/notifications/devices",
+		UNREGISTER_DEVICE: (token: string) =>
+			`/notifications/devices/${encodeURIComponent(token)}`,
 	},
 	ANALYTICS: {
 		ME_PROGRESS: "/analytics/me/progress",
