@@ -7,7 +7,7 @@ import type {
 	ExamSessionQuestion,
 	ExamSessionStatus,
 	SaveAnswerRequest,
-	MissedQuestion,
+	MissedQuestionsResponse,
 	MissedQuestionsQuery,
 } from '@/models/examSession.model';
 import { withErrorHandling } from '@/utils';
@@ -27,7 +27,7 @@ export const examService = {
 	),
 
 	getMissedQuestions: withErrorHandling((params?: MissedQuestionsQuery) =>
-		api.get<ApiResponse<MissedQuestion[]>>(ENDPOINTS.EXAMS.REVIEW_MISSED_QUESTIONS, {
+		api.get<ApiResponse<MissedQuestionsResponse>>(ENDPOINTS.EXAMS.REVIEW_MISSED_QUESTIONS, {
 			params,
 		}),
 	),
