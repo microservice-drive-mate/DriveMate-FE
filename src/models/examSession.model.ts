@@ -62,6 +62,7 @@ export interface SaveAnswerRequest {
 export interface MissedQuestionOption {
   id: string;
   content: string;
+  displayOrder: number;
 }
 
 export type MissedQuestionsMode = 'frequent' | 'recent';
@@ -77,9 +78,13 @@ export interface MissedQuestionsQuery {
 export interface MissedQuestion {
   questionId: string;
   content: string;
-  topicId: string;
-  topicName: string;
+  imageUrl?: string | null;
+  mediaFileId?: string | null;
   options: MissedQuestionOption[];
   missedCount: number;
   lastAnsweredAt: string;
+}
+
+export interface MissedQuestionsResponse {
+  items: MissedQuestion[];
 }

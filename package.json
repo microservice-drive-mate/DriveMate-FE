@@ -13,6 +13,8 @@
     "prebuild": "expo prebuild",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "test:pact": "jest --config jest.pact.config.js --runInBand",
+    "typecheck:pact": "tsc -p tsconfig.pact.json --noEmit",
     "test:ci": "jest --ci",
     "doctor": "npx --yes expo-doctor"
   },
@@ -50,6 +52,8 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^16.5.0",
+    "@repo/pact-matchers": "file:../luyen-thi-lai-xe-microservices/packages/pact-matchers",
     "@types/jest": "29.5.14",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
