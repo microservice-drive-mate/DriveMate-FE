@@ -12,6 +12,7 @@ import {
 	setRefreshToken,
 	clearOnboardingSeen,
 } from '@/utils/storage';
+import { clearAnswersCache } from '@/utils/practiceAnswersCache';
 import { create } from 'zustand';
 
 interface AuthState {
@@ -108,6 +109,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 			// Logout locally even if API call fails
 		} finally {
 			await clearStorage();
+			clearAnswersCache();
 			useNotificationsStore.getState().clear();
 			set({
 				user: null,

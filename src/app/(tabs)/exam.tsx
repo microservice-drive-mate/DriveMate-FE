@@ -32,7 +32,7 @@ const TYPE_TABS: TabItem[] = [
 
 export default function ExamScreen() {
 	const router = useRouter();
-	const [activeType, setActiveType] = useState<ExamType>("sat-hach");
+	const [activeType, setActiveType] = useState<ExamType>("on-tap");
 	const [searchText, setSearchText] = useState("");
 	const [templates, setTemplates] = useState<ExamTemplate[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -125,8 +125,8 @@ export default function ExamScreen() {
 								color={AUTH_UI.colors.accent}
 							/>
 							<Text style={styles.bannerText}>
-								Ôn tập câu hỏi theo từng chủ đề. Xem đáp án
-								ngay sau mỗi câu.
+								Ôn tập câu hỏi theo từng chủ đề. Xem đáp án ngay
+								sau mỗi câu.
 							</Text>
 						</View>
 						<TouchableOpacity

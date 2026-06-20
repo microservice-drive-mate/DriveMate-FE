@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
-import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
+import messaging from '@react-native-firebase/messaging';
 import { useAuthStore } from '@/store/auth.store';
 import { deviceTokenService } from '@/services/device-token.service';
 
@@ -22,8 +22,8 @@ export function usePushNotifications() {
 		const setup = async () => {
 			const authStatus = await messaging().requestPermission();
 			const granted =
-				authStatus === AuthorizationStatus.AUTHORIZED ||
-				authStatus === AuthorizationStatus.PROVISIONAL;
+				authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+				authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
 			if (!granted) return;
 

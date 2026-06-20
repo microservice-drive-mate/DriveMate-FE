@@ -7,10 +7,12 @@ import type { PracticeQuestion } from "@/models/question.model";
 import { questionService } from "@/services/question.service";
 import { colors, withAlpha } from "@/theme";
 import { getErrorMessage } from "@/utils/error";
+import { getPracticeAnswers, setPracticeAnswers } from "@/utils/storage";
+import { answersCache } from "@/utils/practiceAnswersCache";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	Alert,
 	FlatList,
@@ -35,13 +37,22 @@ export default function PracticeScreen() {
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [hasMore, setHasMore] = useState(true);
 	// Map: questionId → selectedOptionId
-	const [answers, setAnswers] = useState<Record<string, string>>({});
+	const [answers, setAnswers] = useState<Record<string, string>>(
+		() => answersCache.get(topicId) ?? {},
+	);
 	const page = useRef(1);
 
 	const load = useCallback(async () => {
 		page.current = 1;
 		setIsLoading(true);
 		setError(null);
+		if (!answersCache.has(topicId)) {
+			const stored = await getPracticeAnswers();
+			if (stored?.[topicId]) {
+				answersCache.set(topicId, stored[topicId]);
+				setAnswers(stored[topicId]);
+			}
+		}
 		const result = await questionService.getPracticeQuestions({
 			topicId,
 			page: 1,
@@ -55,6 +66,10 @@ export default function PracticeScreen() {
 		}
 		setIsLoading(false);
 	}, [topicId]);
+
+	useEffect(() => {
+		load();
+	}, [load]);
 
 	const loadMore = async () => {
 		if (isLoadingMore || !hasMore) return;
@@ -74,9 +89,13 @@ export default function PracticeScreen() {
 	};
 
 	const handleSelectOption = (questionId: string, optionId: string) => {
-		// Không cho thay đổi sau khi đã chọn
 		if (answers[questionId]) return;
-		setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+		const next = { ...answers, [questionId]: optionId };
+		answersCache.set(topicId, next);
+		setAnswers(next);
+		getPracticeAnswers().then((stored) => {
+			setPracticeAnswers({ ...stored, [topicId]: next });
+		});
 	};
 
 	const handleReport = (question: PracticeQuestion) => {

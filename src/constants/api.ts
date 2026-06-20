@@ -16,6 +16,7 @@ export const AUTH_CONFIG = {
 	REFRESH_TOKEN_KEY: "drivemate_refresh_token",
 	USER_KEY: "drivemate_user",
 	ONBOARDING_KEY: "drivemate_onboarding_seen",
+	PRACTICE_ANSWERS_KEY: "drivemate_practice_answers",
 };
 
 export const ENDPOINTS = {

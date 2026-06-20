@@ -12,6 +12,8 @@ import {
 	setStorageItem,
 	shouldLogout,
 } from '@/utils';
+import { clearPracticeAnswers } from '@/utils/storage';
+import { clearAnswersCache } from '@/utils/practiceAnswersCache';
 
 import { router } from 'expo-router';
 
@@ -185,7 +187,9 @@ class ApiService {
 			removeAuthToken(),
 			removeRefreshToken(),
 			removeUserData(),
+			clearPracticeAnswers(),
 		]);
+		clearAnswersCache();
 		this._logoutCallback?.();
 		router.replace(ROUTES.LOGIN);
 	}
