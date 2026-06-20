@@ -662,9 +662,8 @@ Student-safe topic list for practice screens. Same query shape as `GET /admin/qu
 
 ### GET `/questions/practice`
 
-Returns active, non-deleted questions for practice. Query shape matches `GET /admin/questions`, but the response intentionally strips most answer data. `correctOptionId` is included so the student app can show immediate answer feedback after the student selects an option.
+Returns active, non-deleted questions for practice. Query shape matches `GET /admin/questions`, but the response intentionally strips answer data:
 
-Stripped fields:
 - no `options[].isCorrect`
 - no `isCritical`
 - no `explanation`
@@ -684,7 +683,6 @@ Stripped fields:
       "imageUrl": null,
       "mediaFileId": null,
       "topicId": "topic-uuid",
-      "correctOptionId": "option-uuid",
       "options": [
         {
           "id": "option-uuid",

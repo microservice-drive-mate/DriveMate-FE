@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1033184931866",
+    "project_id": "drive-2db5e",
+    "storage_bucket": "drive-2db5e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033184931866:android:335bac22791f36c4dfa1a3",
+        "android_client_info": {
+          "package_name": "com.anonymous.DriveMateFE"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2CLWC7ajryGgUWQHU7jpqAx2EqRqq97c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
