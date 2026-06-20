@@ -26,7 +26,9 @@ jobs:
   build-and-release:
     name: Build and publish Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 45 
+    timeout-minutes: 45
+    env:
+      NODE_OPTIONS: --max_old_space_size=3072
     steps:
       - uses: actions/checkout@v4
         with:
@@ -101,20 +103,55 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - uses: android-actions/setup-android@v3
 
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tune Gradle for CI memory
+        shell: bash
+        run: |
+          sed -i \
+            -e '/^org.gradle.daemon=/d' \
+            -e '/^org.gradle.parallel=/d' \
+            -e '/^org.gradle.workers.max=/d' \
+            -e '/^org.gradle.jvmargs=/d' \
+            -e '/^kotlin.daemon.jvmargs=/d' \
+            -e '/^reactNativeArchitectures=/d' \
+            android/gradle.properties
+
+          {
+            echo ''
+            echo '# CI memory tuning'
+            echo 'org.gradle.daemon=false'
+            echo 'org.gradle.parallel=false'
+            echo 'org.gradle.workers.max=2'
+            echo 'org.gradle.jvmargs=-Xmx2560m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8'
+            echo 'kotlin.daemon.jvmargs=-Xmx768m'
+            echo 'reactNativeArchitectures=armeabi-v7a,arm64-v8a'
+          } >> android/gradle.properties
+
       - name: Build release APK locally
         working-directory: android
+        env:
+          GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --no-daemon --max-workers=2 --stacktrace
 
       - name: Prepare APK artifact
+        shell: bash
         run: |
           mkdir -p build
-          cp android/app/build/outputs/apk/release/app-release.apk "build/${{ steps.meta.outputs.apk_name }}"
+          apk_path="$(find android/app/build/outputs/apk/release -type f -name '*.apk' | head -n 1)"
+
+          if [ -z "${apk_path}" ]; then
+            echo "::error::No release APK generated."
+            find android/app/build/outputs -type f || true
+            exit 1
+          fi
+
+          cp "${apk_path}" "build/${{ steps.meta.outputs.apk_name }}"
 
       - uses: actions/upload-artifact@v4
         with:
