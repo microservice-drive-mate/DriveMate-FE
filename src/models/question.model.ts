@@ -18,7 +18,7 @@ export interface PracticeQuestionOption {
 }
 
 // Student-safe: no explanation, isCorrect per option, isCritical, or versioning.
-// correctOptionId is included to support immediate answer feedback in the practice UI.
+// correctOptionId is not in spec; included by backend for practice answer feedback if available.
 export interface PracticeQuestion {
   id: string;
   content: string;
@@ -28,7 +28,7 @@ export interface PracticeQuestion {
   imageUrl: string | null;
   mediaFileId: string | null;
   topicId: string;
-  correctOptionId: string;
+  correctOptionId?: string | null;
   options: PracticeQuestionOption[];
 }
 
@@ -43,6 +43,6 @@ export interface PracticeQuestionsParams {
 }
 
 export interface ReportQuestionRequest {
-  reason: string;
+  reason: 'WRONG_ANSWER';
   message: string;
 }

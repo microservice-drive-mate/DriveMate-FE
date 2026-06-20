@@ -27,7 +27,7 @@ export const examService = {
 	),
 
 	getMissedQuestions: withErrorHandling((params?: MissedQuestionsQuery) =>
-		api.get<ApiResponse<MissedQuestion[]>>(ENDPOINTS.EXAMS.REVIEW_MISSED_QUESTIONS, {
+		api.get<ApiResponse<{ items: MissedQuestion[] }>>(ENDPOINTS.EXAMS.REVIEW_MISSED_QUESTIONS, {
 			params,
 		}),
 	),

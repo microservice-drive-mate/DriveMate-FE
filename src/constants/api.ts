@@ -24,7 +24,6 @@ export const ENDPOINTS = {
 		REFRESH: "/auth/refresh",
 		LOGOUT: "/auth/logout",
 		FORGOT_PASSWORD: "/auth/forgot-password",
-		CHANGE_PASSWORD: "/auth/change-password",
 	},
 	USERS: {
 		GET_ME: "/users/me",
@@ -53,6 +52,7 @@ export const ENDPOINTS = {
 		REGISTER_DEVICE: "/notifications/devices",
 		UNREGISTER_DEVICE: (token: string) =>
 			`/notifications/devices/${encodeURIComponent(token)}`,
+		PREFERENCES_ME: "/notifications/preferences/me",
 	},
 	ANALYTICS: {
 		ME_PROGRESS: "/analytics/me/progress",

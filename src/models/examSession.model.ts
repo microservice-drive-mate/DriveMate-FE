@@ -12,6 +12,7 @@ export interface ExamTemplate {
   criticalQuestions: number;
   maxCriticalMistakes: number;
   shuffleQuestions: boolean;
+  topicDistribution?: Array<{ topicId: string; questionCount: number }>;
 }
 
 export interface QuestionOption {
@@ -77,8 +78,8 @@ export interface MissedQuestionsQuery {
 export interface MissedQuestion {
   questionId: string;
   content: string;
-  topicId: string;
-  topicName: string;
+  imageUrl?: string | null;
+  mediaFileId?: string | null;
   options: MissedQuestionOption[];
   missedCount: number;
   lastAnsweredAt: string;
