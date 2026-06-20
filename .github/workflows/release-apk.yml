@@ -1,0 +1,133 @@
+name: Release Mobile APK
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, for example 1.0.0 or v1.0.0"
+        required: true
+        type: string
+      target_ref:
+        description: "Branch, tag, or commit SHA to release. Defaults to the selected ref."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-mobile-apk-${{ github.event_name == 'push' && github.ref_name || github.event.inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    name: Build and publish Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.target_ref || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run release checks
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run test:ci
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            raw_version="${{ github.event.inputs.version }}"
+            tag="v${raw_version#v}"
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
+
+          if [[ ! "${tag}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Release tag must look like v1.0.0."
+            exit 1
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+              echo "::error::Tag ${tag} already exists."
+              exit 1
+            fi
+
+            git tag -a "${tag}" -m "Release ${tag}"
+            git push origin "${tag}"
+          fi
+
+          version="${tag#v}"
+          base_version="${version%%[-+]*}"
+          IFS=. read -r major minor patch <<< "${base_version}"
+          version_code=$((10#${major} * 10000 + 10#${minor} * 100 + 10#${patch}))
+          apk_name="DriveMate-${tag}.apk"
+
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "version_code=${version_code}" >> "${GITHUB_OUTPUT}"
+          echo "apk_name=${apk_name}" >> "${GITHUB_OUTPUT}"
+
+      - name: Configure app version
+        env:
+          APP_VERSION_NAME: ${{ steps.meta.outputs.version }}
+          APP_VERSION_CODE: ${{ steps.meta.outputs.version_code }}
+        run: |
+          node -e "const fs = require('fs'); const app = JSON.parse(fs.readFileSync('app.json', 'utf8')); app.expo.version = process.env.APP_VERSION_NAME; app.expo.android = { ...(app.expo.android || {}), versionCode: Number(process.env.APP_VERSION_CODE) }; fs.writeFileSync('app.json', JSON.stringify(app, null, 2) + '\n');"
+
+      - name: Generate Android native project
+        run: npx expo prebuild --platform android --clean
+
+      - name: Build release APK locally
+        working-directory: android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+
+      - name: Prepare APK artifact
+        run: |
+          mkdir -p build
+          cp android/app/build/outputs/apk/release/app-release.apk "build/${{ steps.meta.outputs.apk_name }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.apk_name }}
+          path: build/${{ steps.meta.outputs.apk_name }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: DriveMate ${{ steps.meta.outputs.tag }}
+          files: build/${{ steps.meta.outputs.apk_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          make_latest: true
