@@ -63,36 +63,65 @@ export default function ExamScreen() {
 		[templates, searchText],
 	);
 
-	const handleStart = async (template: ExamTemplate) => {
-		if (isStarting) return;
+	const goToSession = (id: string, expiresAt: string) => {
+		router.push({
+			pathname: "/exam-session/take/[id]",
+			params: { id, expiresAt },
+		});
+	};
+
+	const createSession = async (template: ExamTemplate) => {
 		setIsStarting(true);
 		const result = await examService.startSession(template.id);
-		console.log("start session");
-
 		setIsStarting(false);
 		if (result.success) {
-			const session = result.data;
-			const durationMinutes = Math.max(
-				1,
-				Math.round(
-					(new Date(session.expiresAt).getTime() -
-						new Date(session.startedAt).getTime()) /
-						60000,
-				),
-			);
-			router.push({
-				pathname: "/exam-session/take/[id]",
-				params: {
-					id: session.id,
-					durationMinutes: String(durationMinutes),
-				},
-			});
+			goToSession(result.data.id, result.data.expiresAt);
 		} else {
 			Alert.alert(
 				"Không thể bắt đầu thi",
 				getErrorMessage(result.code, result.error),
 			);
 		}
+	};
+
+	const handleStart = async (template: ExamTemplate) => {
+		if (isStarting) return;
+		setIsStarting(true);
+		const inProgress = await examService.listSessions({
+			status: "IN_PROGRESS",
+			size: 100,
+		});
+		setIsStarting(false);
+
+		const resumable = inProgress.success
+			? inProgress.data.items.find(
+					(s) =>
+						s.templateId === template.id &&
+						new Date(s.expiresAt) > new Date(),
+				)
+			: undefined;
+
+		if (resumable) {
+			Alert.alert(
+				"Bạn có bài thi đang làm dở",
+				"Tiếp tục bài đang làm hay bắt đầu một lượt thi mới?",
+				[
+					{ text: "Hủy", style: "cancel" },
+					{
+						text: "Tiếp tục",
+						onPress: () => goToSession(resumable.id, resumable.expiresAt),
+					},
+					{
+						text: "Bắt đầu mới",
+						style: "destructive",
+						onPress: () => createSession(template),
+					},
+				],
+			);
+			return;
+		}
+
+		createSession(template);
 	};
 
 	return (

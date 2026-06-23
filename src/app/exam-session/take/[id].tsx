@@ -23,24 +23,27 @@ import {
 const QUESTIONS_PER_GROUP = 4;
 
 export default function ExamTakeScreen() {
-	const { id, durationMinutes: durationParam } = useLocalSearchParams<{
+	const { id, expiresAt: expiresAtParam } = useLocalSearchParams<{
 		id: string;
-		durationMinutes: string;
+		expiresAt: string;
 	}>();
 	const router = useRouter();
 	const sessionId = id ?? "";
-	const durationMinutes = parseInt(durationParam ?? "20", 10);
 
-	const session = useExamSession(sessionId, durationMinutes);
+	const session = useExamSession(sessionId, expiresAtParam ?? "");
 
 	const [showNavSheet, setShowNavSheet] = useState(false);
 	const [showSubmitSheet, setShowSubmitSheet] = useState(false);
 
 	const handleBack = () => {
-		Alert.alert("Bạn có chắc muốn thoát?", "Tiến độ bài thi sẽ bị mất nếu thoát.", [
-			{ text: "Ở lại", style: "cancel" },
-			{ text: "Thoát", style: "destructive", onPress: () => router.back() },
-		]);
+		Alert.alert(
+			"Bạn có chắc muốn thoát?",
+			"Đáp án đã chọn được lưu lại, nhưng đồng hồ vẫn tiếp tục chạy. Bạn có thể vào lại để làm tiếp trước khi hết giờ.",
+			[
+				{ text: "Ở lại", style: "cancel" },
+				{ text: "Thoát", style: "destructive", onPress: () => router.back() },
+			],
+		);
 	};
 
 	if (session.isLoadingQuestions) {
