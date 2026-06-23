@@ -7,6 +7,8 @@ import type {
 	RefreshTokenResponse,
 	ForgotPasswordRequest,
 	ForgotPasswordResponse,
+	ChangePasswordRequest,
+	ChangePasswordResponse,
 } from '@/models/auth.model';
 import { withErrorHandling } from '@/utils';
 
@@ -28,5 +30,9 @@ export const authService = {
 
 	forgotPassword: withErrorHandling((data: ForgotPasswordRequest) =>
 		api.post<ApiResponse<ForgotPasswordResponse>>(ENDPOINTS.AUTH.FORGOT_PASSWORD, data),
+	),
+
+	changePassword: withErrorHandling((data: ChangePasswordRequest) =>
+		api.post<ApiResponse<ChangePasswordResponse>>(ENDPOINTS.AUTH.CHANGE_PASSWORD, data),
 	),
 };

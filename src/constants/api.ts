@@ -25,6 +25,7 @@ export const ENDPOINTS = {
 		REFRESH: "/auth/refresh",
 		LOGOUT: "/auth/logout",
 		FORGOT_PASSWORD: "/auth/forgot-password",
+		CHANGE_PASSWORD: "/auth/change-password",
 	},
 	USERS: {
 		GET_ME: "/users/me",

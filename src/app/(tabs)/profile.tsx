@@ -144,6 +144,12 @@ export default function Me() {
 						onChange={setDarkMode}
 					/>
 					<Divider />
+					<MenuRow
+						icon="key-outline"
+						label="Đổi mật khẩu"
+						onPress={() => router.push("../profile/change-password")}
+					/>
+					<Divider />
 					<MenuRow icon="globe-outline" label="Ngôn ngữ" value="Tiếng Việt" />
 				</View>
 

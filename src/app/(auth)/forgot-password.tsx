@@ -4,6 +4,7 @@ import { InputField } from "@/components/common/InputField";
 import { StepProgressBar } from "@/components/ui/StepProgressBar";
 import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
 import { AUTH_MESSAGES } from "@/constants/messages";
+import { checkPasswordRules } from "@/utils/password";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -29,15 +30,6 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_LENGTH = 6;
 const OTP_SECONDS = 60;
-
-function checkPasswordRules(password: string) {
-	return {
-		minLength: password.length >= 8,
-		upperLower: /(?=.*[a-z])(?=.*[A-Z])/.test(password),
-		hasNumber: /\d/.test(password),
-		hasSpecial: /[^A-Za-z0-9]/.test(password),
-	};
-}
 
 export default function ForgotPasswordScreen() {
 	const [step, setStep] = useState(1);
