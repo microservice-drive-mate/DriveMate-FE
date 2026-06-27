@@ -1,13 +1,23 @@
 name: EAS Update (OTA)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Select the OTA release channel'
+        required: true
+        type: choice
+        options:
+          - preview
+          - production
+      message:
+        description: 'Update message or release notes'
+        required: true
+        type: string
 
 jobs:
   update:
-    name: Publish OTA to preview channel
+    name: Publish OTA to ${{ github.event.inputs.channel }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,4 +36,4 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Publish update
-        run: eas update --branch preview --message "${{ github.event.head_commit.message }}" --non-interactive
+        run: eas update --branch ${{ github.event.inputs.channel }} --message "${{ github.event.inputs.message }}" --non-interactive
