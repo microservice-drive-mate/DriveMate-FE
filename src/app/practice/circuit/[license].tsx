@@ -5,6 +5,7 @@ import { Maneuver } from '@/models/practice.model';
 import { practiceService } from '@/services/practice.service';
 import { ms, s, vs } from '@/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -70,9 +71,11 @@ export default function CircuitListScreen() {
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <View style={styles.header}>
-              <View style={styles.mapPlaceholder}>
-                <Text style={styles.mapPlaceholderText}>Bản đồ sa hình {license}</Text>
-              </View>
+              <Image
+                source={require('@/assets/images/circuit-map.png')}
+                style={styles.mapPlaceholder}
+                contentFit="contain"
+              />
               <Text style={styles.hint}>
                 💡 Nhấn vào từng bài để xem chi tiết
               </Text>
@@ -113,10 +116,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: vs(10),
-  },
-  mapPlaceholderText: {
-    color: AUTH_UI.colors.textMuted,
-    fontSize: ms(14),
   },
   hint: {
     fontSize: ms(12),
