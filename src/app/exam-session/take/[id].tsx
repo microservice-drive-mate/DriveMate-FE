@@ -17,10 +17,9 @@ import {
 	ScrollView,
 	StyleSheet,
 	Text,
+	TouchableOpacity,
 	View,
 } from "react-native";
-
-const QUESTIONS_PER_GROUP = 4;
 
 export default function ExamTakeScreen() {
 	const { id, expiresAt: expiresAtParam } = useLocalSearchParams<{
@@ -75,8 +74,6 @@ export default function ExamTakeScreen() {
 
 	const question = session.questions[session.currentQuestionIndex];
 	const totalQuestions = session.questions.length;
-	const totalGroups = Math.ceil(totalQuestions / QUESTIONS_PER_GROUP);
-	const currentGroup = Math.floor(session.currentQuestionIndex / QUESTIONS_PER_GROUP);
 	const isBookmarked = session.bookmarks[question.questionId] ?? false;
 	const selectedOptionId = session.answers[question.questionId] ?? null;
 	const isTimeLow = session.remainingSeconds <= 60;
@@ -146,11 +143,14 @@ export default function ExamTakeScreen() {
 					style={styles.navArrow}
 				/>
 
-				<View style={styles.dots}>
-					{Array.from({ length: totalGroups }).map((_, i) => (
-						<View key={i} style={[styles.dot, i === currentGroup && styles.dotActive]} />
-					))}
-				</View>
+				<TouchableOpacity
+					style={styles.navOpenBtn}
+					onPress={() => setShowNavSheet(true)}>
+					<Ionicons name="grid-outline" size={ms(16)} color={colors.accent} />
+					<Text style={styles.navOpenText}>
+						{session.currentQuestionIndex + 1}/{totalQuestions}
+					</Text>
+				</TouchableOpacity>
 
 				<Button
 					variant="icon"
@@ -250,22 +250,21 @@ const styles = StyleSheet.create({
 		height: s(40),
 		borderRadius: ms(20),
 	},
-	dots: {
+	navOpenBtn: {
 		flexDirection: "row",
-		gap: s(8),
 		alignItems: "center",
+		gap: s(6),
+		paddingHorizontal: s(14),
+		paddingVertical: vs(8),
+		borderRadius: ms(radius.xl),
+		borderWidth: 1,
+		borderColor: colors.border,
+		backgroundColor: colors.surface,
 	},
-	dot: {
-		width: s(8),
-		height: s(8),
-		borderRadius: ms(4),
-		backgroundColor: colors.surfaceMuted,
-	},
-	dotActive: {
-		width: s(24),
-		height: s(8),
-		borderRadius: ms(4),
-		backgroundColor: colors.accent,
+	navOpenText: {
+		fontSize: ms(14),
+		fontWeight: "700",
+		color: colors.textPrimary,
 	},
 	errorCenter: {
 		flex: 1,

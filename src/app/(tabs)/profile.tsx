@@ -202,6 +202,12 @@ export default function Me() {
 							/>
 							<Divider />
 							<MenuRow
+								icon="add-circle-outline"
+								label="Đăng ký khóa học"
+								onPress={() => router.push("/enroll")}
+							/>
+							<Divider />
+							<MenuRow
 								icon="ribbon-outline"
 								label="Hạng bằng đang học"
 								value={licenseTier ?? "Chưa phân hạng"}

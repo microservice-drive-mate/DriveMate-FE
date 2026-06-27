@@ -4,6 +4,8 @@ import { InputField } from "@/components/common/InputField";
 import { AUTH_LAYOUT, AUTH_UI } from "@/constants/auth-ui";
 import { AUTH_MESSAGES } from "@/constants/messages";
 import { authService } from "@/services/auth.service";
+import { hasActiveEnrollment } from "@/services/course.service";
+import { UserRole } from "@/models/user.model";
 import { useAuthStore } from "@/store/auth.store";
 import { ms, s, vs } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,7 +36,14 @@ export default function LoginScreen() {
 			if (result.success) {
 				await setTokens(result.data.accessToken, result.data.refreshToken);
 				await fetchUser();
-				router.replace("/(tabs)");
+
+				// Student bắt buộc phải có khóa học: nếu chưa, ép vào màn đăng ký.
+				const user = useAuthStore.getState().user;
+				if (user?.role === UserRole.STUDENT && !(await hasActiveEnrollment())) {
+					router.replace("/enroll?mandatory=1");
+				} else {
+					router.replace("/(tabs)");
+				}
 			} else {
 				Alert.alert("Lỗi đăng nhập", result.error);
 			}

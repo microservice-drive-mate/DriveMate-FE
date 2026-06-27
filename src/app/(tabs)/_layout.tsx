@@ -1,10 +1,39 @@
 import { AUTH_UI } from "@/constants/auth-ui";
+import { UserRole } from "@/models/user.model";
+import { hasActiveEnrollment } from "@/services/course.service";
+import { useAuthStore } from "@/store/auth.store";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
-import React from "react";
+import { Tabs, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 
 export default function TabsLayout() {
+	const router = useRouter();
+	const [checking, setChecking] = useState(true);
+
+	// Gate khi mở lại app (đã có token, bỏ qua login): student bắt buộc phải có khóa.
+	useEffect(() => {
+		let active = true;
+		(async () => {
+			let user = useAuthStore.getState().user;
+			if (!user) {
+				await useAuthStore.getState().fetchUser();
+				user = useAuthStore.getState().user;
+			}
+			if (!active) return;
+			if (user?.role === UserRole.STUDENT && !(await hasActiveEnrollment())) {
+				router.replace("/enroll?mandatory=1");
+				return; // giữ checking=true để không nháy tab trước khi điều hướng
+			}
+			if (active) setChecking(false);
+		})();
+		return () => {
+			active = false;
+		};
+	}, [router]);
+
+	if (checking) return null;
+
 	return (
 		<Tabs
 			screenOptions={{

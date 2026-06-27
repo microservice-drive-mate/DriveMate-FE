@@ -20,21 +20,31 @@ export function usePushNotifications() {
 		let unsubscribeRefresh: (() => void) | undefined;
 
 		const setup = async () => {
-			const authStatus = await messaging().requestPermission();
-			const granted =
-				authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-				authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+			try {
+				const authStatus = await messaging().requestPermission();
+				const granted =
+					authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+					authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-			if (!granted) return;
+				if (!granted) return;
 
-			const token = await messaging().getToken();
-			tokenRef.current = token;
-			await deviceTokenService.register(token, Platform.OS as 'ios' | 'android');
+				const token = await messaging().getToken();
+				tokenRef.current = token;
+				const result = await deviceTokenService.register(token, Platform.OS as 'ios' | 'android');
+				if (!result.success) {
+					console.warn('[PushNotif] Token registration failed:', result.error);
+				}
 
-			unsubscribeRefresh = messaging().onTokenRefresh(async (newToken) => {
-				tokenRef.current = newToken;
-				await deviceTokenService.register(newToken, Platform.OS as 'ios' | 'android');
-			});
+				unsubscribeRefresh = messaging().onTokenRefresh(async (newToken) => {
+					tokenRef.current = newToken;
+					const refreshResult = await deviceTokenService.register(newToken, Platform.OS as 'ios' | 'android');
+					if (!refreshResult.success) {
+						console.warn('[PushNotif] Token refresh registration failed:', refreshResult.error);
+					}
+				});
+			} catch (err) {
+				console.warn('[PushNotif] Setup failed:', err);
+			}
 		};
 
 		setup();

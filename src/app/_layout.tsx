@@ -1,4 +1,4 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, useRootNavigationState, useRouter } from "expo-router";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import messaging from "@react-native-firebase/messaging";
@@ -14,6 +14,7 @@ messaging().setBackgroundMessageHandler(async () => {});
 
 export default function RootLayout() {
 	const router = useRouter();
+	const rootNavState = useRootNavigationState();
 	const { initialize, isLoading, hasSeenOnboarding } = useAuthStore(
 		useShallow((state) => ({
 			initialize: state.initialize,
@@ -35,10 +36,11 @@ export default function RootLayout() {
 	}, []);
 
 	useEffect(() => {
+		if (!rootNavState?.key) return;
 		if (!isLoading && !hasSeenOnboarding) {
 			router.replace("/(onboarding)");
 		}
-	}, [hasSeenOnboarding, isLoading, router]);
+	}, [hasSeenOnboarding, isLoading, router, rootNavState?.key]);
 
 	// Show banner when FCM message arrives while app is in foreground
 	useEffect(() => {
@@ -70,7 +72,7 @@ export default function RootLayout() {
 				const id = remoteMessage.data?.id as string | undefined;
 				router.push(id ? `/notifications/${id}` : "/notifications");
 			});
-	}, [router]);
+	}, []);
 
 	if (isLoading) {
 		return null;
@@ -91,6 +93,10 @@ export default function RootLayout() {
 				<Stack.Screen
 					name="(tabs)"
 					options={{ headerShown: false }}
+				/>
+				<Stack.Screen
+					name="enroll"
+					options={{ headerShown: false, gestureEnabled: false }}
 				/>
 				<Stack.Screen
 					name="notifications"

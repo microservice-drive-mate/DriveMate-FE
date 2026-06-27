@@ -4,7 +4,7 @@ export const API_CONFIG = {
 	BASE_URL:
 		process.env.EXPO_PUBLIC_API_URL ??
 		Platform.select({
-			android: "http://192.168.0.150:8000",
+			android: "http://172.20.10.2:8000",
 			ios: "http://localhost:8000",
 			default: "http://10.0.2.2:8000",
 		})!,
@@ -67,8 +67,12 @@ export const ENDPOINTS = {
 		MANEUVER_ERRORS: "/simulation/maneuver-errors",
 	},
 	COURSES: {
+		LIST: "/courses",
 		DETAIL: (id: string) => `/courses/${id}`,
-		LESSON: (id: string, lessonId: string) => `/courses/${id}/lessons/${lessonId}`,
+		LESSON: (id: string, lessonId: string) =>
+			`/courses/${id}/lessons/${lessonId}`,
+		ENROLL: (id: string) => `/courses/${id}/enroll`,
+		UNENROLL: (id: string) => `/courses/${id}/unenroll`,
 	},
 	ENROLLMENTS: {
 		LIST: "/enrollments",
