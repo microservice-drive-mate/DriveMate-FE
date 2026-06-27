@@ -1,4 +1,5 @@
 import { ExerciseListItem } from '@/components/practice';
+import { ImageViewerModal } from '@/components/common/ImageViewerModal';
 import { ScreenHeader } from '@/components/layout';
 import { AUTH_UI } from '@/constants/auth-ui';
 import { Maneuver } from '@/models/practice.model';
@@ -11,6 +12,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+const CIRCUIT_MAP = require('@/assets/images/circuit-map.png');
+
 export default function CircuitListScreen() {
   const { license } = useLocalSearchParams<{ license: string }>();
   const router = useRouter();
@@ -18,6 +21,7 @@ export default function CircuitListScreen() {
   const [maneuvers, setManeuvers] = useState<Maneuver[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewerVisible, setViewerVisible] = useState(false);
 
   const load = useCallback(async () => {
     if (!license) return;
@@ -71,11 +75,13 @@ export default function CircuitListScreen() {
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <View style={styles.header}>
-              <Image
-                source={require('@/assets/images/circuit-map.png')}
-                style={styles.mapPlaceholder}
-                contentFit="contain"
-              />
+              <TouchableOpacity onPress={() => setViewerVisible(true)} activeOpacity={0.85}>
+                <Image
+                  source={CIRCUIT_MAP}
+                  style={styles.mapPlaceholder}
+                  contentFit="contain"
+                />
+              </TouchableOpacity>
               <Text style={styles.hint}>
                 💡 Nhấn vào từng bài để xem chi tiết
               </Text>
@@ -92,6 +98,11 @@ export default function CircuitListScreen() {
           )}
         />
       )}
+      <ImageViewerModal
+        visible={viewerVisible}
+        source={CIRCUIT_MAP}
+        onClose={() => setViewerVisible(false)}
+      />
     </SafeAreaView>
   );
 }

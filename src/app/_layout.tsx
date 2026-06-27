@@ -1,6 +1,7 @@
 import { Stack, useRootNavigationState, useRouter } from "expo-router";
 import { useEffect } from "react";
 import "react-native-reanimated";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import messaging from "@react-native-firebase/messaging";
 
 import { apiService } from "@/lib/api";
@@ -79,7 +80,7 @@ export default function RootLayout() {
 	}
 
 	return (
-		<>
+		<GestureHandlerRootView style={{ flex: 1 }}>
 			<NotificationBanner />
 			<Stack screenOptions={{ headerShown: false }}>
 				<Stack.Screen
@@ -107,6 +108,6 @@ export default function RootLayout() {
 					options={{ headerShown: false }}
 				/>
 			</Stack>
-		</>
+		</GestureHandlerRootView>
 	);
 }

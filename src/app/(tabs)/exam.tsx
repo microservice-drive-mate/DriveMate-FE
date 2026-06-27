@@ -6,7 +6,9 @@ import { FilterTabs, TabItem } from "@/components/layout/FilterTabs";
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
 import { ExamTemplate } from "@/models/examSession.model";
+import type { QuestionTopic } from "@/models/question.model";
 import { examService } from "@/services/exam.service";
+import { questionService } from "@/services/question.service";
 import { colors, withAlpha } from "@/theme";
 import { getErrorMessage } from "@/utils/error";
 import { ms, s, vs } from "@/utils/responsive";
@@ -39,6 +41,11 @@ export default function ExamScreen() {
 	const [isStarting, setIsStarting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	const [topics, setTopics] = useState<QuestionTopic[]>([]);
+	const [topicsLoading, setTopicsLoading] = useState(false);
+	const [topicsError, setTopicsError] = useState<string | null>(null);
+	const [topicSearch, setTopicSearch] = useState("");
+
 	const loadTemplates = useCallback(async () => {
 		setIsLoading(true);
 		setError(null);
@@ -55,12 +62,36 @@ export default function ExamScreen() {
 		loadTemplates();
 	}, [loadTemplates]);
 
+	const loadTopics = useCallback(async () => {
+		setTopicsLoading(true);
+		setTopicsError(null);
+		const result = await questionService.getTopics({ size: 100 });
+		if (result.success) {
+			setTopics(result.data.items);
+		} else {
+			setTopicsError(getErrorMessage(result.code, result.error));
+		}
+		setTopicsLoading(false);
+	}, []);
+
+	useEffect(() => {
+		loadTopics();
+	}, [loadTopics]);
+
 	const filteredTemplates = useMemo(
 		() =>
 			templates.filter((t) =>
 				t.name.toLowerCase().includes(searchText.toLowerCase().trim()),
 			),
 		[templates, searchText],
+	);
+
+	const filteredTopics = useMemo(
+		() =>
+			topics.filter((t) =>
+				t.name.toLowerCase().includes(topicSearch.toLowerCase().trim()),
+			),
+		[topics, topicSearch],
 	);
 
 	const goToSession = (id: string, expiresAt: string) => {
@@ -146,7 +177,22 @@ export default function ExamScreen() {
 				/>
 
 				{activeType === "on-tap" ? (
-					<View style={styles.onTapContainer}>
+					<>
+						<InputField
+							leftIcon="search-outline"
+							rightIcon={
+								topicSearch.length > 0
+									? "close-circle"
+									: undefined
+							}
+							onRightPress={() => setTopicSearch("")}
+							placeholder="Tìm chủ đề..."
+							value={topicSearch}
+							onChangeText={setTopicSearch}
+							returnKeyType="search"
+							containerStyle={styles.searchContainer}
+						/>
+
 						<View style={styles.bannerOnTap}>
 							<Ionicons
 								name="book-outline"
@@ -158,25 +204,67 @@ export default function ExamScreen() {
 								sau mỗi câu.
 							</Text>
 						</View>
-						<TouchableOpacity
-							style={styles.onTapButton}
-							onPress={() => router.push("/questions" as never)}
-							activeOpacity={0.7}>
-							<Ionicons
-								name="library-outline"
-								size={ms(20)}
-								color={AUTH_UI.colors.accent}
+
+						<AsyncContent
+							loading={topicsLoading}
+							error={topicsError}
+							onRetry={loadTopics}>
+							<FlatList
+								data={filteredTopics}
+								keyExtractor={(item) => item.id}
+								renderItem={({ item }) => (
+									<TouchableOpacity
+										style={styles.topicItem}
+										onPress={() =>
+											router.push({
+												pathname:
+													"/questions/[topicId]" as never,
+												params: {
+													topicId: item.id,
+													topicName: item.name,
+												},
+											})
+										}
+										activeOpacity={0.7}>
+										<View style={styles.topicIcon}>
+											<Ionicons
+												name="book-outline"
+												size={ms(18)}
+												color={AUTH_UI.colors.accent}
+											/>
+										</View>
+										<View style={styles.topicInfo}>
+											<Text style={styles.topicName}>
+												{item.name}
+											</Text>
+											{item.description ? (
+												<Text
+													style={styles.topicDesc}
+													numberOfLines={1}>
+													{item.description}
+												</Text>
+											) : null}
+										</View>
+										<Ionicons
+											name="chevron-forward"
+											size={ms(16)}
+											color={AUTH_UI.colors.textSecondary}
+										/>
+									</TouchableOpacity>
+								)}
+								contentContainerStyle={styles.listContent}
+								showsVerticalScrollIndicator={false}
+								style={styles.list}
+								ListEmptyComponent={
+									<EmptyState
+										icon="library-outline"
+										title="Không tìm thấy chủ đề"
+										style={styles.emptyState}
+									/>
+								}
 							/>
-							<Text style={styles.onTapButtonText}>
-								Chọn chủ đề để bắt đầu
-							</Text>
-							<Ionicons
-								name="chevron-forward"
-								size={ms(18)}
-								color={AUTH_UI.colors.textSecondary}
-							/>
-						</TouchableOpacity>
-					</View>
+						</AsyncContent>
+					</>
 				) : (
 					<>
 						<InputField
@@ -311,26 +399,36 @@ const styles = StyleSheet.create({
 		lineHeight: ms(19),
 	},
 	bannerTextPurple: { color: colors.satHachTextLight },
-	onTapContainer: {
-		flex: 1,
-		paddingHorizontal: s(16),
-		gap: vs(12),
-	},
-	onTapButton: {
+	topicItem: {
 		flexDirection: "row",
 		alignItems: "center",
 		backgroundColor: AUTH_UI.colors.surface,
+		borderRadius: ms(AUTH_UI.radius.lg),
+		padding: s(14),
+		gap: s(12),
 		borderWidth: 1,
 		borderColor: AUTH_UI.colors.border,
-		borderRadius: ms(AUTH_UI.radius.lg),
-		padding: s(16),
-		gap: s(12),
 	},
-	onTapButtonText: {
+	topicIcon: {
+		width: ms(36),
+		height: ms(36),
+		borderRadius: ms(18),
+		backgroundColor: AUTH_UI.colors.background,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	topicInfo: {
 		flex: 1,
-		fontSize: ms(15),
+		gap: vs(2),
+	},
+	topicName: {
+		fontSize: ms(14),
 		fontWeight: "600",
 		color: AUTH_UI.colors.textPrimary,
+	},
+	topicDesc: {
+		fontSize: ms(12),
+		color: AUTH_UI.colors.textSecondary,
 	},
 	list: { flex: 1 },
 	listContent: {
