@@ -1,11 +1,12 @@
 import { AsyncContent } from "@/components/common/AsyncContent";
 import { Badge } from "@/components/common/Badge";
+import { Button } from "@/components/common/Button";
 import { Divider } from "@/components/common/Divider";
 import { ProgressBar } from "@/components/common/ProgressBar";
 import { ScreenHeader } from "@/components/layout";
 import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
-import type { Course, CourseMaterial, Lesson } from "@/models/course.model";
+import type { Course, CourseMaterial, EnrollmentStatus, Lesson } from "@/models/course.model";
 import { courseService } from "@/services/course.service";
 import { getErrorMessage } from "@/utils/error";
 import { ms, s, vs } from "@/utils/responsive";
@@ -13,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
+	Alert,
 	Linking,
 	ScrollView,
 	StyleSheet,
@@ -28,17 +30,36 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default function CourseDetailScreen() {
-	const { id, enrollmentId, progress: progressParam } = useLocalSearchParams<{
+	const {
+		id,
+		enrollmentId,
+		progress: progressParam,
+		status: statusParam,
+		enrollable,
+		mandatory,
+	} = useLocalSearchParams<{
 		id: string;
 		enrollmentId: string;
 		progress: string;
+		status: string;
+		enrollable: string;
+		mandatory: string;
 	}>();
 	const router = useRouter();
 
+	const isEnrolled = !!enrollmentId;
+	const canEnroll = enrollable === "1" && !isEnrolled;
+
 	const [course, setCourse] = useState<Course | null>(null);
 	const [progress, setProgress] = useState(Number(progressParam) || 0);
+	const [enrollmentStatus, setEnrollmentStatus] = useState<EnrollmentStatus | null>(
+		(statusParam as EnrollmentStatus) || null,
+	);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [actionLoading, setActionLoading] = useState(false);
+
+	const isDropped = enrollmentStatus === "DROPPED";
 
 	const load = useCallback(async () => {
 		if (!id) return;
@@ -62,7 +83,10 @@ export default function CourseDetailScreen() {
 		useCallback(() => {
 			if (!enrollmentId) return;
 			courseService.getEnrollment(enrollmentId).then((result) => {
-				if (result.success) setProgress(result.data.progress);
+				if (result.success) {
+					setProgress(result.data.progress);
+					setEnrollmentStatus(result.data.status);
+				}
 			});
 		}, [enrollmentId]),
 	);
@@ -79,6 +103,55 @@ export default function CourseDetailScreen() {
 
 	const openMaterial = (material: CourseMaterial) => {
 		if (material.fileUrl) Linking.openURL(material.fileUrl);
+	};
+
+	const handleEnroll = () => {
+		if (!id || actionLoading) return;
+		Alert.alert(
+			"Đăng ký khóa học",
+			`Bạn có chắc muốn đăng ký khóa "${course?.title ?? ""}"?`,
+			[
+				{ text: "Hủy", style: "cancel" },
+				{
+					text: "Đăng ký",
+					onPress: async () => {
+						setActionLoading(true);
+						const result = await courseService.enrollCourse(id);
+						setActionLoading(false);
+						if (result.success) {
+							router.replace(mandatory === "1" ? "/(tabs)" : "/courses");
+						} else {
+							Alert.alert("Không thể đăng ký", getErrorMessage(result.code, result.error));
+						}
+					},
+				},
+			],
+		);
+	};
+
+	const handleUnenroll = () => {
+		if (!id || actionLoading || isDropped) return;
+		Alert.alert(
+			"Rút khỏi khóa học",
+			`Bạn có chắc muốn rút khỏi khóa "${course?.title ?? ""}"? Tiến độ học tập sẽ bị dừng lại.`,
+			[
+				{ text: "Hủy", style: "cancel" },
+				{
+					text: "Rút khóa",
+					style: "destructive",
+					onPress: async () => {
+						setActionLoading(true);
+						const result = await courseService.unenrollCourse(id);
+						setActionLoading(false);
+						if (result.success) {
+							router.replace("/enroll");
+						} else {
+							Alert.alert("Không thể rút khóa", getErrorMessage(result.code, result.error));
+						}
+					},
+				},
+			],
+		);
 	};
 
 	return (
@@ -249,6 +322,28 @@ export default function CourseDetailScreen() {
 					</ScrollView>
 				)}
 			</AsyncContent>
+
+			{course && canEnroll && (
+				<View style={styles.footer}>
+					<Button
+						label="Đăng ký khóa học"
+						onPress={handleEnroll}
+						loading={actionLoading}
+					/>
+				</View>
+			)}
+
+			{course && isEnrolled && (
+				<View style={styles.footer}>
+					<Button
+						variant="danger"
+						label={isDropped ? "Đã hủy khóa học" : "Rút khỏi khóa học"}
+						onPress={handleUnenroll}
+						loading={actionLoading}
+						disabled={isDropped}
+					/>
+				</View>
+			)}
 		</ScreenWrapper>
 	);
 }
@@ -383,5 +478,13 @@ const styles = StyleSheet.create({
 		fontSize: ms(13),
 		color: AUTH_UI.colors.textMuted,
 		paddingVertical: vs(4),
+	},
+	footer: {
+		paddingHorizontal: s(16),
+		paddingTop: vs(10),
+		paddingBottom: vs(16),
+		borderTopWidth: 1,
+		borderTopColor: AUTH_UI.colors.border,
+		backgroundColor: AUTH_UI.colors.background,
 	},
 });

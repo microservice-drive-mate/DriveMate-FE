@@ -12,6 +12,7 @@ export interface ExamTemplate {
   criticalQuestions: number;
   maxCriticalMistakes: number;
   shuffleQuestions: boolean;
+  topicDistribution?: Array<{ topicId: string; questionCount: number }>;
 }
 
 export interface QuestionOption {

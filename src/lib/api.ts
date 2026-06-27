@@ -12,6 +12,8 @@ import {
 	setStorageItem,
 	shouldLogout,
 } from '@/utils';
+import { clearPracticeAnswers } from '@/utils/storage';
+import { clearAnswersCache } from '@/utils/practiceAnswersCache';
 
 import { router } from 'expo-router';
 
@@ -86,7 +88,12 @@ class ApiService {
 				const originalRequest = error.config as RetryableRequestConfig;
 				const parsedError = parseError(error);
 
-				if (this._isLoginEndpoint(originalRequest?.url)) {
+				// Login và change-password tự xử lý lỗi 401 ở tầng UI (sai mật khẩu),
+				// không kích hoạt luồng auto-refresh/logout của interceptor.
+				if (
+					this._isLoginEndpoint(originalRequest?.url) ||
+					this._isChangePasswordEndpoint(originalRequest?.url)
+				) {
 					logError(parsedError, { context: 'api.response' });
 					return Promise.reject(error);
 				}
@@ -173,6 +180,10 @@ class ApiService {
 		return url?.includes('refresh');
 	}
 
+	private _isChangePasswordEndpoint(url: string | undefined) {
+		return url?.endsWith('/change-password');
+	}
+
 	private async _performTokenRefresh(refreshToken: string) {
 		return axios.post<ApiResponse<LoginResponse>>(
 			`${this.baseUrl}${ENDPOINTS.AUTH.REFRESH}`,
@@ -185,7 +196,9 @@ class ApiService {
 			removeAuthToken(),
 			removeRefreshToken(),
 			removeUserData(),
+			clearPracticeAnswers(),
 		]);
+		clearAnswersCache();
 		this._logoutCallback?.();
 		router.replace(ROUTES.LOGIN);
 	}

@@ -1,7 +1,7 @@
 import { apiService as api } from '@/lib/api';
 import { ENDPOINTS } from '@/constants';
 import type { ApiResponse, PaginatedResponse } from '@/types/api.types';
-import type { Notification } from '@/models/notification.model';
+import type { Notification, NotificationPreferences, UpdateNotificationPreferencesRequest } from '@/models/notification.model';
 import { withErrorHandling } from '@/utils';
 
 export const notificationService = {
@@ -15,5 +15,13 @@ export const notificationService = {
 
 	markAllRead: withErrorHandling(() =>
 		api.patch<ApiResponse<{ updated: number }>>(ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {}),
+	),
+
+	getPreferences: withErrorHandling(() =>
+		api.get<ApiResponse<NotificationPreferences>>(ENDPOINTS.NOTIFICATIONS.PREFERENCES_ME),
+	),
+
+	updatePreferences: withErrorHandling((data: UpdateNotificationPreferencesRequest) =>
+		api.patch<ApiResponse<NotificationPreferences>>(ENDPOINTS.NOTIFICATIONS.PREFERENCES_ME, data),
 	),
 };

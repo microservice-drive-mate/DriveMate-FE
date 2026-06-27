@@ -1,4 +1,5 @@
 import { AsyncContent } from "@/components/common/AsyncContent";
+import { Button } from "@/components/common/Button";
 import { EmptyState } from "@/components/common/EmptyState";
 import { CourseCard } from "@/components/course/CourseCard";
 import { ScreenHeader } from "@/components/layout";
@@ -70,6 +71,7 @@ export default function MyCoursesScreen() {
 										id: item.course.id,
 										enrollmentId: item.enrollment.id,
 										progress: String(item.enrollment.progress),
+										status: item.enrollment.status,
 									},
 								})
 							}
@@ -81,7 +83,14 @@ export default function MyCoursesScreen() {
 						<EmptyState
 							icon="school-outline"
 							title="Bạn chưa đăng ký khóa học nào"
-							subtitle="Liên hệ trung tâm để được đăng ký khóa học phù hợp với hạng bằng của bạn."
+							subtitle="Chọn khóa học phù hợp với hạng bằng của bạn để bắt đầu."
+							action={
+								<Button
+									label="Đăng ký khóa học"
+									onPress={() => router.push("/enroll")}
+									style={styles.enrollBtn}
+								/>
+							}
 						/>
 					}
 				/>
@@ -97,5 +106,9 @@ const styles = StyleSheet.create({
 		paddingTop: vs(8),
 		paddingBottom: vs(24),
 		gap: vs(12),
+	},
+	enrollBtn: {
+		marginTop: vs(12),
+		paddingHorizontal: s(28),
 	},
 });

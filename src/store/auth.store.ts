@@ -12,6 +12,7 @@ import {
 	setRefreshToken,
 	clearOnboardingSeen,
 } from '@/utils/storage';
+import { clearAnswersCache } from '@/utils/practiceAnswersCache';
 import { create } from 'zustand';
 
 interface AuthState {
@@ -32,6 +33,7 @@ interface AuthActions {
 	completeOnboarding: () => Promise<void>;
 	resetOnboardingForDev: () => Promise<void>;
 	logout: () => Promise<void>;
+	signOutLocal: () => Promise<void>;
 	clearAuth: () => void;
 }
 
@@ -108,6 +110,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 			// Logout locally even if API call fails
 		} finally {
 			await clearStorage();
+			clearAnswersCache();
 			useNotificationsStore.getState().clear();
 			set({
 				user: null,
@@ -116,6 +119,20 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 				isAuthenticated: false,
 			});
 		}
+	},
+
+	// Đăng xuất cục bộ: xoá token + state, KHÔNG gọi network logout. Dùng sau khi
+	// đổi mật khẩu thành công (backend đã thu hồi mọi session/token cũ rồi).
+	signOutLocal: async () => {
+		await clearStorage();
+		clearAnswersCache();
+		useNotificationsStore.getState().clear();
+		set({
+			user: null,
+			accessToken: null,
+			refreshToken: null,
+			isAuthenticated: false,
+		});
 	},
 
 	clearAuth: () => {

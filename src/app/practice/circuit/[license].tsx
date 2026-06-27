@@ -1,14 +1,18 @@
 import { ExerciseListItem } from '@/components/practice';
+import { ImageViewerModal } from '@/components/common/ImageViewerModal';
 import { ScreenHeader } from '@/components/layout';
 import { AUTH_UI } from '@/constants/auth-ui';
 import { Maneuver } from '@/models/practice.model';
 import { practiceService } from '@/services/practice.service';
 import { ms, s, vs } from '@/utils/responsive';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const CIRCUIT_MAP = require('@/assets/images/circuit-map.png');
 
 export default function CircuitListScreen() {
   const { license } = useLocalSearchParams<{ license: string }>();
@@ -17,6 +21,7 @@ export default function CircuitListScreen() {
   const [maneuvers, setManeuvers] = useState<Maneuver[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewerVisible, setViewerVisible] = useState(false);
 
   const load = useCallback(async () => {
     if (!license) return;
@@ -70,9 +75,13 @@ export default function CircuitListScreen() {
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <View style={styles.header}>
-              <View style={styles.mapPlaceholder}>
-                <Text style={styles.mapPlaceholderText}>Bản đồ sa hình {license}</Text>
-              </View>
+              <TouchableOpacity onPress={() => setViewerVisible(true)} activeOpacity={0.85}>
+                <Image
+                  source={CIRCUIT_MAP}
+                  style={styles.mapPlaceholder}
+                  contentFit="contain"
+                />
+              </TouchableOpacity>
               <Text style={styles.hint}>
                 💡 Nhấn vào từng bài để xem chi tiết
               </Text>
@@ -89,6 +98,11 @@ export default function CircuitListScreen() {
           )}
         />
       )}
+      <ImageViewerModal
+        visible={viewerVisible}
+        source={CIRCUIT_MAP}
+        onClose={() => setViewerVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -113,10 +127,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: vs(10),
-  },
-  mapPlaceholderText: {
-    color: AUTH_UI.colors.textMuted,
-    fontSize: ms(14),
   },
   hint: {
     fontSize: ms(12),

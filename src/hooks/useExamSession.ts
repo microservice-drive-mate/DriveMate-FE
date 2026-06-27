@@ -12,7 +12,7 @@ import { useCountdownTimer } from "./useCountdownTimer";
  * bài thủ công. Khi nộp, mọi đáp án chưa lưu được flush và chờ xác nhận trước khi
  * finalize để không mất câu trả lời lúc làm nhanh hoặc mạng chập chờn.
  */
-export function useExamSession(sessionId: string, durationMinutes: number) {
+export function useExamSession(sessionId: string, expiresAt: string) {
 	const router = useRouter();
 
 	const [questions, setQuestions] = useState<ExamSessionQuestion[]>([]);
@@ -167,7 +167,7 @@ export function useExamSession(sessionId: string, durationMinutes: number) {
 	}, [flushPendingSaves, navigateToResult, sessionId]);
 
 	const remainingSeconds = useCountdownTimer(
-		durationMinutes * 60,
+		new Date(expiresAt).getTime(),
 		!isLoadingQuestions && !isSubmitting,
 		submit,
 	);

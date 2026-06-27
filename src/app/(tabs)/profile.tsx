@@ -12,15 +12,17 @@ import { ms, s, vs } from "@/utils/responsive";
 import { useAuthStore } from "@/store/auth.store";
 import { UserRole } from "@/models/user.model";
 import { analyticsService } from "@/services/analytics.service";
+import { notificationService } from "@/services/notification.service";
 import type { ProgressDashboard } from "@/models/analytics.model";
+import type { NotificationPreferences } from "@/models/notification.model";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Me() {
-	const [notif, setNotif] = useState(true);
 	const [darkMode, setDarkMode] = useState(true);
 	const [dashboard, setDashboard] = useState<ProgressDashboard | null>(null);
+	const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
 	const { logout, user } = useAuthStore();
 	const router = useRouter();
 
@@ -32,10 +34,19 @@ export default function Me() {
 		analyticsService.getMyProgress().then((result) => {
 			if (!cancelled && result.success) setDashboard(result.data);
 		});
+		notificationService.getPreferences().then((result) => {
+			if (!cancelled && result.success) setPrefs(result.data);
+		});
 		return () => {
 			cancelled = true;
 		};
 	}, []);
+
+	const handleTogglePref = (key: keyof NotificationPreferences, value: boolean) => {
+		if (!prefs) return;
+		setPrefs({ ...prefs, [key]: value });
+		notificationService.updatePreferences({ [key]: value });
+	};
 
 	const attemptValue = dashboard ? String(dashboard.attemptCount) : "—";
 	const passRateValue = dashboard ? `${dashboard.passRate}%` : "—";
@@ -127,20 +138,57 @@ export default function Me() {
 				<Text style={styles.sectionTitle}>Tài khoản</Text>
 				<View style={styles.sectionCard}>
 					<ToggleRow
-						icon="notifications-outline"
-						label="Thông báo"
-						value={notif}
-						onChange={setNotif}
-					/>
-					<Divider />
-					<ToggleRow
 						icon="moon-outline"
 						label="Chế độ tối"
 						value={darkMode}
 						onChange={setDarkMode}
 					/>
 					<Divider />
+					<MenuRow
+						icon="key-outline"
+						label="Đổi mật khẩu"
+						onPress={() => router.push("../profile/change-password")}
+					/>
+					<Divider />
 					<MenuRow icon="globe-outline" label="Ngôn ngữ" value="Tiếng Việt" />
+				</View>
+
+				<Text style={styles.sectionTitle}>Thông báo</Text>
+				<View style={styles.sectionCard}>
+					<ToggleRow
+						icon="notifications-outline"
+						label="Thông báo đẩy"
+						value={prefs?.pushEnabled ?? false}
+						onChange={(v) => handleTogglePref('pushEnabled', v)}
+					/>
+					<Divider />
+					<ToggleRow
+						icon="alarm-outline"
+						label="Nhắc nhở học tập"
+						value={prefs?.studyReminderEnabled ?? false}
+						onChange={(v) => handleTogglePref('studyReminderEnabled', v)}
+					/>
+					<Divider />
+					<ToggleRow
+						icon="document-text-outline"
+						label="Nhắc nhở ôn thi"
+						value={prefs?.examReminderEnabled ?? false}
+						onChange={(v) => handleTogglePref('examReminderEnabled', v)}
+					/>
+					<Divider />
+					<ToggleRow
+						icon="school-outline"
+						label="Cập nhật khóa học"
+						value={prefs?.courseUpdateEnabled ?? false}
+						onChange={(v) => handleTogglePref('courseUpdateEnabled', v)}
+					/>
+					<Divider />
+					<ToggleRow
+						icon="warning-outline"
+						label="Cảnh báo học tập"
+						value={prefs?.academicWarningEnabled ?? false}
+						onChange={(v) => handleTogglePref('academicWarningEnabled', v)}
+					/>
 				</View>
 
 				{isStudent && (
@@ -151,6 +199,12 @@ export default function Me() {
 								icon="school-outline"
 								label="Khóa học của tôi"
 								onPress={() => router.push("/courses")}
+							/>
+							<Divider />
+							<MenuRow
+								icon="add-circle-outline"
+								label="Đăng ký khóa học"
+								onPress={() => router.push("/enroll")}
 							/>
 							<Divider />
 							<MenuRow

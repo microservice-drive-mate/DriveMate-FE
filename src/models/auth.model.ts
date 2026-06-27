@@ -18,12 +18,17 @@ export interface ForgotPasswordRequest {
   email: string;
 }
 
-export interface ForgotPasswordResponse {
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
   success: boolean;
   message: string;
 }
 
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
 }

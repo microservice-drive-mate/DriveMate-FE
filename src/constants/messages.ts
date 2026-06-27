@@ -8,4 +8,10 @@ export const AUTH_MESSAGES = {
   MSG05: 'Email không tồn tại trong hệ thống.',
   MSG06: 'Mã xác nhận không hợp lệ hoặc đã hết hạn.',
   MSG07: 'Mật khẩu không đáp ứng yêu cầu bảo mật.',
+  // Đổi mật khẩu
+  CHANGE_PW_REQUIRED: 'Vui lòng nhập đầy đủ thông tin.',
+  CHANGE_PW_MISMATCH: 'Mật khẩu xác nhận không khớp.',
+  CHANGE_PW_SAME_AS_OLD: 'Mật khẩu mới phải khác mật khẩu hiện tại.',
+  CHANGE_PW_WRONG_CURRENT: 'Mật khẩu hiện tại không đúng.',
+  CHANGE_PW_SUCCESS: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.',
 };

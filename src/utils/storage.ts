@@ -72,6 +72,7 @@ export const clearStorage = async (): Promise<boolean> => {
 			AUTH_CONFIG.REFRESH_TOKEN_KEY,
 			AUTH_CONFIG.USER_KEY,
 			AUTH_CONFIG.ONBOARDING_KEY,
+			AUTH_CONFIG.PRACTICE_ANSWERS_KEY,
 		];
 		await Promise.all(keys.map((key) => SecureStore.deleteItemAsync(key)));
 		return true;
@@ -122,3 +123,13 @@ export const saveOnboardingSeen = (): Promise<boolean> =>
 
 export const clearOnboardingSeen = (): Promise<boolean> =>
 	removeStorageItem(AUTH_CONFIG.ONBOARDING_KEY);
+
+// Practice answers helpers
+export const getPracticeAnswers = (): Promise<Record<string, Record<string, string>> | null> =>
+	getStorageItem<Record<string, Record<string, string>>>(AUTH_CONFIG.PRACTICE_ANSWERS_KEY, null);
+
+export const setPracticeAnswers = (data: Record<string, Record<string, string>>): Promise<boolean> =>
+	setStorageItem(AUTH_CONFIG.PRACTICE_ANSWERS_KEY, data);
+
+export const clearPracticeAnswers = (): Promise<boolean> =>
+	removeStorageItem(AUTH_CONFIG.PRACTICE_ANSWERS_KEY);

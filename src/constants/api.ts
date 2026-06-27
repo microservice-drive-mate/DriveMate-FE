@@ -4,7 +4,7 @@ export const API_CONFIG = {
 	BASE_URL:
 		process.env.EXPO_PUBLIC_API_URL ??
 		Platform.select({
-			android: "http://192.168.0.150:8000",
+			android: "http://172.20.10.2:8000",
 			ios: "http://localhost:8000",
 			default: "http://10.0.2.2:8000",
 		})!,
@@ -16,6 +16,7 @@ export const AUTH_CONFIG = {
 	REFRESH_TOKEN_KEY: "drivemate_refresh_token",
 	USER_KEY: "drivemate_user",
 	ONBOARDING_KEY: "drivemate_onboarding_seen",
+	PRACTICE_ANSWERS_KEY: "drivemate_practice_answers",
 };
 
 export const ENDPOINTS = {
@@ -50,6 +51,10 @@ export const ENDPOINTS = {
 		ME: "/notifications/me",
 		MARK_READ: (id: string) => `/notifications/${id}/read`,
 		MARK_ALL_READ: "/notifications/mark-all-read",
+		REGISTER_DEVICE: "/notifications/devices",
+		UNREGISTER_DEVICE: (token: string) =>
+			`/notifications/devices/${encodeURIComponent(token)}`,
+		PREFERENCES_ME: "/notifications/preferences/me",
 	},
 	ANALYTICS: {
 		ME_PROGRESS: "/analytics/me/progress",
@@ -62,14 +67,23 @@ export const ENDPOINTS = {
 		MANEUVER_ERRORS: "/simulation/maneuver-errors",
 	},
 	COURSES: {
+		LIST: "/courses",
 		DETAIL: (id: string) => `/courses/${id}`,
-		LESSON: (id: string, lessonId: string) => `/courses/${id}/lessons/${lessonId}`,
+		LESSON: (id: string, lessonId: string) =>
+			`/courses/${id}/lessons/${lessonId}`,
+		ENROLL: (id: string) => `/courses/${id}/enroll`,
+		UNENROLL: (id: string) => `/courses/${id}/unenroll`,
 	},
 	ENROLLMENTS: {
 		LIST: "/enrollments",
 		DETAIL: (id: string) => `/enrollments/${id}`,
 		COMPLETE_LESSON: (id: string, lessonId: string) =>
 			`/enrollments/${id}/lessons/${lessonId}/complete`,
+	},
+	QUESTIONS: {
+		TOPICS: "/questions/topics",
+		PRACTICE: "/questions/practice",
+		REPORT: (id: string) => `/questions/${id}/report`,
 	},
 };
 
