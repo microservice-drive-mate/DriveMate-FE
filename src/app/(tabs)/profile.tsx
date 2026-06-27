@@ -1,4 +1,3 @@
-import { ScreenWrapper } from "@/components/screen-wrapper";
 import { Button } from "@/components/common/Button";
 import { Divider } from "@/components/common/Divider";
 import { Avatar } from "@/components/profile";
@@ -6,16 +5,17 @@ import { InfoRow } from "@/components/profile/InfoRow";
 import { MenuRow } from "@/components/profile/MenuRow";
 import { StatCard } from "@/components/profile/StatCard";
 import { ToggleRow } from "@/components/profile/ToggleRow";
+import { ScreenWrapper } from "@/components/screen-wrapper";
 import { AUTH_UI } from "@/constants/auth-ui";
-import { formatNullableDate } from "@/utils/examFormat";
-import { ms, s, vs } from "@/utils/responsive";
-import { useAuthStore } from "@/store/auth.store";
+import type { ProgressDashboard } from "@/models/analytics.model";
+import type { NotificationPreferences } from "@/models/notification.model";
 import { UserRole } from "@/models/user.model";
 import { analyticsService } from "@/services/analytics.service";
 import { notificationService } from "@/services/notification.service";
-import type { ProgressDashboard } from "@/models/analytics.model";
-import type { NotificationPreferences } from "@/models/notification.model";
-import { useRouter } from "expo-router";
+import { useAuthStore } from "@/store/auth.store";
+import { formatNullableDate } from "@/utils/examFormat";
+import { ms, s, vs } from "@/utils/responsive";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -28,6 +28,19 @@ export default function Me() {
 
 	const isStudent = user?.role === UserRole.STUDENT;
 	const licenseTier = isStudent ? user?.studentDetail?.licenseTier : null;
+
+	useFocusEffect(() => {
+		let cancelled = false;
+		analyticsService.getMyProgress().then((result) => {
+			if (!cancelled && result.success) setDashboard(result.data);
+		});
+		notificationService.getPreferences().then((result) => {
+			if (!cancelled && result.success) setPrefs(result.data);
+		});
+		return () => {
+			cancelled = true;
+		};
+	});
 
 	useEffect(() => {
 		let cancelled = false;
@@ -42,7 +55,10 @@ export default function Me() {
 		};
 	}, []);
 
-	const handleTogglePref = (key: keyof NotificationPreferences, value: boolean) => {
+	const handleTogglePref = (
+		key: keyof NotificationPreferences,
+		value: boolean,
+	) => {
 		if (!prefs) return;
 		setPrefs({ ...prefs, [key]: value });
 		notificationService.updatePreferences({ [key]: value });
@@ -50,7 +66,6 @@ export default function Me() {
 
 	const attemptValue = dashboard ? String(dashboard.attemptCount) : "—";
 	const passRateValue = dashboard ? `${dashboard.passRate}%` : "—";
-	const avgScoreValue = dashboard ? `${dashboard.avgExamScore}%` : "—";
 
 	const handleLogout = async () => {
 		await logout();
@@ -74,8 +89,12 @@ export default function Me() {
 								avatarUrl={user?.avatarUrl}
 							/>
 							<View style={styles.headerInfo}>
-								<Text style={styles.fullName}>{user?.fullName ?? "—"}</Text>
-								<Text style={styles.email}>{user?.email ?? "—"}</Text>
+								<Text style={styles.fullName}>
+									{user?.fullName ?? "—"}
+								</Text>
+								<Text style={styles.email}>
+									{user?.email ?? "—"}
+								</Text>
 							</View>
 						</View>
 						<TouchableOpacity
@@ -88,12 +107,16 @@ export default function Me() {
 					<View style={styles.badgesRow}>
 						{licenseTier && (
 							<View style={styles.badgePrimary}>
-								<Text style={styles.badgePrimaryText}>Hạng {licenseTier}</Text>
+								<Text style={styles.badgePrimaryText}>
+									Hạng {licenseTier}
+								</Text>
 							</View>
 						)}
 						{isStudent && (
 							<View style={styles.badgePill}>
-								<Text style={styles.badgePillText}>Đang học</Text>
+								<Text style={styles.badgePillText}>
+									Đang học
+								</Text>
 							</View>
 						)}
 					</View>
@@ -130,9 +153,14 @@ export default function Me() {
 				</View>
 
 				<View style={styles.statsRow}>
-					<StatCard label="Bài thi" value={attemptValue} />
-					<StatCard label="Tỷ lệ đạt" value={passRateValue} />
-					<StatCard label="Điểm TB" value={avgScoreValue} color={AUTH_UI.colors.success} />
+					<StatCard
+						label="Bài thi"
+						value={attemptValue}
+					/>
+					<StatCard
+						label="Tỷ lệ đạt"
+						value={passRateValue}
+					/>
 				</View>
 
 				<Text style={styles.sectionTitle}>Tài khoản</Text>
@@ -147,10 +175,16 @@ export default function Me() {
 					<MenuRow
 						icon="key-outline"
 						label="Đổi mật khẩu"
-						onPress={() => router.push("../profile/change-password")}
+						onPress={() =>
+							router.push("../profile/change-password")
+						}
 					/>
 					<Divider />
-					<MenuRow icon="globe-outline" label="Ngôn ngữ" value="Tiếng Việt" />
+					<MenuRow
+						icon="globe-outline"
+						label="Ngôn ngữ"
+						value="Tiếng Việt"
+					/>
 				</View>
 
 				<Text style={styles.sectionTitle}>Thông báo</Text>
@@ -159,35 +193,43 @@ export default function Me() {
 						icon="notifications-outline"
 						label="Thông báo đẩy"
 						value={prefs?.pushEnabled ?? false}
-						onChange={(v) => handleTogglePref('pushEnabled', v)}
+						onChange={(v) => handleTogglePref("pushEnabled", v)}
 					/>
 					<Divider />
 					<ToggleRow
 						icon="alarm-outline"
 						label="Nhắc nhở học tập"
 						value={prefs?.studyReminderEnabled ?? false}
-						onChange={(v) => handleTogglePref('studyReminderEnabled', v)}
+						onChange={(v) =>
+							handleTogglePref("studyReminderEnabled", v)
+						}
 					/>
 					<Divider />
 					<ToggleRow
 						icon="document-text-outline"
 						label="Nhắc nhở ôn thi"
 						value={prefs?.examReminderEnabled ?? false}
-						onChange={(v) => handleTogglePref('examReminderEnabled', v)}
+						onChange={(v) =>
+							handleTogglePref("examReminderEnabled", v)
+						}
 					/>
 					<Divider />
 					<ToggleRow
 						icon="school-outline"
 						label="Cập nhật khóa học"
 						value={prefs?.courseUpdateEnabled ?? false}
-						onChange={(v) => handleTogglePref('courseUpdateEnabled', v)}
+						onChange={(v) =>
+							handleTogglePref("courseUpdateEnabled", v)
+						}
 					/>
 					<Divider />
 					<ToggleRow
 						icon="warning-outline"
 						label="Cảnh báo học tập"
 						value={prefs?.academicWarningEnabled ?? false}
-						onChange={(v) => handleTogglePref('academicWarningEnabled', v)}
+						onChange={(v) =>
+							handleTogglePref("academicWarningEnabled", v)
+						}
 					/>
 				</View>
 
@@ -213,21 +255,35 @@ export default function Me() {
 								value={licenseTier ?? "Chưa phân hạng"}
 							/>
 							<Divider />
-							<MenuRow icon="star-outline" label="Đánh giá ứng dụng" />
+							<MenuRow
+								icon="star-outline"
+								label="Đánh giá ứng dụng"
+							/>
 						</View>
 					</>
 				)}
 
 				<Text style={styles.sectionTitle}>Hỗ trợ</Text>
 				<View style={styles.sectionCard}>
-					<MenuRow icon="help-circle-outline" label="Trung tâm hỗ trợ" />
+					<MenuRow
+						icon="help-circle-outline"
+						label="Trung tâm hỗ trợ"
+					/>
 					<Divider />
-					<MenuRow icon="lock-closed-outline" label="Chính sách bảo mật" />
+					<MenuRow
+						icon="lock-closed-outline"
+						label="Chính sách bảo mật"
+					/>
 					<Divider />
-					<MenuRow icon="document-text-outline" label="Điều khoản sử dụng" />
+					<MenuRow
+						icon="document-text-outline"
+						label="Điều khoản sử dụng"
+					/>
 				</View>
 
-				<Text style={styles.versionText}>LXePro v1.0.0 • Build 2026.04</Text>
+				<Text style={styles.versionText}>
+					LXePro v1.0.0 • Build 2026.04
+				</Text>
 
 				<Button
 					variant="danger"
@@ -261,7 +317,11 @@ const styles = StyleSheet.create({
 		fontWeight: "800",
 		fontSize: ms(16),
 	},
-	email: { color: AUTH_UI.colors.textSecondary, marginTop: vs(4), fontSize: ms(12) },
+	email: {
+		color: AUTH_UI.colors.textSecondary,
+		marginTop: vs(4),
+		fontSize: ms(12),
+	},
 	editButton: {
 		paddingHorizontal: s(12),
 		paddingVertical: vs(6),

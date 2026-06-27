@@ -35,6 +35,9 @@ function WrongQuestionCard({
 	const selectedIndex = sortedOptions.findIndex(
 		(o) => o.id === question.selectedOptionId,
 	);
+	const correctIndex = sortedOptions.findIndex(
+		(o) => o.id === question.correctOptionId,
+	);
 
 	return (
 		<View style={styles.card}>
@@ -60,14 +63,23 @@ function WrongQuestionCard({
 			<View style={styles.optionsList}>
 				{sortedOptions.map((opt, i) => {
 					const isUserChoice = opt.id === question.selectedOptionId;
+					const isCorrect = opt.id === question.correctOptionId;
 					return (
 						<OptionCard
 							key={opt.id}
 							letter={OPTION_LABELS[i] ?? String(i + 1)}
 							text={opt.content}
-							state={isUserChoice ? "wrong" : "dimmed"}
-							trailingIcon={isUserChoice ? "close-circle" : undefined}
-							trailingIconColor={AUTH_UI.colors.danger}
+							state={isUserChoice ? "wrong" : isCorrect ? "correct" : "dimmed"}
+							trailingIcon={
+								isCorrect
+									? "checkmark-circle"
+									: isUserChoice
+										? "close-circle"
+										: undefined
+							}
+							trailingIconColor={
+								isCorrect ? AUTH_UI.colors.success : AUTH_UI.colors.danger
+							}
 						/>
 					);
 				})}
@@ -94,6 +106,24 @@ function WrongQuestionCard({
 					)}
 				</Text>
 			</View>
+
+			{correctIndex >= 0 && (
+				<View style={styles.noteBox}>
+					<Ionicons
+						name="checkmark-circle-outline"
+						size={ms(16)}
+						color={AUTH_UI.colors.success}
+					/>
+					<Text style={styles.noteText}>
+						Đáp án đúng:{" "}
+						<Text style={styles.highlightCorrect}>
+							{OPTION_LABELS[correctIndex] ?? correctIndex + 1} —{" "}
+							{sortedOptions[correctIndex].content}
+						</Text>
+						.
+					</Text>
+				</View>
+			)}
 		</View>
 	);
 }
@@ -257,6 +287,10 @@ const styles = StyleSheet.create({
 	},
 	highlightWrong: {
 		color: AUTH_UI.colors.danger,
+		fontWeight: "600",
+	},
+	highlightCorrect: {
+		color: AUTH_UI.colors.success,
 		fontWeight: "600",
 	},
 	errorCenter: {

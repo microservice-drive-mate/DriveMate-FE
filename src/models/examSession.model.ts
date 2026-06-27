@@ -32,6 +32,7 @@ export interface ExamSessionQuestion {
   selectedOptionId: string | null;
   // Only present in submit/result payloads; omitted for active sessions & question list.
   isCorrect?: boolean;
+  correctOptionId?: string | null;
 }
 
 // Full session object returned by POST /exams/sessions (start), POST .../submit,
